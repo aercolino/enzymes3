@@ -7,19 +7,19 @@ require_once dirname(ENZYMES3_PRIMARY) . '/src/Enzymes3Sequence.php';
 require_once dirname(ENZYMES3_PRIMARY) . '/src/Enzymes3Capabilities.php';
 require_once dirname(ENZYMES3_PRIMARY) . '/src/Enzymes3Options.php';
 
-class Enzymes3
+class Enzymes3Engine
 {
     /**
      *  When calling the engine directly, for forcing the global post, use one of the following:
      * - Enzymes3Plugin::engine()->metabolize($content);
      * - Enzymes3Plugin::engine()->metabolize($content, null);
-     * - Enzymes3Plugin::engine()->metabolize($content, Enzymes3::GLOBAL_POST);
+     * - Enzymes3Plugin::engine()->metabolize($content, Enzymes3Engine::GLOBAL_POST);
      */
     const GLOBAL_POST = null;
 
     /**
      * When calling the engine directly, for forcing no post at all, use one of the following:
-     * - Enzymes3Plugin::engine()->metabolize($content, Enzymes3::NO_POST);
+     * - Enzymes3Plugin::engine()->metabolize($content, Enzymes3Engine::NO_POST);
      */
     const NO_POST = -1;
 
@@ -44,7 +44,7 @@ class Enzymes3
 
     /**
      * The post which the content belongs to.
-     * It can be null if the developer forced no post with ->metabolize($content, Enzymes3::NO_POST).
+     * It can be null if the developer forced no post with ->metabolize($content, Enzymes3Engine::NO_POST).
      *
      * @var WP_Post
      */

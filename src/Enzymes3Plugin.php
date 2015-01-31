@@ -1,5 +1,5 @@
 <?php
-require_once dirname(ENZYMES3_PRIMARY) . '/src/Enzymes3.php';
+require_once dirname(ENZYMES3_PRIMARY) . '/src/Enzymes3Engine.php';
 
 class Enzymes3Plugin
 {
@@ -16,18 +16,18 @@ class Enzymes3Plugin
     /**
      * Singleton
      *
-     * @var Enzymes3
+     * @var Enzymes3Engine
      */
     static protected $enzymes;
 
     /**
-     * @return Enzymes3
+     * @return Enzymes3Engine
      */
     static public
     function engine()
     {
         if ( is_null(self::$enzymes) ) {
-            self::$enzymes = new Enzymes3();
+            self::$enzymes = new Enzymes3Engine();
         }
         return self::$enzymes;
     }
