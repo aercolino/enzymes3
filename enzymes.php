@@ -14,11 +14,3 @@ define('ENZYMES3_PRIMARY', __FILE__);
 require_once 'src/EnzymesPlugin.php';
 
 $enzymesPlugin = new EnzymesPlugin();
-
-
-
-// ---------------------------------------------------------------------------------------------------------------------
-// The following code will allow old version 2 enzymes sequences to work exactly as they did.
-// Important: put "require_once 'enzymes.2/enzymes.php';" always after "$enzymesPlugin = new EnzymesPlugin();"
-require_once 'enzymes.2/enzymes.php';
-// ---------------------------------------------------------------------------------------------------------------------
