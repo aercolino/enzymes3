@@ -5,5 +5,5 @@ if (basename(dirname(__FILE__)) != dirname(WP_UNINSTALL_PLUGIN))
     return;
 }
 
-require 'src/Enzymes3Plugin.php';
-Enzymes3Plugin::on_uninstall();
+require dirname(__FILE__) . '/src/Enzymes3/Plugin.php';
+Enzymes3_Plugin::on_uninstall();

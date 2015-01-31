@@ -11,6 +11,6 @@ License: GPLv2 or later
 
 
 define('ENZYMES3_PRIMARY', __FILE__);
-require_once dirname(ENZYMES3_PRIMARY) . '/src/Enzymes3Plugin.php';
+require_once dirname( ENZYMES3_PRIMARY ) . '/src/Enzymes3/Plugin.php';
 
-$enzymesPlugin = new Enzymes3Plugin();
+$enzymesPlugin = new Enzymes3_Plugin();

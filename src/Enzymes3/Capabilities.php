@@ -1,6 +1,6 @@
 <?php
 
-class Enzymes3Capabilities
+class Enzymes3_Capabilities
 {
     const PREFIX = 'enzymes3.';
 

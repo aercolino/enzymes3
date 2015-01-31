@@ -1,25 +1,25 @@
 <?php
 require_once( ABSPATH . 'wp-admin/includes/plugin.php' );
 
-require_once dirname(ENZYMES3_PRIMARY) . '/vendor/Ando/Regex.php';
-require_once dirname(ENZYMES3_PRIMARY) . '/vendor/Ando/ErrorFactory.php';
-require_once dirname(ENZYMES3_PRIMARY) . '/src/Enzymes3Sequence.php';
-require_once dirname(ENZYMES3_PRIMARY) . '/src/Enzymes3Capabilities.php';
-require_once dirname(ENZYMES3_PRIMARY) . '/src/Enzymes3Options.php';
+require_once dirname( ENZYMES3_PRIMARY ) . '/vendor/Ando/Regex.php';
+require_once dirname( ENZYMES3_PRIMARY ) . '/vendor/Ando/ErrorFactory.php';
+require_once dirname( ENZYMES3_PRIMARY ) . '/src/Enzymes3/Sequence.php';
+require_once dirname( ENZYMES3_PRIMARY ) . '/src/Enzymes3/Capabilities.php';
+require_once dirname( ENZYMES3_PRIMARY ) . '/src/Enzymes3/Options.php';
 
-class Enzymes3Engine
+class Enzymes3_Engine
 {
     /**
      *  When calling the engine directly, for forcing the global post, use one of the following:
-     * - Enzymes3Plugin::engine()->metabolize($content);
-     * - Enzymes3Plugin::engine()->metabolize($content, null);
-     * - Enzymes3Plugin::engine()->metabolize($content, Enzymes3Engine::GLOBAL_POST);
+     * - Enzymes3_Plugin::engine()->metabolize($content);
+     * - Enzymes3_Plugin::engine()->metabolize($content, null);
+     * - Enzymes3_Plugin::engine()->metabolize($content, Enzymes3_Engine::GLOBAL_POST);
      */
     const GLOBAL_POST = null;
 
     /**
      * When calling the engine directly, for forcing no post at all, use one of the following:
-     * - Enzymes3Plugin::engine()->metabolize($content, Enzymes3Engine::NO_POST);
+     * - Enzymes3_Plugin::engine()->metabolize($content, Enzymes3_Engine::NO_POST);
      */
     const NO_POST = -1;
 
@@ -44,7 +44,7 @@ class Enzymes3Engine
 
     /**
      * The post which the content belongs to.
-     * It can be null if the developer forced no post with ->metabolize($content, Enzymes3Engine::NO_POST).
+     * It can be null if the developer forced no post with ->metabolize($content, Enzymes3_Engine::NO_POST).
      *
      * @var WP_Post
      */
@@ -124,7 +124,7 @@ class Enzymes3Engine
     /**
      * Sequence of catalyzed enzymes, which are meant to be used as arguments for other enzymes.
      *
-     * @var Enzymes3Sequence
+     * @var Enzymes3_Sequence
      */
     protected $catalyzed;
 
@@ -651,10 +651,10 @@ class Enzymes3Engine
     protected
     function execute_code( $code, $arguments, $post_object )
     {
-        if ( author_can($post_object, Enzymes3Capabilities::create_dynamic_custom_fields) &&
+        if ( author_can($post_object, Enzymes3_Capabilities::create_dynamic_custom_fields) &&
              ($this->injection_author_owns($post_object) ||
-              author_can($post_object, Enzymes3Capabilities::share_dynamic_custom_fields) &&
-              $this->injection_author_can(Enzymes3Capabilities::use_others_custom_fields))
+              author_can($post_object, Enzymes3_Capabilities::share_dynamic_custom_fields) &&
+              $this->injection_author_can(Enzymes3_Capabilities::use_others_custom_fields))
         ) {
             list($result, $error, $output) = $this->clean_eval($code, $arguments);
             if ( $error ) {
@@ -776,10 +776,10 @@ class Enzymes3Engine
     protected
     function transclude_code( $code, $post_object )
     {
-        if ( author_can($post_object, Enzymes3Capabilities::create_static_custom_fields) &&
+        if ( author_can($post_object, Enzymes3_Capabilities::create_static_custom_fields) &&
              ($this->injection_author_owns($post_object) ||
-              author_can($post_object, Enzymes3Capabilities::share_static_custom_fields) &&
-              $this->injection_author_can(Enzymes3Capabilities::use_others_custom_fields))
+              author_can($post_object, Enzymes3_Capabilities::share_static_custom_fields) &&
+              $this->injection_author_can(Enzymes3_Capabilities::use_others_custom_fields))
         ) {
             $result = $code;
         } else {
@@ -841,9 +841,9 @@ class Enzymes3Engine
     {
         $this->debug_print('transcluding post_attr');
         $same_author = $this->injection_author_owns($post_object);
-        if ( $same_author && author_can($post_object, Enzymes3Capabilities::use_own_attributes) ||
+        if ( $same_author && author_can($post_object, Enzymes3_Capabilities::use_own_attributes) ||
              ! $same_author &&
-             $this->injection_author_can(Enzymes3Capabilities::use_others_attributes)
+             $this->injection_author_can(Enzymes3_Capabilities::use_others_attributes)
         ) {
             preg_match($this->grammar_rule('post_attr'), $post_attr, $matches);
             $result = $this->wp_post_attribute($post_object, $matches);
@@ -867,9 +867,9 @@ class Enzymes3Engine
     {
         $this->debug_print('transcluding author_attr');
         $same_author = $this->injection_author_owns($post_object);
-        if ( $same_author && author_can($post_object, Enzymes3Capabilities::use_own_attributes) ||
+        if ( $same_author && author_can($post_object, Enzymes3_Capabilities::use_own_attributes) ||
              ! $same_author &&
-             $this->injection_author_can(Enzymes3Capabilities::use_others_attributes)
+             $this->injection_author_can(Enzymes3_Capabilities::use_others_attributes)
         ) {
             preg_match($this->grammar_rule('author_attr'), $author_attr, $matches);
             $user_object = $this->wp_author($post_object);
@@ -985,7 +985,7 @@ class Enzymes3Engine
             $result = '{[' . $could_be_sequence . ']}';  // skip this injection AS IS
         } else {
             $this->current_sequence = $could_be_sequence;
-            $this->catalyzed        = new Enzymes3Sequence();
+            $this->catalyzed        = new Enzymes3_Sequence();
             $rest                   = $sequence;
             while (preg_match($this->e_sequence_start, $rest, $matches)) {
                 $execution    = $this->value($matches, 'execution');
@@ -1080,7 +1080,7 @@ class Enzymes3Engine
 //            $this->debug_print('(1)');
             return $content;
         }
-        if ( ! $this->injection_author_can(Enzymes3Capabilities::inject) ) {
+        if ( ! $this->injection_author_can(Enzymes3_Capabilities::inject) ) {
 //            $this->debug_print('(2)');
             return $content;
         }

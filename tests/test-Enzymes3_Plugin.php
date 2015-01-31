@@ -1,12 +1,13 @@
 <?php
 
-class Enzymes3PluginTest
+class Enzymes3_PluginTest
         extends WP_UnitTestCase
 {
     // NOTE: The tests/bootstrap.php file loads the plugin into WordPress.
 
     function test_plugin_hooks_into_wordpress()
     {
+        Enzymes3_Plugin::on_init();
         $events = array(
                 'wp_title',
                 'the_title',
@@ -15,10 +16,10 @@ class Enzymes3PluginTest
                 'the_excerpt_rss',
                 'the_content'
         );
-        $enzymes = Enzymes3Plugin::engine();
+        $enzymes = Enzymes3_Plugin::engine();
         foreach ($events as $event) {
-            $this->assertEquals(Enzymes3Plugin::PRIORITY, has_filter($event, array($enzymes, 'metabolize')),
-                                "Enzymes didn't attach to '$event'.");
+            $this->assertEquals(Enzymes3_Plugin::PRIORITY, has_filter($event, array($enzymes, 'metabolize')),
+                                "Enzymes3 didn't attach to '$event'.");
         }
     }
 
