@@ -42,12 +42,12 @@ class EnzymesPlugin
     function on_init()
     {
         $enzymes = self::engine();  // pointer to the singleton
-        add_filter('wp_title', array($enzymes, 'metabolize'), 10, 2);
-        add_filter('the_title', array($enzymes, 'metabolize'), 10, 2);
-        add_filter('the_title_rss', array($enzymes, 'metabolize'), 10, 2);
-        add_filter('the_excerpt', array($enzymes, 'metabolize'), 10, 2);
-        add_filter('the_excerpt_rss', array($enzymes, 'metabolize'), 10, 2);
-        add_filter('the_content', array($enzymes, 'metabolize'), 10, 2);
+        add_filter('wp_title', array($enzymes, 'metabolize'), 9, 1);
+        add_filter('the_title', array($enzymes, 'metabolize'), 9, 2);
+        add_filter('the_title_rss', array($enzymes, 'metabolize'), 9, 2);
+        add_filter('the_excerpt', array($enzymes, 'metabolize'), 9, 2);
+        add_filter('the_excerpt_rss', array($enzymes, 'metabolize'), 9, 2);
+        add_filter('the_content', array($enzymes, 'metabolize'), 9, 2);
     }
 
     /**
