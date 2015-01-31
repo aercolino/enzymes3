@@ -1,6 +1,6 @@
 <?php
 
-class EnzymesSequence {
+class Enzymes3Sequence {
     protected $store = array();
 
     public

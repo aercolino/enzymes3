@@ -84,11 +84,15 @@ class Enzymes3Test
         if ( function_exists('xdebug_disable') ) {
             xdebug_disable();
         }
+
+        Enzymes3Plugin::on_activation();
     }
 
     public static
     function tearDownAfterClass()
     {
+        Enzymes3Plugin::on_deactivation();
+
         if ( function_exists('xdebug_enable') ) {
             xdebug_enable();
         }
@@ -106,6 +110,8 @@ class Enzymes3Test
         $content1 = 'This is something before {{[ whatever ]} and this is after.';
         $content2 = 'This is something before {[ whatever ]} and this is after.';
         $this->assertEquals($content2, $enzymes->metabolize($content1));
+
+        // TODO make two tests out of this one, for both the cases Enzymes 2 active and not active
     }
 
     public
@@ -157,27 +163,27 @@ class Enzymes3Test
     }
 
     public
-    function test_safe_eval_no_error()
+    function test_clean_eval_no_error()
     {
         $code = '
             list($name) = $arguments;
             echo $name;
             return $name;';
         $name = 'Andrea';
-        list($result, $error) = $this->call_method('safe_eval', array($code, array($name)));
+        list($result, $error) = $this->call_method('clean_eval', array($code, array($name)));
         $this->assertNull($error);
         $this->assertEquals($name, $result);
         $this->expectOutputString('');
     }
 
     public
-    function test_safe_eval_E_WARNING()
+    function test_clean_eval_E_WARNING()
     {
         $this->expectOutputString('');
 
         $code    = Ando_ErrorFactory::E_WARNING_code();
         $enzymes = new Enzymes3();
-        list(, $error, $output) = $this->call_method('safe_eval', array($code, array()), $enzymes);
+        list(, $error, $output) = $this->call_method('clean_eval', array($code, array()), $enzymes);
 
         $this->assertTrue(is_array($error));
         extract($error);
@@ -192,26 +198,26 @@ class Enzymes3Test
     }
 
     public
-    function test_safe_eval_E_PARSE()
+    function test_clean_eval_E_PARSE()
     {
         $this->expectOutputString('');
 
         $code    = Ando_ErrorFactory::E_PARSE_code();
         $enzymes = new Enzymes3();
-        list(, $error, $output) = $this->call_method('safe_eval', array($code, array()), $enzymes);
+        list(, $error, $output) = $this->call_method('clean_eval', array($code, array()), $enzymes);
 
         $this->assertTrue($error);
         $this->assertRegExp('@^Parse error:@m', $output);
     }
 
     public
-    function test_safe_eval_E_NOTICE()
+    function test_clean_eval_E_NOTICE()
     {
         $this->expectOutputString('');
 
         $code    = Ando_ErrorFactory::E_NOTICE_code();
         $enzymes = new Enzymes3();
-        list(, $error, $output) = $this->call_method('safe_eval', array($code, array()), $enzymes);
+        list(, $error, $output) = $this->call_method('clean_eval', array($code, array()), $enzymes);
 
         $this->assertTrue(is_array($error));
         extract($error);
@@ -226,26 +232,26 @@ class Enzymes3Test
     }
 
     public
-    function test_safe_eval_E_COMPILE_WARNING()
+    function test_clean_eval_E_COMPILE_WARNING()
     {
         $this->expectOutputString('');
 
         $code    = Ando_ErrorFactory::E_COMPILE_WARNING_code();
         $enzymes = new Enzymes3();
-        list(, $error, $output) = $this->call_method('safe_eval', array($code, array()), $enzymes);
+        list(, $error, $output) = $this->call_method('clean_eval', array($code, array()), $enzymes);
 
         $this->assertFalse(is_array($error));
         $this->assertRegExp('@^Warning:@m', $output);
     }
 
     public
-    function test_safe_eval_E_USER_WARNING()
+    function test_clean_eval_E_USER_WARNING()
     {
         $this->expectOutputString('');
 
         $code    = Ando_ErrorFactory::E_USER_WARNING_code();
         $enzymes = new Enzymes3();
-        list(, $error, $output) = $this->call_method('safe_eval', array($code, array()), $enzymes);
+        list(, $error, $output) = $this->call_method('clean_eval', array($code, array()), $enzymes);
 
         $this->assertTrue(is_array($error));
         extract($error);
@@ -260,13 +266,13 @@ class Enzymes3Test
     }
 
     public
-    function test_safe_eval_E_USER_NOTICE()
+    function test_clean_eval_E_USER_NOTICE()
     {
         $this->expectOutputString('');
 
         $code    = Ando_ErrorFactory::E_USER_NOTICE_code();
         $enzymes = new Enzymes3();
-        list(, $error, $output) = $this->call_method('safe_eval', array($code, array()), $enzymes);
+        list(, $error, $output) = $this->call_method('clean_eval', array($code, array()), $enzymes);
 
         $this->assertTrue(is_array($error));
         extract($error);
@@ -281,13 +287,13 @@ class Enzymes3Test
     }
 
     public
-    function test_safe_eval_E_STRICT()
+    function test_clean_eval_E_STRICT()
     {
         $this->expectOutputString('');
 
         $code    = Ando_ErrorFactory::E_STRICT_code();
         $enzymes = new Enzymes3();
-        list(, $error, $output) = $this->call_method('safe_eval', array($code, array()), $enzymes);
+        list(, $error, $output) = $this->call_method('clean_eval', array($code, array()), $enzymes);
 
         $this->assertTrue(is_array($error));
         extract($error);
@@ -302,13 +308,13 @@ class Enzymes3Test
     }
 
     public
-    function test_safe_eval_E_DEPRECATED()
+    function test_clean_eval_E_DEPRECATED()
     {
         $this->expectOutputString('');
 
         $code    = Ando_ErrorFactory::E_DEPRECATED_code();
         $enzymes = new Enzymes3();
-        list(, $error, $output) = $this->call_method('safe_eval', array($code, array()), $enzymes);
+        list(, $error, $output) = $this->call_method('clean_eval', array($code, array()), $enzymes);
 
         $this->assertTrue(is_array($error));
         extract($error);
@@ -323,13 +329,13 @@ class Enzymes3Test
     }
 
     public
-    function test_safe_eval_E_USER_DEPRECATED()
+    function test_clean_eval_E_USER_DEPRECATED()
     {
         $this->expectOutputString('');
 
         $code    = Ando_ErrorFactory::E_USER_DEPRECATED_code();
         $enzymes = new Enzymes3();
-        list(, $error, $output) = $this->call_method('safe_eval', array($code, array()), $enzymes);
+        list(, $error, $output) = $this->call_method('clean_eval', array($code, array()), $enzymes);
 
         $this->assertTrue(is_array($error));
         extract($error);
@@ -344,13 +350,13 @@ class Enzymes3Test
     }
 
     public
-    function test_safe_eval_E_USER_ERROR()
+    function test_clean_eval_E_USER_ERROR()
     {
         $this->expectOutputString('');
 
         $code    = Ando_ErrorFactory::E_USER_ERROR_code();
         $enzymes = new Enzymes3();
-        list(, $error, $output) = $this->call_method('safe_eval', array($code, array()), $enzymes);
+        list(, $error, $output) = $this->call_method('clean_eval', array($code, array()), $enzymes);
 
         $this->assertTrue(is_array($error));
         extract($error);
@@ -365,13 +371,13 @@ class Enzymes3Test
     }
 
     public
-    function test_safe_eval_E_RECOVERABLE_ERROR()
+    function test_clean_eval_E_RECOVERABLE_ERROR()
     {
         $this->expectOutputString('');
 
         $code    = Ando_ErrorFactory::E_RECOVERABLE_ERROR_code();
         $enzymes = new Enzymes3();
-        list(, $error, $output) = $this->call_method('safe_eval', array($code, array()), $enzymes);
+        list(, $error, $output) = $this->call_method('clean_eval', array($code, array()), $enzymes);
 
         $this->assertTrue(is_array($error));
         extract($error);
@@ -386,12 +392,12 @@ class Enzymes3Test
     }
 
     public
-    function test_safe_eval_bubbling_exception()
+    function test_clean_eval_bubbling_exception()
     {
         $code    = '
             throw new Exception("What did you expect?");';
         $enzymes = new Enzymes3();
-        list(, $error, $output) = $this->call_method('safe_eval', array($code, array()), $enzymes);
+        list(, $error, $output) = $this->call_method('clean_eval', array($code, array()), $enzymes);
         $this->assertInstanceOf('Exception', $error);
         $this->assertEquals('What did you expect?', $error->getMessage());
         $this->assertEquals('', $output);
@@ -737,7 +743,7 @@ class Enzymes3Test
         $attrs_count = count($attrs);
 
         // This role is not really needed for attributes, but it makes my test easier to write.
-        $user = $this->factory->user->create_and_get(array('role' => EnzymesCapabilities::Coder));
+        $user = $this->factory->user->create_and_get(array('role' => Enzymes3Capabilities::Coder));
         $data = array();
         foreach ($attrs as $key) {
             $data[$key] = $user->$key;
@@ -761,7 +767,7 @@ class Enzymes3Test
     public
     function test_transcluded_author_from_current_post()
     {
-        $user_id = $this->factory->user->create(array('role' => EnzymesCapabilities::User));
+        $user_id = $this->factory->user->create(array('role' => Enzymes3Capabilities::User));
         add_user_meta($user_id, 'sample-name', 'sample-value');
         add_user_meta($user_id, 'sample name', 'sample value');
         $post_id = $this->factory->post->create(array('post_author' => $user_id));
@@ -777,12 +783,12 @@ class Enzymes3Test
     public
     function test_transcluded_author_from_another_post()
     {
-        $user_1_id = $this->factory->user->create(array('role' => EnzymesCapabilities::PrivilegedUser));
+        $user_1_id = $this->factory->user->create(array('role' => Enzymes3Capabilities::PrivilegedUser));
         add_user_meta($user_1_id, 'sample-name', 'sample value 1');
         $post_1_id = $this->factory->post->create(array('post_author' => $user_1_id));
         $post_1    = get_post($post_1_id);
 
-        $user_2_id = $this->factory->user->create(array('role' => EnzymesCapabilities::TrustedUser));
+        $user_2_id = $this->factory->user->create(array('role' => Enzymes3Capabilities::TrustedUser));
         add_user_meta($user_2_id, 'sample-name', 'sample value 2');
         $post_2_id = $this->factory->post->create(array('post_author' => $user_2_id));
 
@@ -796,12 +802,12 @@ class Enzymes3Test
     public
     function test_transcluded_author_from_another_post_by_slug()
     {
-        $user_1_id = $this->factory->user->create(array('role' => EnzymesCapabilities::PrivilegedUser));
+        $user_1_id = $this->factory->user->create(array('role' => Enzymes3Capabilities::PrivilegedUser));
         add_user_meta($user_1_id, 'sample-name', 'sample value 1');
         $post_1_id = $this->factory->post->create(array('post_author' => $user_1_id));
         $post_1    = get_post($post_1_id);
 
-        $user_2_id = $this->factory->user->create(array('role' => EnzymesCapabilities::TrustedUser));
+        $user_2_id = $this->factory->user->create(array('role' => Enzymes3Capabilities::TrustedUser));
         add_user_meta($user_2_id, 'sample-name', 'sample value 2');
         $post_2_id = $this->factory->post->create(array(
                 'post_author' => $user_2_id,
@@ -880,7 +886,7 @@ class Enzymes3Test
     public
     function test_executed_author_with_no_arguments()
     {
-        $user_id = $this->factory->user->create(array('role' => EnzymesCapabilities::Coder));
+        $user_id = $this->factory->user->create(array('role' => Enzymes3Capabilities::Coder));
         add_user_meta($user_id, 'sample-name', '
         $a = 100;
         $b = 20;
@@ -901,7 +907,7 @@ class Enzymes3Test
     public
     function test_executed_author_with_one_argument()
     {
-        $user_id = $this->factory->user->create(array('role' => EnzymesCapabilities::Coder));
+        $user_id = $this->factory->user->create(array('role' => Enzymes3Capabilities::Coder));
         add_user_meta($user_id, 'sample-name', '
         list($a) = $arguments;
         $b = 20;
@@ -922,7 +928,7 @@ class Enzymes3Test
     public
     function test_executed_author_with_many_arguments()
     {
-        $user_id = $this->factory->user->create(array('role' => EnzymesCapabilities::Coder));
+        $user_id = $this->factory->user->create(array('role' => Enzymes3Capabilities::Coder));
         add_user_meta($user_id, 'sample-name', '
         list($a, $b, $c) = $arguments;
         $result = $a * $b - $c;
@@ -941,7 +947,7 @@ class Enzymes3Test
     public
     function test_executed_author_with_an_array_argument()
     {
-        $user_id = $this->factory->user->create(array('role' => EnzymesCapabilities::Coder));
+        $user_id = $this->factory->user->create(array('role' => Enzymes3Capabilities::Coder));
         add_user_meta($user_id, 'sample-name', '
         list($a, $bc) = $arguments;
         $result = $a * array_sum($bc);
@@ -960,7 +966,7 @@ class Enzymes3Test
     public
     function test_executed_author_with_a_hash_argument()
     {
-        $user_id = $this->factory->user->create(array('role' => EnzymesCapabilities::Coder));
+        $user_id = $this->factory->user->create(array('role' => Enzymes3Capabilities::Coder));
         add_user_meta($user_id, 'sample-name', '
         list($hash) = $arguments;
         $result = $hash["a hundred"] * array_sum($hash["twenty and three"]);

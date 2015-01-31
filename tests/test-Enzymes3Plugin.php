@@ -1,6 +1,6 @@
 <?php
 
-class EnzymesPluginTest
+class Enzymes3PluginTest
         extends WP_UnitTestCase
 {
     // NOTE: The tests/bootstrap.php file loads the plugin into WordPress.
@@ -15,9 +15,9 @@ class EnzymesPluginTest
                 'the_excerpt_rss',
                 'the_content'
         );
-        $enzymes = EnzymesPlugin::engine();
+        $enzymes = Enzymes3Plugin::engine();
         foreach ($events as $event) {
-            $this->assertEquals(10, has_filter($event, array($enzymes, 'metabolize')),
+            $this->assertEquals(Enzymes3Plugin::PRIORITY, has_filter($event, array($enzymes, 'metabolize')),
                                 "Enzymes didn't attach to '$event'.");
         }
     }

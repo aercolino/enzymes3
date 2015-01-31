@@ -1,31 +1,25 @@
 <?php
+require_once( ABSPATH . 'wp-admin/includes/plugin.php' );
+
 require_once dirname(ENZYMES3_PRIMARY) . '/vendor/Ando/Regex.php';
 require_once dirname(ENZYMES3_PRIMARY) . '/vendor/Ando/ErrorFactory.php';
-require_once 'EnzymesSequence.php';
-require_once 'EnzymesCapabilities.php';
-require_once 'EnzymesOptions.php';
+require_once dirname(ENZYMES3_PRIMARY) . '/src/Enzymes3Sequence.php';
+require_once dirname(ENZYMES3_PRIMARY) . '/src/Enzymes3Capabilities.php';
+require_once dirname(ENZYMES3_PRIMARY) . '/src/Enzymes3Options.php';
 
 class Enzymes3
 {
-    protected $support_enzymes2 = false;
-
-    const FORCE_POST_VERSION = 'enzymes';
-
-    const FORCE_INJECTION_VERSION_2 = '=enzymes 2=';
-
-    const FORCE_INJECTION_VERSION_3 = '=enzymes 3=';
-
     /**
      *  When calling the engine directly, for forcing the global post, use one of the following:
-     * - EnzymesPlugin::engine()->metabolize($content);
-     * - EnzymesPlugin::engine()->metabolize($content, null);
-     * - EnzymesPlugin::engine()->metabolize($content, Enzymes3::GLOBAL_POST);
+     * - Enzymes3Plugin::engine()->metabolize($content);
+     * - Enzymes3Plugin::engine()->metabolize($content, null);
+     * - Enzymes3Plugin::engine()->metabolize($content, Enzymes3::GLOBAL_POST);
      */
     const GLOBAL_POST = null;
 
     /**
      * When calling the engine directly, for forcing no post at all, use one of the following:
-     * - EnzymesPlugin::engine()->metabolize($content, Enzymes3::NO_POST);
+     * - Enzymes3Plugin::engine()->metabolize($content, Enzymes3::NO_POST);
      */
     const NO_POST = -1;
 
@@ -130,7 +124,7 @@ class Enzymes3
     /**
      * Sequence of catalyzed enzymes, which are meant to be used as arguments for other enzymes.
      *
-     * @var EnzymesSequence
+     * @var Enzymes3Sequence
      */
     protected $catalyzed;
 
@@ -301,9 +295,6 @@ class Enzymes3
     {
         $this->init_grammar();
         $this->init_expressions();
-
-        $support_enzymes2 = EnzymesPlugin::$options->get('support_enzymes2');
-        $this->support_enzymes2 = boolval($support_enzymes2);
 
         $this->has_eval_recovered = true;
         register_shutdown_function(array($this, 'echo_last_eval_error'));
@@ -660,10 +651,10 @@ class Enzymes3
     protected
     function execute_code( $code, $arguments, $post_object )
     {
-        if ( author_can($post_object, EnzymesCapabilities::create_dynamic_custom_fields) &&
+        if ( author_can($post_object, Enzymes3Capabilities::create_dynamic_custom_fields) &&
              ($this->injection_author_owns($post_object) ||
-              author_can($post_object, EnzymesCapabilities::share_dynamic_custom_fields) &&
-              $this->injection_author_can(EnzymesCapabilities::use_others_custom_fields))
+              author_can($post_object, Enzymes3Capabilities::share_dynamic_custom_fields) &&
+              $this->injection_author_can(Enzymes3Capabilities::use_others_custom_fields))
         ) {
             list($result, $error, $output) = $this->clean_eval($code, $arguments);
             if ( $error ) {
@@ -785,10 +776,10 @@ class Enzymes3
     protected
     function transclude_code( $code, $post_object )
     {
-        if ( author_can($post_object, EnzymesCapabilities::create_static_custom_fields) &&
+        if ( author_can($post_object, Enzymes3Capabilities::create_static_custom_fields) &&
              ($this->injection_author_owns($post_object) ||
-              author_can($post_object, EnzymesCapabilities::share_static_custom_fields) &&
-              $this->injection_author_can(EnzymesCapabilities::use_others_custom_fields))
+              author_can($post_object, Enzymes3Capabilities::share_static_custom_fields) &&
+              $this->injection_author_can(Enzymes3Capabilities::use_others_custom_fields))
         ) {
             $result = $code;
         } else {
@@ -850,9 +841,9 @@ class Enzymes3
     {
         $this->debug_print('transcluding post_attr');
         $same_author = $this->injection_author_owns($post_object);
-        if ( $same_author && author_can($post_object, EnzymesCapabilities::use_own_attributes) ||
+        if ( $same_author && author_can($post_object, Enzymes3Capabilities::use_own_attributes) ||
              ! $same_author &&
-             $this->injection_author_can(EnzymesCapabilities::use_others_attributes)
+             $this->injection_author_can(Enzymes3Capabilities::use_others_attributes)
         ) {
             preg_match($this->grammar_rule('post_attr'), $post_attr, $matches);
             $result = $this->wp_post_attribute($post_object, $matches);
@@ -876,9 +867,9 @@ class Enzymes3
     {
         $this->debug_print('transcluding author_attr');
         $same_author = $this->injection_author_owns($post_object);
-        if ( $same_author && author_can($post_object, EnzymesCapabilities::use_own_attributes) ||
+        if ( $same_author && author_can($post_object, Enzymes3Capabilities::use_own_attributes) ||
              ! $same_author &&
-             $this->injection_author_can(EnzymesCapabilities::use_others_attributes)
+             $this->injection_author_can(Enzymes3Capabilities::use_others_attributes)
         ) {
             preg_match($this->grammar_rule('author_attr'), $author_attr, $matches);
             $user_object = $this->wp_author($post_object);
@@ -979,62 +970,6 @@ class Enzymes3
     }
 
     /**
-     * Detect the engine version of the injection post.
-     *
-     * @return int
-     */
-    protected
-    function post_engine_version()
-    {
-        // The injection_post at this point of the execution can be null only in version 3 because
-        // in version 2 it follows a different path, i.e. it would go straight into the Enzymes class
-        // by means of a call to the global metabolize() function. --
-        if ( is_null($this->injection_post) ) {
-            return 3;
-        }
-        // By looking at these dates we can only assume a post default version, because the user
-        // could have forced another default version or another injection version. --
-        $result = $this->injection_post->post_date_gmt <= EnzymesPlugin::activated_on()
-                ? 2
-                : 3;
-        // Allow a user to specify a different default version by using an "enzymes" custom field
-        // set to 2 or 3. --
-        $forced_version = get_post_meta($this->injection_post->ID, self::FORCE_POST_VERSION, true);
-        if ( in_array($forced_version, array(2, 3)) ) {
-            $result = $forced_version;
-        }
-
-        return $result;
-    }
-
-    /**
-     * Detect the version of an injection, and remove the forced version from the sequence, if any.
-     *
-     * @param string $sequence
-     *
-     * @return int
-     */
-    protected
-    function injection_engine_version( &$sequence )
-    {
-        $forced_2_prefix = self::FORCE_INJECTION_VERSION_2 . '|';
-        $forced_3_prefix = self::FORCE_INJECTION_VERSION_3 . '|';
-
-        $result = $this->post_engine_version();
-        switch (true) {
-            case (0 === strpos($sequence, $forced_2_prefix)):
-                $sequence = substr($sequence, strlen($forced_2_prefix));
-                $result   = 2;
-                break;
-            case (0 === strpos($sequence, $forced_3_prefix)):
-                $sequence = substr($sequence, strlen($forced_3_prefix));
-                $result   = 3;
-                break;
-        }
-        return $result;
-    }
-
-    /**
      * Process the enzymes in the matched sequence.
      *
      * @param string $could_be_sequence
@@ -1048,12 +983,9 @@ class Enzymes3
         $there_are_only_chained_enzymes = preg_match($this->e_sequence_valid, '|' . $sequence);
         if ( ! $there_are_only_chained_enzymes ) {
             $result = '{[' . $could_be_sequence . ']}';  // skip this injection AS IS
-        } elseif ( $this->support_enzymes2 && $this->injection_engine_version($sequence) == 2 ) {
-            $result = '{[' . $sequence . ']}';  // skip this injection
-            // REM: injection_engine_version strips out the forced version from $sequence, if any
         } else {
             $this->current_sequence = $could_be_sequence;
-            $this->catalyzed        = new EnzymesSequence();
+            $this->catalyzed        = new Enzymes3Sequence();
             $rest                   = $sequence;
             while (preg_match($this->e_sequence_start, $rest, $matches)) {
                 $execution    = $this->value($matches, 'execution');
@@ -1141,17 +1073,22 @@ class Enzymes3
     public
     function metabolize( $content )
     {
+//        $this->debug_on = true;
         $args = func_get_args();
         list($continue, $this->injection_post) = $this->get_injection_post($args);
         if ( ! $continue ) {
+//            $this->debug_print('(1)');
             return $content;
         }
-        if ( ! $this->injection_author_can(EnzymesCapabilities::inject) ) {
+        if ( ! $this->injection_author_can(Enzymes3Capabilities::inject) ) {
+//            $this->debug_print('(2)');
             return $content;
         }
         if ( ! $this->there_is_an_injection($content, $matches) ) {
+//            $this->debug_print('(3)');
             return $content;
         }
+//        $this->debug_on = false;
         $this->new_content = '';
         do {
             $before            = $this->value($matches, 'before');
@@ -1159,7 +1096,11 @@ class Enzymes3
             $after             = $this->value($matches, 'after');
             $escaped_injection = '{' == substr($before, -1);  // "{{[ .. ]}"
             if ( $escaped_injection ) {
-                $result = '{[' . $could_be_sequence . ']}';  // do not unescape now, version 2 will do it later...
+                if ( is_plugin_active( 'enzymes/enzymes.php' ) ) {
+                    $result = '{[' . $could_be_sequence . ']}';  // do not unescape now, version 2 will do it later...
+                } else {
+                    $result = '[' . $could_be_sequence . ']}';   // unescape now, version 2 is not active...
+                }
             } else {
                 $result = $this->process($could_be_sequence);
             }

@@ -1,31 +1,31 @@
 <?php
 
-class SequenceTest
+class Enzymes3SequenceTest
         extends WP_UnitTestCase
 {
 
     function test_peek_for_empty_store_is_null()
     {
-        $s = new EnzymesSequence();
+        $s = new Enzymes3Sequence();
         $this->assertEquals(null, $s->peek());
         $this->assertEquals(null, $s->peek(2));
     }
 
     function test_pop_for_empty_store_is_null()
     {
-        $s = new EnzymesSequence();
+        $s = new Enzymes3Sequence();
         $this->assertEquals(null, $s->pop());
         $this->assertEquals(null, $s->pop(2));
     }
 
     function test_push() {
-        $s = new EnzymesSequence();
+        $s = new Enzymes3Sequence();
         $this->assertEquals(1, $s->push('hello'));
         $this->assertEquals(2, $s->push('world'));
     }
 
     function test_peek() {
-        $s = new EnzymesSequence();
+        $s = new Enzymes3Sequence();
         $s->push('hello');
         $this->assertEquals(array('hello'), $s->peek());
 
@@ -38,7 +38,7 @@ class SequenceTest
     }
 
     function test_pop() {
-        $s = new EnzymesSequence();
+        $s = new Enzymes3Sequence();
         $s->push('hello');
         $s->push('world');
         $this->assertEquals(array('world'), $s->pop());
@@ -52,7 +52,7 @@ class SequenceTest
     }
 
     function test_replace() {
-        $s = new EnzymesSequence();
+        $s = new Enzymes3Sequence();
         $s->push('hello');
         $s->push('world');
         $replace = $s->replace('world 2');
