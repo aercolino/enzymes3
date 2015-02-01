@@ -41,7 +41,7 @@ class Enzymes3_Plugin
             register_activation_hook( ENZYMES3_PRIMARY, array( 'Enzymes3_Plugin', 'on_activation' ) );
             register_deactivation_hook( ENZYMES3_PRIMARY, array( 'Enzymes3_Plugin', 'on_deactivation' ) );
         } else {
-            add_action( 'init', array( 'Enzymes3Plugin', 'on_init' ), 10, 2 );
+            add_action( 'init', array( 'Enzymes3_Plugin', 'on_init' ), 10, 2 );
         }
     }
 
