@@ -185,7 +185,7 @@ class Enzymes3_Engine
 
                 'slug'         => '(?<slug>[\w+~-]+)',
                 'post'         => '(?<post>\d+|@$slug|)',
-                'field'        => '(?<field>[\w-]+|$string)',
+                'field'        => '(?<field>[^|.=\]}]+|$string)',
                 'post_item'    => '(?<post_item>$post\.$field)',
                 'author_item'  => '(?<author_item>$post/author\.$field)',
                 'item'         => '(?<item>$post_item|$author_item)',
@@ -414,6 +414,13 @@ class Enzymes3_Engine
     protected
     function clean_eval( $code, array $arguments = array() )
     {
+        if (! is_string($code)) {
+            return array( null, 'Code to execute must be a string: ' . gettype($code) . ' given.', '' );
+        }
+        $code = trim($code);
+        if (empty($code)) {
+            return array( null, 'No code to execute.', '' );
+        }
         $previous_ini = array();
         if ( function_exists('xdebug_is_enabled') && xdebug_is_enabled() ) {
             $previous_ini['xdebug.scream'] = ini_set('xdebug.scream', false);
@@ -442,7 +449,7 @@ class Enzymes3_Engine
 
         if ( false === $result ) {
             if ( ! $error instanceof Exception ) {
-                $error = true; // Assume error info is into $output.
+                $error = "Troubles with this code: [\n$code\n]"; // Assume error info is into $output.
             }
         }
         // Note that $error can be true, array, or exception.
@@ -682,7 +689,7 @@ class Enzymes3_Engine
     protected
     function execute_post_item( $post_item, $num_args )
     {
-        $this->debug_print('executing post_item');
+//        $this->debug_print('executing post_item');
         // match again to be able to access groups by name...
         preg_match($this->grammar_rule('post_item'), $post_item, $matches);
         $post_object = $this->wp_post($matches);
@@ -709,7 +716,7 @@ class Enzymes3_Engine
     protected
     function execute_author_item( $author_item, $num_args )
     {
-        $this->debug_print('executing author_item');
+//        $this->debug_print('executing author_item');
         preg_match($this->grammar_rule('author_item'), $author_item, $matches);
         $post_object = $this->wp_post($matches);
         if ( ! $post_object instanceof WP_Post ) {
@@ -800,7 +807,7 @@ class Enzymes3_Engine
     protected
     function transclude_post_item( $post_item, $post_object )
     {
-        $this->debug_print('transcluding post_item');
+//        $this->debug_print('transcluding post_item');
         preg_match($this->grammar_rule('post_item'), $post_item, $matches);
         $code   = $this->wp_post_field($post_object, $matches);
         $result = $this->transclude_code($code, $post_object);
@@ -819,7 +826,7 @@ class Enzymes3_Engine
     protected
     function transclude_author_item( $author_item, $post_object )
     {
-        $this->debug_print('transcluding author_item');
+//        $this->debug_print('transcluding author_item');
         preg_match($this->grammar_rule('author_item'), $author_item, $matches);
         $user_object = $this->wp_author($post_object);
         $code        = $this->wp_user_field($user_object, $matches);
@@ -839,7 +846,7 @@ class Enzymes3_Engine
     protected
     function transclude_post_attr( $post_attr, $post_object )
     {
-        $this->debug_print('transcluding post_attr');
+//        $this->debug_print('transcluding post_attr');
         $same_author = $this->injection_author_owns($post_object);
         if ( $same_author && author_can($post_object, Enzymes3_Capabilities::use_own_attributes) ||
              ! $same_author &&
@@ -865,7 +872,7 @@ class Enzymes3_Engine
     protected
     function transclude_author_attr( $author_attr, $post_object )
     {
-        $this->debug_print('transcluding author_attr');
+//        $this->debug_print('transcluding author_attr');
         $same_author = $this->injection_author_owns($post_object);
         if ( $same_author && author_can($post_object, Enzymes3_Capabilities::use_own_attributes) ||
              ! $same_author &&
