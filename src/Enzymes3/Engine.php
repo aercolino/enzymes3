@@ -64,6 +64,13 @@ class Enzymes3_Engine
      */
     protected $evaluating_code;
 
+	/**
+	 * Post used as origin of the current enzyme .
+	 *
+	 * @var WP_Post
+	 */
+	protected $origin_post;
+
     /**
      * Regular expression for matching "{[ .. ]}".
      *
@@ -192,7 +199,7 @@ class Enzymes3_Engine
 
                 'slug'         => '(?<slug>[\w+~-]+)',
                 'post'         => '(?<post>\d+|@$slug|)',
-                'field'        => '(?<field>[^|.=\]}]+|$string)',
+                'field'        => '(?<field>[^|.=\]}]+|$string)',  // REM: spaces outside of strings are stripped out.
                 'post_item'    => '(?<post_item>$post\.$field)',
                 'author_item'  => '(?<author_item>$post/author\.$field)',
                 'item'         => '(?<item>$post_item|$author_item)',
@@ -684,6 +691,7 @@ class Enzymes3_Engine
               author_can($post_object, Enzymes3_Capabilities::share_dynamic_custom_fields) &&
               $this->injection_author_can(Enzymes3_Capabilities::use_others_custom_fields))
         ) {
+	        $this->origin_post = $post_object;
             list($result, $error, $output) = $this->clean_eval($code, $arguments);
             if ( $error ) {
                 $this->console_log($this->decorate(__('ENZYMES ERROR'), $error));
@@ -1101,22 +1109,17 @@ class Enzymes3_Engine
     public
     function metabolize( $content )
     {
-//        $this->debug_on = true;
         $args = func_get_args();
         list($continue, $this->injection_post) = $this->get_injection_post($args);
         if ( ! $continue ) {
-//            $this->debug_print('(1)');
             return $content;
         }
         if ( ! $this->injection_author_can(Enzymes3_Capabilities::inject) ) {
-//            $this->debug_print('(2)');
             return $content;
         }
         if ( ! $this->there_is_an_injection($content, $matches) ) {
-//            $this->debug_print('(3)');
             return $content;
         }
-//        $this->debug_on = false;
         $this->new_content = '';
         do {
             $before            = $this->value($matches, 'before');
@@ -1126,9 +1129,9 @@ class Enzymes3_Engine
             $escaped_injection = '{' == substr($before, -1);  // "{{[ .. ]}"
             if ( $escaped_injection ) {
                 if ( is_plugin_active( 'enzymes/enzymes.php' ) ) {
-                    $result = '{[' . $could_be_sequence . ']}';  // do not unescape now, version 2 will do it later...
+                    $result = '{[' . $could_be_sequence . ']}';  // Do not unescape now: version 2 will do it later.
                 } else {
-                    $result = '[' . $could_be_sequence . ']}';   // unescape now, version 2 is not active...
+                    $result = '[' . $could_be_sequence . ']}';   // Unescape now: version 2 is not active.
                 }
             } else {
                 $result = $this->process($could_be_sequence);
