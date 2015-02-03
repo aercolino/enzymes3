@@ -58,6 +58,13 @@ class Enzymes3_Engine
     protected $new_content;
 
     /**
+     * The code that is being evaluated.
+     *
+     * @var string
+     */
+    protected $evaluating_code;
+
+    /**
      * Regular expression for matching "{[ .. ]}".
      *
      * @var Ando_Regex
@@ -361,6 +368,18 @@ class Enzymes3_Engine
         $result[] = sprintf(__('Post: %1$s - Enzyme: %3$s - Injection: {[%2$s]}'), $this->injection_post->ID,
                 $this->current_sequence, $this->current_enzyme);
         $result[] = $output;
+        if ($this->evaluating_code) {
+            // add line numbers
+            $lines = explode("\n", $this->evaluating_code);
+            $digits = strlen('' . count($lines));
+            $format = '%' . $digits . 'd: %s';
+            $code = array();
+            foreach ($lines as $i => $line) {
+                $code[] = sprintf( $format, $i + 1, $line );
+            }
+            $code = implode("\n", $code);
+            $result[] = $code;
+        }
         return $result;
     }
 
@@ -430,6 +449,7 @@ class Enzymes3_Engine
         ob_start();
         $this->has_eval_recovered = false;
         $this->last_eval_error    = null;
+        $this->evaluating_code    = $code;
         // -------------------------------------------------------------------------------------------------------------
         try {
             $result = eval($code);
@@ -439,6 +459,7 @@ class Enzymes3_Engine
             $error  = $e;     // and take the exception as the error.
         }
         // -------------------------------------------------------------------------------------------------------------
+        $this->evaluating_code    = null;
         $this->last_eval_error    = null;
         $this->has_eval_recovered = true;
         $output                   = ob_get_clean();
@@ -449,7 +470,7 @@ class Enzymes3_Engine
 
         if ( false === $result ) {
             if ( ! $error instanceof Exception ) {
-                $error = "Troubles with this code: [\n$code\n]"; // Assume error info is into $output.
+                $error = "Troubles with the code."; // Assume error info is into $output.
             }
         }
         // Note that $error can be true, array, or exception.
