@@ -1122,6 +1122,7 @@ class Enzymes3_Engine
             $before            = $this->value($matches, 'before');
             $could_be_sequence = $this->value($matches, 'could_be_sequence');
             $after             = $this->value($matches, 'after');
+	        $this->new_content .= $before;
             $escaped_injection = '{' == substr($before, -1);  // "{{[ .. ]}"
             if ( $escaped_injection ) {
                 if ( is_plugin_active( 'enzymes/enzymes.php' ) ) {
@@ -1132,7 +1133,7 @@ class Enzymes3_Engine
             } else {
                 $result = $this->process($could_be_sequence);
             }
-            $this->new_content .= $before . $result;
+            $this->new_content .= $result;
         } while ($this->there_is_an_injection($after, $matches));
         $result = $this->new_content . $after;
 
