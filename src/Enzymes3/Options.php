@@ -1,7 +1,6 @@
 <?php
 
-class Enzymes3_Options
-{
+class Enzymes3_Options {
     const PREFIX = 'enzymes3.';
 
     /**
@@ -12,11 +11,11 @@ class Enzymes3_Options
      * @return string
      */
     protected
-    function name( $username = null )
-    {
-        $result = self::PREFIX . ($username
-                        ? $username
-                        : 'global_options');
+    function name( $username = null ) {
+        $result = self::PREFIX . ( $username
+                ? $username
+                : 'global_options' );
+
         return $result;
     }
 
@@ -26,25 +25,23 @@ class Enzymes3_Options
      * @param string $username
      */
     public
-    function remove( $username = null )
-    {
-        if ( is_numeric($username) ) {
-            $user = new WP_User($username);
+    function remove( $username = null ) {
+        if ( is_numeric( $username ) ) {
+            $user     = new WP_User( $username );
             $username = $user->user_login;
         }
-        $name = $this->name($username);
-        delete_option($name);
+        $name = $this->name( $username );
+        delete_option( $name );
     }
 
     /**
      * Removes site option and each user's ones.
      */
     public
-    function remove_all()
-    {
+    function remove_all() {
         global $wpdb;
         $prefix = self::PREFIX;
-        $wpdb->query("DELETE FROM `$wpdb->options` WHERE `option_name` LIKE '{$prefix}%'");
+        $wpdb->query( "DELETE FROM `$wpdb->options` WHERE `option_name` LIKE '{$prefix}%'" );
     }
 
     /**
@@ -55,10 +52,10 @@ class Enzymes3_Options
      * @return mixed
      */
     public
-    function get( $username = null )
-    {
-        $name = $this->name($username);
-        $result = get_option($name, array());
+    function get( $username = null ) {
+        $name   = $this->name( $username );
+        $result = get_option( $name, array() );
+
         return $result;
     }
 
@@ -71,14 +68,13 @@ class Enzymes3_Options
      * @param string $username
      */
     public
-    function set( $value, $username = null )
-    {
-        $name = $this->name($username);
-        delete_option($name);
+    function set( $value, $username = null ) {
+        $name = $this->name( $username );
+        delete_option( $name );
         $autoload = $username
-                ? 'no'
-                : 'yes';
-        add_option($name, $value, null, $autoload);
+            ? 'no'
+            : 'yes';
+        add_option( $name, $value, null, $autoload );
     }
 
     /**
@@ -90,11 +86,11 @@ class Enzymes3_Options
      * @return array
      */
     public
-    function keysGet( $keys, $username = null )
-    {
-        $result = array_fill_keys($keys, null);
-        $data = $this->get($username);
-        $result = array_merge($result, $data);
+    function keysGet( $keys, $username = null ) {
+        $result = array_fill_keys( $keys, null );
+        $data   = $this->get( $username );
+        $result = array_merge( $result, $data );
+
         return $result;
     }
 
@@ -105,10 +101,9 @@ class Enzymes3_Options
      * @param string $username
      */
     public
-    function keysSet( $values, $username = null )
-    {
-        $data = $this->get($username);
-        $data = array_merge($data, $values);
-        $this->set($data, $username);
+    function keysSet( $values, $username = null ) {
+        $data = $this->get( $username );
+        $data = array_merge( $data, $values );
+        $this->set( $data, $username );
     }
 }

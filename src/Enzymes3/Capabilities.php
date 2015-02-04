@@ -1,7 +1,6 @@
 <?php
 
-class Enzymes3_Capabilities
-{
+class Enzymes3_Capabilities {
     const PREFIX = 'enzymes3.';
 
 //@formatter:off
@@ -28,19 +27,19 @@ class Enzymes3_Capabilities
      * @return array
      */
     static public
-    function all()
-    {
+    function all() {
         $result = array(
-                self::inject,
-                self::use_own_attributes,
-                self::use_others_attributes,
-                self::use_own_custom_fields,
-                self::use_others_custom_fields,
-                self::create_static_custom_fields,
-                self::create_dynamic_custom_fields,
-                self::share_static_custom_fields,
-                self::share_dynamic_custom_fields,
+            self::inject,
+            self::use_own_attributes,
+            self::use_others_attributes,
+            self::use_own_custom_fields,
+            self::use_others_custom_fields,
+            self::create_static_custom_fields,
+            self::create_dynamic_custom_fields,
+            self::share_static_custom_fields,
+            self::share_dynamic_custom_fields,
         );
+
         return $result;
     }
 
@@ -50,14 +49,14 @@ class Enzymes3_Capabilities
      * @return array
      */
     public static
-    function for_User()
-    {
-        $result = array_merge(array_fill_keys(self::all(), false), array(
-                self::inject                      => true,
-                self::use_own_attributes          => true,
-                self::use_own_custom_fields       => true,
-                self::create_static_custom_fields => true,
-        ));
+    function for_User() {
+        $result = array_merge( array_fill_keys( self::all(), false ), array(
+            self::inject                      => true,
+            self::use_own_attributes          => true,
+            self::use_own_custom_fields       => true,
+            self::create_static_custom_fields => true,
+        ) );
+
         return $result;
     }
 
@@ -67,11 +66,11 @@ class Enzymes3_Capabilities
      * @return array
      */
     public static
-    function for_PrivilegedUser()
-    {
-        $result = array_merge(self::for_User(), array(
-                self::use_others_custom_fields => true,
-        ));
+    function for_PrivilegedUser() {
+        $result = array_merge( self::for_User(), array(
+            self::use_others_custom_fields => true,
+        ) );
+
         return $result;
     }
 
@@ -81,11 +80,11 @@ class Enzymes3_Capabilities
      * @return array
      */
     public static
-    function for_TrustedUser()
-    {
-        $result = array_merge(self::for_PrivilegedUser(), array(
-                self::share_static_custom_fields => true,
-        ));
+    function for_TrustedUser() {
+        $result = array_merge( self::for_PrivilegedUser(), array(
+            self::share_static_custom_fields => true,
+        ) );
+
         return $result;
     }
 
@@ -95,11 +94,11 @@ class Enzymes3_Capabilities
      * @return array
      */
     public static
-    function for_Coder()
-    {
-        $result = array_merge(self::for_TrustedUser(), array(
-                self::create_dynamic_custom_fields => true,
-        ));
+    function for_Coder() {
+        $result = array_merge( self::for_TrustedUser(), array(
+            self::create_dynamic_custom_fields => true,
+        ) );
+
         return $result;
     }
 
@@ -109,11 +108,11 @@ class Enzymes3_Capabilities
      * @return array
      */
     public static
-    function for_TrustedCoder()
-    {
-        $result = array_merge(self::for_Coder(), array(
-                self::share_dynamic_custom_fields => true,
-        ));
+    function for_TrustedCoder() {
+        $result = array_merge( self::for_Coder(), array(
+            self::share_dynamic_custom_fields => true,
+        ) );
+
         return $result;
     }
 
