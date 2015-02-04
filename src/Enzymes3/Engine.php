@@ -165,7 +165,7 @@ class Enzymes3_Engine
      *   slug        := [\w+~-]+
      *   field       := [\w-]+ | string
      *
-     * execution := ("array" | "hash" | item) "(" \d* ")"
+     * execution := ("array" | "hash" | "priority" | item) "(" \d* ")"
      * ---
      *
      * These (key, value) pairs follow the pattern: "'rule_left' => '(?<rule_left>rule_right)';".
@@ -208,7 +208,7 @@ class Enzymes3_Engine
                 'attr'         => '(?<attr>$post_attr|$author_attr)',
                 'transclusion' => '(?<transclusion>$item|$attr)',
 
-                'execution'    => '(?<execution>(?:\barray\b|\bhash\b|$item)\((?<num_args>\d*)\))',
+                'execution'    => '(?<execution>(?:\b(?:array|hash|priority)\b|$item)\((?<num_args>\d*)\))',
 
                 'enzyme'       => '(?<enzyme>(?:$execution|$transclusion|$literal))',
                 'sequence'     => '(?<sequence>$enzyme(\|$enzyme)*)',
@@ -758,6 +758,11 @@ class Enzymes3_Engine
         return $result;
     }
 
+    protected
+    function set_priority() {
+
+    }
+
     /**
      * Execute the matched enzyme.
      *
@@ -785,6 +790,10 @@ class Enzymes3_Engine
                     $value        = $arguments[$i + 1];
                     $result[$key] = $value;
                 }
+                break;
+            case (strpos($execution, 'priority(') === 0 && $num_args > 0):
+                $this->set_priority($num_args);
+                $result = null;
                 break;
             case ($post_item != ''):
                 $result = $this->execute_post_item($post_item, $num_args);
