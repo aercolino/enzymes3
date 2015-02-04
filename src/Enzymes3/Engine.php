@@ -718,7 +718,6 @@ class Enzymes3_Engine
     protected
     function execute_post_item( $post_item, $num_args )
     {
-//        $this->debug_print('executing post_item');
         // match again to be able to access groups by name...
         preg_match($this->grammar_rule('post_item'), $post_item, $matches);
         $post_object = $this->wp_post($matches);
@@ -745,7 +744,6 @@ class Enzymes3_Engine
     protected
     function execute_author_item( $author_item, $num_args )
     {
-//        $this->debug_print('executing author_item');
         preg_match($this->grammar_rule('author_item'), $author_item, $matches);
         $post_object = $this->wp_post($matches);
         if ( ! $post_object instanceof WP_Post ) {
@@ -836,7 +834,6 @@ class Enzymes3_Engine
     protected
     function transclude_post_item( $post_item, $post_object )
     {
-//        $this->debug_print('transcluding post_item');
         preg_match($this->grammar_rule('post_item'), $post_item, $matches);
         $code   = $this->wp_post_field($post_object, $matches);
         $result = $this->transclude_code($code, $post_object);
@@ -855,7 +852,6 @@ class Enzymes3_Engine
     protected
     function transclude_author_item( $author_item, $post_object )
     {
-//        $this->debug_print('transcluding author_item');
         preg_match($this->grammar_rule('author_item'), $author_item, $matches);
         $user_object = $this->wp_author($post_object);
         $code        = $this->wp_user_field($user_object, $matches);
@@ -875,7 +871,6 @@ class Enzymes3_Engine
     protected
     function transclude_post_attr( $post_attr, $post_object )
     {
-//        $this->debug_print('transcluding post_attr');
         $same_author = $this->injection_author_owns($post_object);
         if ( $same_author && author_can($post_object, Enzymes3_Capabilities::use_own_attributes) ||
              ! $same_author &&
@@ -901,7 +896,6 @@ class Enzymes3_Engine
     protected
     function transclude_author_attr( $author_attr, $post_object )
     {
-//        $this->debug_print('transcluding author_attr');
         $same_author = $this->injection_author_owns($post_object);
         if ( $same_author && author_can($post_object, Enzymes3_Capabilities::use_own_attributes) ||
              ! $same_author &&

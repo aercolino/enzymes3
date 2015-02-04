@@ -206,7 +206,7 @@ class Enzymes3_EngineTest
         $enzymes = new Enzymes3_Engine();
         list(, $error, $output) = $this->call_method('clean_eval', array($code, array()), $enzymes);
 
-        $this->assertTrue($error);
+        $this->assertEquals('Troubles with the code.', $error);
         $this->assertRegExp('@^Parse error:@m', $output);
     }
 
