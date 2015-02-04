@@ -7,8 +7,7 @@ require_once dirname( ENZYMES3_PRIMARY ) . '/src/Enzymes3/Sequence.php';
 require_once dirname( ENZYMES3_PRIMARY ) . '/src/Enzymes3/Capabilities.php';
 require_once dirname( ENZYMES3_PRIMARY ) . '/src/Enzymes3/Options.php';
 
-class Enzymes3_Engine
-{
+class Enzymes3_Engine {
     /**
      *  When calling the engine directly, for forcing the global post, use one of the following:
      * - Enzymes3_Plugin::engine()->metabolize($content);
@@ -21,7 +20,7 @@ class Enzymes3_Engine
      * When calling the engine directly, for forcing no post at all, use one of the following:
      * - Enzymes3_Plugin::engine()->metabolize($content, Enzymes3_Engine::NO_POST);
      */
-    const NO_POST = -1;
+    const NO_POST = - 1;
 
     /**
      * When calling the engine directly, ID of the user to consider the author after forcing no post.
@@ -64,12 +63,12 @@ class Enzymes3_Engine
      */
     protected $evaluating_code;
 
-	/**
-	 * Post used as origin of the current enzyme .
-	 *
-	 * @var WP_Post
-	 */
-	protected $origin_post;
+    /**
+     * Post used as origin of the current enzyme .
+     *
+     * @var WP_Post
+     */
+    protected $origin_post;
 
     /**
      * Regular expression for matching "{[ .. ]}".
@@ -187,8 +186,7 @@ class Enzymes3_Engine
      * Notice that $grammar rules are sorted bottom up here to allow complete interpolation.
      */
     protected
-    function init_grammar()
-    {
+    function init_grammar() {
 //@formatter:off
         $grammar = array(
                 'number'       => '(?<number>\d+(\.\d+)?)',
@@ -211,10 +209,10 @@ class Enzymes3_Engine
                 'injection'    => '(?<injection>{[$sequence]})',
         );
 //@formatter:on
-        $result  = array();
-        foreach ($grammar as $symbol => $rule) {
-            $regex           = new Ando_Regex($rule);
-            $result[$symbol] = $regex->interpolate($result);
+        $result = array();
+        foreach ( $grammar as $symbol => $rule ) {
+            $regex             = new Ando_Regex( $rule );
+            $result[ $symbol ] = $regex->interpolate( $result );
         }
         $this->grammar = $result;
     }
@@ -223,17 +221,16 @@ class Enzymes3_Engine
      * Init the regular expression for matching the injection of a sequence.
      */
     protected
-    function init_e_injection()
-    {
-        $before             = new Ando_Regex('(?<before>.*?)');
-        $could_be_injection = new Ando_Regex('\{\[(?<could_be_sequence>.*?)\]\}');
-        $after              = new Ando_Regex('(?<after>.*)');
-        $content            = new Ando_Regex('^$before$could_be_injection$after$', '@@s');
-        $content->interpolate(array(
-                'before'             => $before,
-                'could_be_injection' => $could_be_injection,
-                'after'              => $after,
-        ));
+    function init_e_injection() {
+        $before             = new Ando_Regex( '(?<before>.*?)' );
+        $could_be_injection = new Ando_Regex( '\{\[(?<could_be_sequence>.*?)\]\}' );
+        $after              = new Ando_Regex( '(?<after>.*)' );
+        $content            = new Ando_Regex( '^$before$could_be_injection$after$', '@@s' );
+        $content->interpolate( array(
+            'before'             => $before,
+            'could_be_injection' => $could_be_injection,
+            'after'              => $after,
+        ) );
         $this->e_injection = $content;
     }
 
@@ -241,13 +238,12 @@ class Enzymes3_Engine
      * Init the regular expression for matching a valid sequence.
      */
     protected
-    function init_e_sequence_valid()
-    {
+    function init_e_sequence_valid() {
         // Notice that sequence_valid matches all the enzymes of the sequence at once.
-        $sequence_valid = new Ando_Regex(Ando_Regex::option_same_name() . '^(?:\|$enzyme)+$', '@@');
-        $sequence_valid->interpolate(array(
-                'enzyme' => $this->grammar['enzyme'],
-        ));
+        $sequence_valid = new Ando_Regex( Ando_Regex::option_same_name() . '^(?:\|$enzyme)+$', '@@' );
+        $sequence_valid->interpolate( array(
+            'enzyme' => $this->grammar['enzyme'],
+        ) );
         $this->e_sequence_valid = $sequence_valid;
     }
 
@@ -255,14 +251,13 @@ class Enzymes3_Engine
      * Init the regular expression for matching the start of a sequence.
      */
     protected
-    function init_e_sequence_start()
-    {
-        $rest           = new Ando_Regex('(?:\|(?<rest>.+))');
-        $sequence_start = new Ando_Regex(Ando_Regex::option_same_name() . '^$enzyme$rest?$', '@@');
-        $sequence_start->interpolate(array(
-                'enzyme' => $this->grammar['enzyme'],
-                'rest'   => $rest,
-        ));
+    function init_e_sequence_start() {
+        $rest           = new Ando_Regex( '(?:\|(?<rest>.+))' );
+        $sequence_start = new Ando_Regex( Ando_Regex::option_same_name() . '^$enzyme$rest?$', '@@' );
+        $sequence_start->interpolate( array(
+            'enzyme' => $this->grammar['enzyme'],
+            'rest'   => $rest,
+        ) );
         $this->e_sequence_start = $sequence_start;
     }
 
@@ -270,12 +265,11 @@ class Enzymes3_Engine
      * Init the regular expression for matching strings.
      */
     protected
-    function init_e_string()
-    {
-        $maybe_quoted = new Ando_Regex('(?<before_string>.*?)$string|(?<anything_else>.+)', '@@s');
-        $maybe_quoted->interpolate(array(
-                'string' => $this->grammar['string'],
-        ));
+    function init_e_string() {
+        $maybe_quoted = new Ando_Regex( '(?<before_string>.*?)$string|(?<anything_else>.+)', '@@s' );
+        $maybe_quoted->interpolate( array(
+            'string' => $this->grammar['string'],
+        ) );
         $this->e_string = $maybe_quoted;
     }
 
@@ -283,32 +277,30 @@ class Enzymes3_Engine
      * Init regular expressions.
      */
     protected
-    function init_expressions()
-    {
+    function init_expressions() {
         $this->init_e_injection();
         $this->init_e_sequence_valid();
         $this->init_e_sequence_start();
         $this->init_e_string();
 
-        $this->e_comment = new Ando_Regex('\/\*.*?\*\/', '@@s');
+        $this->e_comment = new Ando_Regex( '\/\*.*?\*\/', '@@s' );
         // for some reason WP introduces some C2 (hex) chars when writing a post...
-        $this->e_unbreakable_space           = new Ando_Regex('\xC2\xA0', '@@');
-        $this->e_all_spaces                  = new Ando_Regex('(?:\s|\xC2\xA0)+', '@@');
-        $this->e_escaped_injection_delimiter = new Ando_Regex('\\\\([{[\]}])', '@@');
-        $this->e_escaped_string_delimiter    = new Ando_Regex('\\\\=', '@@');
+        $this->e_unbreakable_space           = new Ando_Regex( '\xC2\xA0', '@@' );
+        $this->e_all_spaces                  = new Ando_Regex( '(?:\s|\xC2\xA0)+', '@@' );
+        $this->e_escaped_injection_delimiter = new Ando_Regex( '\\\\([{[\]}])', '@@' );
+        $this->e_escaped_string_delimiter    = new Ando_Regex( '\\\\=', '@@' );
     }
 
     /**
      * Bootstrap the engine.
      */
     public
-    function __construct()
-    {
+    function __construct() {
         $this->init_grammar();
         $this->init_expressions();
 
         $this->has_eval_recovered = true;
-        register_shutdown_function(array($this, 'echo_last_eval_error'));
+        register_shutdown_function( array( $this, 'echo_last_eval_error' ) );
     }
 
     /**
@@ -321,13 +313,13 @@ class Enzymes3_Engine
      * @throws Ando_Exception
      */
     protected
-    function grammar_rule( $rule, $same_name = true )
-    {
-        $result = $this->grammar[$rule]->wrapper_set('@@')
-                                       ->expression(true);
+    function grammar_rule( $rule, $same_name = true ) {
+        $result = $this->grammar[ $rule ]->wrapper_set( '@@' )
+                                         ->expression( true );
         if ( $same_name ) {
-            $result = substr_replace($result, Ando_Regex::option_same_name(), 1, 0);
+            $result = substr_replace( $result, Ando_Regex::option_same_name(), 1, 0 );
         }
+
         return $result;
     }
 
@@ -337,19 +329,18 @@ class Enzymes3_Engine
      * @param array $logs
      */
     protected
-    function console_log( array $logs )
-    {
-        if ( count($logs) == 0 ) {
+    function console_log( array $logs ) {
+        if ( count( $logs ) == 0 ) {
             return;
         }
         $lines = array();
-        foreach ($logs as $data) {
-            $json    = json_encode((is_array($data) || is_object($data))
-                    ? $data
-                    : trim($data));
+        foreach ( $logs as $data ) {
+            $json    = json_encode( ( is_array( $data ) || is_object( $data ) )
+                ? $data
+                : trim( $data ) );
             $lines[] = "window.console.log($json);";
         }
-        $lines  = implode('', $lines);
+        $lines  = implode( '', $lines );
         $output = "<script>if(window.console){if(window.console.log){$lines}}</script>";
         echo $output;
     }
@@ -365,25 +356,25 @@ class Enzymes3_Engine
      * @return array
      */
     protected
-    function decorate( $title, $output )
-    {
+    function decorate( $title, $output ) {
         $result   = array();
         $result[] = $title;
-        $result[] = sprintf(__('Post: %1$s - Enzyme: %3$s - Injection: {[%2$s]}'), $this->injection_post->ID,
-                $this->current_sequence, $this->current_enzyme);
+        $result[] = sprintf( __( 'Post: %1$s - Enzyme: %3$s - Injection: {[%2$s]}' ), $this->injection_post->ID,
+            $this->current_sequence, $this->current_enzyme );
         $result[] = $output;
-        if ($this->evaluating_code) {
+        if ( $this->evaluating_code ) {
             // add line numbers
-            $lines = explode("\n", $this->evaluating_code);
-            $digits = strlen('' . count($lines));
+            $lines  = explode( "\n", $this->evaluating_code );
+            $digits = strlen( '' . count( $lines ) );
             $format = '%' . $digits . 'd: %s';
-            $code = array();
-            foreach ($lines as $i => $line) {
+            $code   = array();
+            foreach ( $lines as $i => $line ) {
                 $code[] = sprintf( $format, $i + 1, $line );
             }
-            $code = implode("\n", $code);
+            $code     = implode( "\n", $code );
             $result[] = $code;
         }
+
         return $result;
     }
 
@@ -391,17 +382,16 @@ class Enzymes3_Engine
      * Send the last eval error to the browser.
      */
     public
-    function echo_last_eval_error()
-    {
+    function echo_last_eval_error() {
         // Only execute after a bad eval.
         if ( $this->has_eval_recovered ) {
             return;
         }
         // We are shutting down, so $error is really the last (fatal) error.
         $error = error_get_last();
-        $this->console_log($this->decorate(__('ENZYMES SHUTDOWN ERROR'),
-                sprintf(__('%1$s: %2$s on line %3$s.'), Ando_ErrorFactory::to_str($error['type']), $error['message'],
-                        $error['line'])));
+        $this->console_log( $this->decorate( __( 'ENZYMES SHUTDOWN ERROR' ),
+            sprintf( __( '%1$s: %2$s on line %3$s.' ), Ando_ErrorFactory::to_str( $error['type'] ), $error['message'],
+                $error['line'] ) ) );
     }
 
     /**
@@ -416,9 +406,9 @@ class Enzymes3_Engine
      * @return bool
      */
     public
-    function set_last_eval_error( $type = null, $message = null, $file = null, $line = null, $context = null )
-    {
-        $this->last_eval_error = compact('type', 'message', 'file', 'line', 'context');
+    function set_last_eval_error( $type = null, $message = null, $file = null, $line = null, $context = null ) {
+        $this->last_eval_error = compact( 'type', 'message', 'file', 'line', 'context' );
+
         return true;  // True to consider the error handled and suppress bubbling.
     }
 
@@ -435,28 +425,27 @@ class Enzymes3_Engine
      * @return array
      */
     protected
-    function clean_eval( $code, array $arguments = array() )
-    {
-        if (! is_string($code)) {
-            return array( null, 'Code to execute must be a string: ' . gettype($code) . ' given.', '' );
+    function clean_eval( $code, array $arguments = array() ) {
+        if ( ! is_string( $code ) ) {
+            return array( null, 'Code to execute must be a string: ' . gettype( $code ) . ' given.', '' );
         }
-        $code = trim($code);
-        if (empty($code)) {
+        $code = trim( $code );
+        if ( empty( $code ) ) {
             return array( null, 'No code to execute.', '' );
         }
         $previous_ini = array();
-        if ( function_exists('xdebug_is_enabled') && xdebug_is_enabled() ) {
-            $previous_ini['xdebug.scream'] = ini_set('xdebug.scream', false);
+        if ( function_exists( 'xdebug_is_enabled' ) && xdebug_is_enabled() ) {
+            $previous_ini['xdebug.scream'] = ini_set( 'xdebug.scream', false );
         }
-        $previous_ini['scream.enabled'] = ini_set('scream.enabled', false);
-        set_error_handler(array($this, 'set_last_eval_error'));
+        $previous_ini['scream.enabled'] = ini_set( 'scream.enabled', false );
+        set_error_handler( array( $this, 'set_last_eval_error' ) );
         ob_start();
         $this->has_eval_recovered = false;
         $this->last_eval_error    = null;
         $this->evaluating_code    = $code;
         // -------------------------------------------------------------------------------------------------------------
         try {
-            $result = eval($code);
+            $result = eval( $code );
             $error  = $this->last_eval_error;
         } catch ( Exception $e ) {
             $result = false;  // Let's force the same error treatment
@@ -468,8 +457,8 @@ class Enzymes3_Engine
         $this->has_eval_recovered = true;
         $output                   = ob_get_clean();
         restore_error_handler();
-        foreach ($previous_ini as $setting => $value) {
-            ini_set($setting, $value);
+        foreach ( $previous_ini as $setting => $value ) {
+            ini_set( $setting, $value );
         }
 
         if ( false === $result ) {
@@ -477,8 +466,9 @@ class Enzymes3_Engine
                 $error = "Troubles with the code."; // Assume error info is into $output.
             }
         }
+
         // Note that $error can be true, array, or exception.
-        return array($result, $error, $output);
+        return array( $result, $error, $output );
     }
 
     /**
@@ -489,29 +479,29 @@ class Enzymes3_Engine
      * @return null|WP_Post
      */
     protected
-    function wp_post( array $matches )
-    {
-        $post = $this->value($matches, 'post');
-        $slug = $this->value($matches, 'slug');
-        switch (true) {
-            case ($post == ''):
+    function wp_post( array $matches ) {
+        $post = $this->value( $matches, 'post' );
+        $slug = $this->value( $matches, 'slug' );
+        switch ( true ) {
+            case ( $post == '' ):
                 $result = $this->injection_post;
                 break;
-            case ($post[0] == '@'):
+            case ( $post[0] == '@' ):
                 // We can't use the following API call because we want all post types.
                 //$result = get_page_by_path($slug, OBJECT, 'post');
                 global $wpdb;
                 /* @var $wpdb wpdb */
-                $post_id = $wpdb->get_var("SELECT `ID` FROM $wpdb->posts WHERE `post_name` = '$slug' LIMIT 1");
-                $result  = get_post($post_id);
+                $post_id = $wpdb->get_var( "SELECT `ID` FROM $wpdb->posts WHERE `post_name` = '$slug' LIMIT 1" );
+                $result  = get_post( $post_id );
                 break;
-            case (is_numeric($post)):
-                $result = get_post($post);
+            case ( is_numeric( $post ) ):
+                $result = get_post( $post );
                 break;
             default:
                 $result = null;
                 break;
         }
+
         return $result;
     }
 
@@ -523,10 +513,9 @@ class Enzymes3_Engine
      * @return mixed|string
      */
     protected
-    function unquote( $string )
-    {
-        $result = substr($string, 1, -1);  // unwrap from quotes
-        $result = str_replace('\\=', '=', $result);  // revert escaped quotes
+    function unquote( $string ) {
+        $result = substr( $string, 1, - 1 );  // unwrap from quotes
+        $result = str_replace( '\\=', '=', $result );  // revert escaped quotes
         return $result;
     }
 
@@ -539,19 +528,19 @@ class Enzymes3_Engine
      * @return mixed
      */
     protected
-    function wp_post_field( $post_object, array $matches )
-    {
-        $field  = $this->value($matches, 'field');
-        $string = $this->value($matches, 'string');
+    function wp_post_field( $post_object, array $matches ) {
+        $field  = $this->value( $matches, 'field' );
+        $string = $this->value( $matches, 'string' );
         if ( $string ) {
-            $field = $this->unquote($field);
+            $field = $this->unquote( $field );
         }
-        $values = get_post_meta($post_object->ID, $field);
-        $result = count($values) == 1
-                ? $values[0]
-                : (count($values) == 0
-                        ? null
-                        : $values);
+        $values = get_post_meta( $post_object->ID, $field );
+        $result = count( $values ) == 1
+            ? $values[0]
+            : ( count( $values ) == 0
+                ? null
+                : $values );
+
         return $result;
     }
 
@@ -564,14 +553,14 @@ class Enzymes3_Engine
      * @return mixed
      */
     protected
-    function wp_post_attribute( $post_object, array $matches )
-    {
-        $field  = $this->value($matches, 'field');
-        $string = $this->value($matches, 'string');
+    function wp_post_attribute( $post_object, array $matches ) {
+        $field  = $this->value( $matches, 'field' );
+        $string = $this->value( $matches, 'string' );
         if ( $string ) {
-            $field = $this->unquote($field);
+            $field = $this->unquote( $field );
         }
         $result = @$post_object->$field;
+
         return $result;
     }
 
@@ -584,19 +573,19 @@ class Enzymes3_Engine
      * @return mixed
      */
     protected
-    function wp_user_field( $user_object, array $matches )
-    {
-        $field  = $this->value($matches, 'field');
-        $string = $this->value($matches, 'string');
+    function wp_user_field( $user_object, array $matches ) {
+        $field  = $this->value( $matches, 'field' );
+        $string = $this->value( $matches, 'string' );
         if ( $string ) {
-            $field = $this->unquote($field);
+            $field = $this->unquote( $field );
         }
-        $values = get_user_meta($user_object->ID, $field);
-        $result = count($values) == 1
-                ? $values[0]
-                : (count($values) == 0
-                        ? null
-                        : $values);
+        $values = get_user_meta( $user_object->ID, $field );
+        $result = count( $values ) == 1
+            ? $values[0]
+            : ( count( $values ) == 0
+                ? null
+                : $values );
+
         return $result;
     }
 
@@ -609,14 +598,14 @@ class Enzymes3_Engine
      * @return mixed
      */
     protected
-    function wp_user_attribute( $user_object, array $matches )
-    {
-        $field  = $this->value($matches, 'field');
-        $string = $this->value($matches, 'string');
+    function wp_user_attribute( $user_object, array $matches ) {
+        $field  = $this->value( $matches, 'field' );
+        $string = $this->value( $matches, 'string' );
         if ( $string ) {
-            $field = $this->unquote($field);
+            $field = $this->unquote( $field );
         }
         $result = @$user_object->$field;
+
         return $result;
     }
 
@@ -628,10 +617,10 @@ class Enzymes3_Engine
      * @return WP_User
      */
     protected
-    function wp_author( $post_object )
-    {
+    function wp_author( $post_object ) {
         $id     = $post_object->post_author;
-        $result = get_user_by('id', $id);
+        $result = get_user_by( 'id', $id );
+
         return $result;
     }
 
@@ -643,13 +632,13 @@ class Enzymes3_Engine
      * @return bool
      */
     protected
-    function injection_author_can( $capability )
-    {
-        if ( is_null($this->injection_post) ) {
-            $result = user_can(self::NO_POST_AUTHOR, $capability);
+    function injection_author_can( $capability ) {
+        if ( is_null( $this->injection_post ) ) {
+            $result = user_can( self::NO_POST_AUTHOR, $capability );
         } else {
-            $result = author_can($this->injection_post, $capability);
+            $result = author_can( $this->injection_post, $capability );
         }
+
         return $result;
     }
 
@@ -661,13 +650,13 @@ class Enzymes3_Engine
      * @return bool
      */
     protected
-    function injection_author_owns( $post_object )
-    {
-        if ( is_null($this->injection_post) ) {
+    function injection_author_owns( $post_object ) {
+        if ( is_null( $this->injection_post ) ) {
             $result = self::NO_POST_AUTHOR == $post_object->post_author;
         } else {
             $result = $this->injection_post->post_author == $post_object->post_author;
         }
+
         return $result;
     }
 
@@ -681,25 +670,25 @@ class Enzymes3_Engine
      * @return null
      */
     protected
-    function execute_code( $code, $arguments, $post_object )
-    {
-        if ( author_can($post_object, Enzymes3_Capabilities::create_dynamic_custom_fields) &&
-             ($this->injection_author_owns($post_object) ||
-              author_can($post_object, Enzymes3_Capabilities::share_dynamic_custom_fields) &&
-              $this->injection_author_can(Enzymes3_Capabilities::use_others_custom_fields))
+    function execute_code( $code, $arguments, $post_object ) {
+        if ( author_can( $post_object, Enzymes3_Capabilities::create_dynamic_custom_fields ) &&
+             ( $this->injection_author_owns( $post_object ) ||
+               author_can( $post_object, Enzymes3_Capabilities::share_dynamic_custom_fields ) &&
+               $this->injection_author_can( Enzymes3_Capabilities::use_others_custom_fields ) )
         ) {
-	        $this->origin_post = $post_object;
-            list($result, $error, $output) = $this->clean_eval($code, $arguments);
+            $this->origin_post = $post_object;
+            list( $result, $error, $output ) = $this->clean_eval( $code, $arguments );
             if ( $error ) {
-                $this->console_log($this->decorate(__('ENZYMES ERROR'), $error));
+                $this->console_log( $this->decorate( __( 'ENZYMES ERROR' ), $error ) );
                 $result = null;
             }
             if ( $output ) {
-                $this->console_log($this->decorate(__('ENZYMES OUTPUT'), $output));
+                $this->console_log( $this->decorate( __( 'ENZYMES OUTPUT' ), $output ) );
             }
         } else {
             $result = null;
         }
+
         return $result;
     }
 
@@ -713,19 +702,19 @@ class Enzymes3_Engine
      * @throws Ando_Exception
      */
     protected
-    function execute_post_item( $post_item, $num_args )
-    {
+    function execute_post_item( $post_item, $num_args ) {
         // match again to be able to access groups by name...
-        preg_match($this->grammar_rule('post_item'), $post_item, $matches);
-        $post_object = $this->wp_post($matches);
+        preg_match( $this->grammar_rule( 'post_item' ), $post_item, $matches );
+        $post_object = $this->wp_post( $matches );
         if ( ! $post_object instanceof WP_Post ) {
             return null;
         }
-        $code      = $this->wp_post_field($post_object, $matches);
+        $code      = $this->wp_post_field( $post_object, $matches );
         $arguments = $num_args > 0
-                ? $this->catalyzed->pop($num_args)
-                : array();
-        $result    = $this->execute_code($code, $arguments, $post_object);
+            ? $this->catalyzed->pop( $num_args )
+            : array();
+        $result    = $this->execute_code( $code, $arguments, $post_object );
+
         return $result;
     }
 
@@ -739,19 +728,19 @@ class Enzymes3_Engine
      * @throws Ando_Exception
      */
     protected
-    function execute_author_item( $author_item, $num_args )
-    {
-        preg_match($this->grammar_rule('author_item'), $author_item, $matches);
-        $post_object = $this->wp_post($matches);
+    function execute_author_item( $author_item, $num_args ) {
+        preg_match( $this->grammar_rule( 'author_item' ), $author_item, $matches );
+        $post_object = $this->wp_post( $matches );
         if ( ! $post_object instanceof WP_Post ) {
             return null;
         }
-        $user_object = $this->wp_author($post_object);
-        $code        = $this->wp_user_field($user_object, $matches);
+        $user_object = $this->wp_author( $post_object );
+        $code        = $this->wp_user_field( $user_object, $matches );
         $arguments   = $num_args > 0
-                ? $this->catalyzed->pop($num_args)
-                : array();
-        $result      = $this->execute_code($code, $arguments, $post_object);
+            ? $this->catalyzed->pop( $num_args )
+            : array();
+        $result      = $this->execute_code( $code, $arguments, $post_object );
+
         return $result;
     }
 
@@ -768,40 +757,40 @@ class Enzymes3_Engine
      * @return array|null
      */
     protected
-    function do_execution( $execution )
-    {
+    function do_execution( $execution ) {
         $this->current_enzyme = $execution;
-        preg_match($this->grammar_rule('execution'), $execution, $matches);
-        $post_item   = $this->value($matches, 'post_item');
-        $author_item = $this->value($matches, 'author_item');
-        $num_args    = (int) $this->value($matches, 'num_args');
-        switch (true) {
-            case (strpos($execution, 'array(') === 0 && $num_args > 0):
-                $result = $this->catalyzed->pop($num_args);
+        preg_match( $this->grammar_rule( 'execution' ), $execution, $matches );
+        $post_item   = $this->value( $matches, 'post_item' );
+        $author_item = $this->value( $matches, 'author_item' );
+        $num_args    = (int) $this->value( $matches, 'num_args' );
+        switch ( true ) {
+            case ( strpos( $execution, 'array(' ) === 0 && $num_args > 0 ):
+                $result = $this->catalyzed->pop( $num_args );
                 break;
-            case (strpos($execution, 'hash(') === 0 && $num_args > 0):
+            case ( strpos( $execution, 'hash(' ) === 0 && $num_args > 0 ):
                 $result    = array();
-                $arguments = $this->catalyzed->pop(2 * $num_args);
-                for ($i = 0, $i_top = 2 * $num_args; $i < $i_top; $i += 2) {
-                    $key          = $arguments[$i];
-                    $value        = $arguments[$i + 1];
-                    $result[$key] = $value;
+                $arguments = $this->catalyzed->pop( 2 * $num_args );
+                for ( $i = 0, $i_top = 2 * $num_args; $i < $i_top; $i += 2 ) {
+                    $key            = $arguments[ $i ];
+                    $value          = $arguments[ $i + 1 ];
+                    $result[ $key ] = $value;
                 }
                 break;
-            case (strpos($execution, 'priority(') === 0 && $num_args > 0):
-                $this->set_priority($num_args);
+            case ( strpos( $execution, 'priority(' ) === 0 && $num_args > 0 ):
+                $this->set_priority( $num_args );
                 $result = null;
                 break;
-            case ($post_item != ''):
-                $result = $this->execute_post_item($post_item, $num_args);
+            case ( $post_item != '' ):
+                $result = $this->execute_post_item( $post_item, $num_args );
                 break;
-            case ($author_item != ''):
-                $result = $this->execute_author_item($author_item, $num_args);
+            case ( $author_item != '' ):
+                $result = $this->execute_author_item( $author_item, $num_args );
                 break;
             default:
                 $result = null;
                 break;
         }
+
         return $result;
     }
 
@@ -814,17 +803,17 @@ class Enzymes3_Engine
      * @return string
      */
     protected
-    function transclude_code( $code, $post_object )
-    {
-        if ( author_can($post_object, Enzymes3_Capabilities::create_static_custom_fields) &&
-             ($this->injection_author_owns($post_object) ||
-              author_can($post_object, Enzymes3_Capabilities::share_static_custom_fields) &&
-              $this->injection_author_can(Enzymes3_Capabilities::use_others_custom_fields))
+    function transclude_code( $code, $post_object ) {
+        if ( author_can( $post_object, Enzymes3_Capabilities::create_static_custom_fields ) &&
+             ( $this->injection_author_owns( $post_object ) ||
+               author_can( $post_object, Enzymes3_Capabilities::share_static_custom_fields ) &&
+               $this->injection_author_can( Enzymes3_Capabilities::use_others_custom_fields ) )
         ) {
             $result = $code;
         } else {
             $result = '';
         }
+
         return $result;
     }
 
@@ -838,11 +827,11 @@ class Enzymes3_Engine
      * @throws Ando_Exception
      */
     protected
-    function transclude_post_item( $post_item, $post_object )
-    {
-        preg_match($this->grammar_rule('post_item'), $post_item, $matches);
-        $code   = $this->wp_post_field($post_object, $matches);
-        $result = $this->transclude_code($code, $post_object);
+    function transclude_post_item( $post_item, $post_object ) {
+        preg_match( $this->grammar_rule( 'post_item' ), $post_item, $matches );
+        $code   = $this->wp_post_field( $post_object, $matches );
+        $result = $this->transclude_code( $code, $post_object );
+
         return $result;
     }
 
@@ -856,12 +845,12 @@ class Enzymes3_Engine
      * @throws Ando_Exception
      */
     protected
-    function transclude_author_item( $author_item, $post_object )
-    {
-        preg_match($this->grammar_rule('author_item'), $author_item, $matches);
-        $user_object = $this->wp_author($post_object);
-        $code        = $this->wp_user_field($user_object, $matches);
-        $result      = $this->transclude_code($code, $post_object);
+    function transclude_author_item( $author_item, $post_object ) {
+        preg_match( $this->grammar_rule( 'author_item' ), $author_item, $matches );
+        $user_object = $this->wp_author( $post_object );
+        $code        = $this->wp_user_field( $user_object, $matches );
+        $result      = $this->transclude_code( $code, $post_object );
+
         return $result;
     }
 
@@ -875,18 +864,18 @@ class Enzymes3_Engine
      * @throws Ando_Exception
      */
     protected
-    function transclude_post_attr( $post_attr, $post_object )
-    {
-        $same_author = $this->injection_author_owns($post_object);
-        if ( $same_author && author_can($post_object, Enzymes3_Capabilities::use_own_attributes) ||
+    function transclude_post_attr( $post_attr, $post_object ) {
+        $same_author = $this->injection_author_owns( $post_object );
+        if ( $same_author && author_can( $post_object, Enzymes3_Capabilities::use_own_attributes ) ||
              ! $same_author &&
-             $this->injection_author_can(Enzymes3_Capabilities::use_others_attributes)
+             $this->injection_author_can( Enzymes3_Capabilities::use_others_attributes )
         ) {
-            preg_match($this->grammar_rule('post_attr'), $post_attr, $matches);
-            $result = $this->wp_post_attribute($post_object, $matches);
+            preg_match( $this->grammar_rule( 'post_attr' ), $post_attr, $matches );
+            $result = $this->wp_post_attribute( $post_object, $matches );
         } else {
             $result = null;
         }
+
         return $result;
     }
 
@@ -900,19 +889,19 @@ class Enzymes3_Engine
      * @throws Ando_Exception
      */
     protected
-    function transclude_author_attr( $author_attr, $post_object )
-    {
-        $same_author = $this->injection_author_owns($post_object);
-        if ( $same_author && author_can($post_object, Enzymes3_Capabilities::use_own_attributes) ||
+    function transclude_author_attr( $author_attr, $post_object ) {
+        $same_author = $this->injection_author_owns( $post_object );
+        if ( $same_author && author_can( $post_object, Enzymes3_Capabilities::use_own_attributes ) ||
              ! $same_author &&
-             $this->injection_author_can(Enzymes3_Capabilities::use_others_attributes)
+             $this->injection_author_can( Enzymes3_Capabilities::use_others_attributes )
         ) {
-            preg_match($this->grammar_rule('author_attr'), $author_attr, $matches);
-            $user_object = $this->wp_author($post_object);
-            $result      = $this->wp_user_attribute($user_object, $matches);
+            preg_match( $this->grammar_rule( 'author_attr' ), $author_attr, $matches );
+            $user_object = $this->wp_author( $post_object );
+            $result      = $this->wp_user_attribute( $user_object, $matches );
         } else {
             $result = null;
         }
+
         return $result;
     }
 
@@ -924,35 +913,35 @@ class Enzymes3_Engine
      * @return null|string
      */
     protected
-    function do_transclusion( $transclusion )
-    {
+    function do_transclusion( $transclusion ) {
         $this->current_enzyme = $transclusion;
-        preg_match($this->grammar_rule('transclusion'), $transclusion, $matches);
-        $post_item   = $this->value($matches, 'post_item');
-        $post_attr   = $this->value($matches, 'post_attr');
-        $author_item = $this->value($matches, 'author_item');
-        $author_attr = $this->value($matches, 'author_attr');
-        $post_object = $this->wp_post($matches);
+        preg_match( $this->grammar_rule( 'transclusion' ), $transclusion, $matches );
+        $post_item   = $this->value( $matches, 'post_item' );
+        $post_attr   = $this->value( $matches, 'post_attr' );
+        $author_item = $this->value( $matches, 'author_item' );
+        $author_attr = $this->value( $matches, 'author_attr' );
+        $post_object = $this->wp_post( $matches );
         if ( ! $post_object instanceof WP_Post ) {
             return null;
         }
-        switch (true) {
-            case ($post_item != ''):
-                $result = $this->transclude_post_item($post_item, $post_object);
+        switch ( true ) {
+            case ( $post_item != '' ):
+                $result = $this->transclude_post_item( $post_item, $post_object );
                 break;
-            case ($post_attr != ''):
-                $result = $this->transclude_post_attr($post_attr, $post_object);
+            case ( $post_attr != '' ):
+                $result = $this->transclude_post_attr( $post_attr, $post_object );
                 break;
-            case ($author_item != ''):
-                $result = $this->transclude_author_item($author_item, $post_object);
+            case ( $author_item != '' ):
+                $result = $this->transclude_author_item( $author_item, $post_object );
                 break;
-            case ($author_attr != ''):
-                $result = $this->transclude_author_attr($author_attr, $post_object);
+            case ( $author_attr != '' ):
+                $result = $this->transclude_author_attr( $author_attr, $post_object );
                 break;
             default:
                 $result = null;
                 break;
         }
+
         return $result;
     }
 
@@ -964,17 +953,16 @@ class Enzymes3_Engine
      * @return string
      */
     protected
-    function strip_blanks( array $matches )
-    {
-        $before_string = $this->value($matches, 'before_string');
-        $string        = $this->value($matches, 'string');
-        $anything_else = $this->value($matches, 'anything_else');
+    function strip_blanks( array $matches ) {
+        $before_string = $this->value( $matches, 'before_string' );
+        $string        = $this->value( $matches, 'string' );
+        $anything_else = $this->value( $matches, 'anything_else' );
         $outside       = $string
-                ? $before_string
-                : $anything_else;
-        $result        = preg_replace($this->e_all_spaces, '', $outside) .
-                         preg_replace($this->e_unbreakable_space, ' ',
-                                 $string);  // normal spaces are meaningful in $string
+            ? $before_string
+            : $anything_else;
+        $result        = preg_replace( $this->e_all_spaces, '', $outside ) .
+                         preg_replace( $this->e_unbreakable_space, ' ',
+                             $string );  // normal spaces are meaningful in $string
         return $result;
     }
 
@@ -986,18 +974,17 @@ class Enzymes3_Engine
      * @return string
      */
     protected
-    function clean_up( $sequence )
-    {
+    function clean_up( $sequence ) {
         $result = $sequence;
 
         // erase comments
-        $result = preg_replace($this->e_comment, '', $result);
+        $result = preg_replace( $this->e_comment, '', $result );
 
         // erase blanks (except inside strings)
-        $result = preg_replace_callback($this->e_string, array($this, 'strip_blanks'), $result);
+        $result = preg_replace_callback( $this->e_string, array( $this, 'strip_blanks' ), $result );
 
         // erase backslashes from escaped injection delimiters
-        $result = preg_replace($this->e_escaped_injection_delimiter, '$1', $result);
+        $result = preg_replace( $this->e_escaped_injection_delimiter, '$1', $result );
 
         // erase WordPress HTML tags
         $result = strip_tags( $result );
@@ -1013,43 +1000,43 @@ class Enzymes3_Engine
      * @return array|null|string
      */
     protected
-    function process( $could_be_sequence )
-    {
-        $sequence                       = $this->clean_up($could_be_sequence);
-        $there_are_only_chained_enzymes = preg_match($this->e_sequence_valid, '|' . $sequence);
+    function process( $could_be_sequence ) {
+        $sequence                       = $this->clean_up( $could_be_sequence );
+        $there_are_only_chained_enzymes = preg_match( $this->e_sequence_valid, '|' . $sequence );
         if ( ! $there_are_only_chained_enzymes ) {
             $result = '{[' . $could_be_sequence . ']}';  // skip this injection AS IS
         } else {
             $this->current_sequence = $could_be_sequence;
             $this->catalyzed        = new Enzymes3_Sequence();
             $rest                   = $sequence;
-            while (preg_match($this->e_sequence_start, $rest, $matches)) {
-                $execution    = $this->value($matches, 'execution');
-                $transclusion = $this->value($matches, 'transclusion');
-                $literal      = $this->value($matches, 'literal');
-                $str_literal  = $this->value($matches, 'str_literal');
-                $number       = $this->value($matches, 'number');
-                $rest         = $this->value($matches, 'rest');
-                switch (true) {
+            while ( preg_match( $this->e_sequence_start, $rest, $matches ) ) {
+                $execution    = $this->value( $matches, 'execution' );
+                $transclusion = $this->value( $matches, 'transclusion' );
+                $literal      = $this->value( $matches, 'literal' );
+                $str_literal  = $this->value( $matches, 'str_literal' );
+                $number       = $this->value( $matches, 'number' );
+                $rest         = $this->value( $matches, 'rest' );
+                switch ( true ) {
                     case $execution != '':
-                        $argument = $this->do_execution($execution);
+                        $argument = $this->do_execution( $execution );
                         break;
                     case $transclusion != '':
-                        $argument = $this->do_transclusion($transclusion);
+                        $argument = $this->do_transclusion( $transclusion );
                         break;
                     case $literal != '':
                         $argument = $str_literal
-                                ? $this->unquote($str_literal)
-                                : floatval($number);
+                            ? $this->unquote( $str_literal )
+                            : floatval( $number );
                         break;
                     default:
                         $argument = null;
                         break;
                 }
-                $this->catalyzed->push($argument);
+                $this->catalyzed->push( $argument );
             }
-            list($result) = $this->catalyzed->peek();
+            list( $result ) = $this->catalyzed->peek();
         }
+
         return $result;
     }
 
@@ -1062,9 +1049,9 @@ class Enzymes3_Engine
      * @return bool
      */
     protected
-    function there_is_an_injection( $content, &$matches )
-    {
-        $result = false !== strpos($content, '{[') && preg_match($this->e_injection, $content, $matches);
+    function there_is_an_injection( $content, &$matches ) {
+        $result = false !== strpos( $content, '{[' ) && preg_match( $this->e_injection, $content, $matches );
+
         return $result;
     }
 
@@ -1077,26 +1064,26 @@ class Enzymes3_Engine
      * @return array
      */
     protected
-    function get_injection_post( $args )
-    {
-        list(, $post) = array_pad($args, 2, null);
+    function get_injection_post( $args ) {
+        list( , $post ) = array_pad( $args, 2, null );
         if ( $post instanceof WP_Post ) {
-            return array(true, $post);
+            return array( true, $post );
         }
         if ( $post == self::NO_POST ) {
-            return array(true, null);
+            return array( true, null );
         }
         // Some filters of ours do not pass the 2nd argument, while others pass a post ID, but
         // 'wp_title' pass a string separator, so we fix this occurrence.
         $post_id = current_filter() == 'wp_title'
-                ? null
-                : $post;
-        $post    = get_post($post_id);
-        if ( is_null($post) ) {
+            ? null
+            : $post;
+        $post    = get_post( $post_id );
+        if ( is_null( $post ) ) {
             // Consider this an error, because the developer didn't force no post.
-            return array(false, null);
+            return array( false, null );
         }
-        return array(true, $post);
+
+        return array( true, $post );
     }
 
     /**
@@ -1107,26 +1094,25 @@ class Enzymes3_Engine
      * @return array|null|string
      */
     public
-    function metabolize( $content )
-    {
+    function metabolize( $content ) {
         $args = func_get_args();
-        list($continue, $this->injection_post) = $this->get_injection_post($args);
+        list( $continue, $this->injection_post ) = $this->get_injection_post( $args );
         if ( ! $continue ) {
             return $content;
         }
-        if ( ! $this->injection_author_can(Enzymes3_Capabilities::inject) ) {
+        if ( ! $this->injection_author_can( Enzymes3_Capabilities::inject ) ) {
             return $content;
         }
-        if ( ! $this->there_is_an_injection($content, $matches) ) {
+        if ( ! $this->there_is_an_injection( $content, $matches ) ) {
             return $content;
         }
         $this->new_content = '';
         do {
-            $before            = $this->value($matches, 'before');
-            $could_be_sequence = $this->value($matches, 'could_be_sequence');
-            $after             = $this->value($matches, 'after');
-	        $this->new_content .= $before;
-            $escaped_injection = '{' == substr($before, -1);  // "{{[ .. ]}"
+            $before            = $this->value( $matches, 'before' );
+            $could_be_sequence = $this->value( $matches, 'could_be_sequence' );
+            $after             = $this->value( $matches, 'after' );
+            $this->new_content .= $before;
+            $escaped_injection = '{' == substr( $before, - 1 );  // "{{[ .. ]}"
             if ( $escaped_injection ) {
                 if ( is_plugin_active( 'enzymes/enzymes.php' ) ) {
                     $result = '{[' . $could_be_sequence . ']}';  // Do not unescape now: version 2 will do it later.
@@ -1134,10 +1120,10 @@ class Enzymes3_Engine
                     $result = '[' . $could_be_sequence . ']}';   // Unescape now: version 2 is not active.
                 }
             } else {
-                $result = $this->process($could_be_sequence);
+                $result = $this->process( $could_be_sequence );
             }
             $this->new_content .= $result;
-        } while ($this->there_is_an_injection($after, $matches));
+        } while ( $this->there_is_an_injection( $after, $matches ) );
         $result = $this->new_content . $after;
 
         return $result;
@@ -1156,11 +1142,10 @@ class Enzymes3_Engine
      * @return mixed
      */
     protected
-    function value( $matches, $key, $default = null )
-    {
-        return isset($matches[$key])
-                ? $matches[$key]
-                : $default;
+    function value( $matches, $key, $default = null ) {
+        return isset( $matches[ $key ] )
+            ? $matches[ $key ]
+            : $default;
     }
 
     // -----------------------------------------------------------------------------------------------------------------
@@ -1174,11 +1159,10 @@ class Enzymes3_Engine
      * @param mixed $something
      */
     public
-    function debug_print( $something )
-    {
+    function debug_print( $something ) {
         if ( ! $this->debug_on ) {
             return;
         }
-        fwrite(STDERR, "\n" . print_r($something, true) . "\n");
+        fwrite( STDERR, "\n" . print_r( $something, true ) . "\n" );
     }
 }
