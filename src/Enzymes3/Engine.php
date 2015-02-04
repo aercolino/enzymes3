@@ -183,20 +183,18 @@ class Enzymes3_Engine
 
     /**
      * Init the grammar.
+     *
+     * Notice that $grammar rules are sorted bottom up here to allow complete interpolation.
      */
     protected
     function init_grammar()
     {
-        /**
-         * Notice that $grammar rules are sorted bottom up here to allow complete interpolation.
-         */
+//@formatter:off
         $grammar = array(
                 'number'       => '(?<number>\d+(\.\d+)?)',
-                'string'       => '(?<string>' . Ando_Regex::pattern_quoted_string('=', '=') . ')',
-                // @=[^=\\]*(?:\\.[^=\\]*)*=@
+                'string'       => '(?<string>' . Ando_Regex::pattern_quoted_string('=', '=') . ')',  // @=[^=\\]*(?:\\.[^=\\]*)*=@
                 'str_literal'  => '(?<str_literal>$string)',
                 'literal'      => '(?<literal>$number|$str_literal)',
-
                 'slug'         => '(?<slug>[\w+~-]+)',
                 'post'         => '(?<post>\d+|@$slug|)',
                 'field'        => '(?<field>[^|.=\]}]+|$string)',  // REM: spaces outside of strings are stripped out.
@@ -207,13 +205,12 @@ class Enzymes3_Engine
                 'author_attr'  => '(?<author_attr>$post/author:$field)',
                 'attr'         => '(?<attr>$post_attr|$author_attr)',
                 'transclusion' => '(?<transclusion>$item|$attr)',
-
                 'execution'    => '(?<execution>(?:\b(?:array|hash|priority)\b|$item)\((?<num_args>\d*)\))',
-
                 'enzyme'       => '(?<enzyme>(?:$execution|$transclusion|$literal))',
                 'sequence'     => '(?<sequence>$enzyme(\|$enzyme)*)',
                 'injection'    => '(?<injection>{[$sequence]})',
         );
+//@formatter:on
         $result  = array();
         foreach ($grammar as $symbol => $rule) {
             $regex           = new Ando_Regex($rule);
