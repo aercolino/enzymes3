@@ -772,18 +772,19 @@ class Enzymes3_Engine {
      * Get the registered proxy for the tag and the priority.
      *
      * @param string $tag
-     * @param int $priority
+     * @param int    $priority
      *
      * @return array|bool
      */
     public
-    function registered_proxy($tag, $priority) {
+    function registered_proxy( $tag, $priority ) {
         if ( ! isset( $this->proxy_registry[ $tag ] ) ) {
             return null;
         }
         if ( ! isset( $this->proxy_registry[ $tag ][ $priority ] ) ) {
             return null;
         }
+
         return $this->proxy_registry[ $tag ][ $priority ];
     }
 
@@ -804,7 +805,7 @@ class Enzymes3_Engine {
                 'order' => '1 2 0',
             ) );
             // $this->metabolize() gets 3 arguments, the 3rd being the priority it's running at.
-            // Filters here must pass 2 arguments at most, for the priority to work as expected.
+            // Filters here must pass 2 arguments at most, for the priority trick to work as expected.
             add_filter( $tag, $this->proxy_registry[ $tag ][ $priority ], $priority, 2 );
         }
     }
@@ -1198,15 +1199,15 @@ class Enzymes3_Engine {
             $could_be_sequence = $this->value( $matches, 'could_be_sequence' );
             $after             = $this->value( $matches, 'after' );
             $this->new_content .= $before;
-            $was_escaped = '{' == substr( $before, - 1 );  // True if it was "{{[ .. ]}".
-            $injection   = $this->escape_for_enzyme2( $could_be_sequence, $was_escaped );
+            $was_escaped  = '{' == substr( $before, - 1 );  // True if it was "{{[ .. ]}".
+            $re_injection = $this->escape_for_enzyme2( $could_be_sequence, $was_escaped );
             if ( $was_escaped ) {
-                $result = $injection;
+                $result = $re_injection;
             } else {
                 $this->undo_processing = false;
                 $result                = $this->process( $could_be_sequence );
                 if ( $this->undo_processing ) {
-                    $result = $injection;
+                    $result = $re_injection;
                 }
             }
             $this->new_content .= $result;
