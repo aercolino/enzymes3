@@ -2,6 +2,7 @@
 require_once( ABSPATH . 'wp-admin/includes/plugin.php' );
 
 require_once dirname( ENZYMES3_PRIMARY ) . '/vendor/Ando/Regex.php';
+require_once dirname( ENZYMES3_PRIMARY ) . '/vendor/Ando/StarFunc.php';
 require_once dirname( ENZYMES3_PRIMARY ) . '/vendor/Ando/ErrorFactory.php';
 require_once dirname( ENZYMES3_PRIMARY ) . '/src/Enzymes3/Sequence.php';
 require_once dirname( ENZYMES3_PRIMARY ) . '/src/Enzymes3/Capabilities.php';
@@ -71,11 +72,25 @@ class Enzymes3_Engine {
     protected $origin_post;
 
     /**
-     * True if we can continue processing enzymes of the current injection.
+     * True if the processing needs to be undone.
      *
      * @var bool
      */
-    protected $continue_processing;
+    protected $undo_processing;
+
+    /**
+     * Priority at which the metabolize method is running.
+     *
+     * @var int
+     */
+    protected $current_priority;
+
+    /**
+     * Registry of proxy functions, by tag and priority.
+     *
+     * @var array
+     */
+    protected $proxy_registry;
 
     /**
      * Regular expression for matching "{[ .. ]}".
@@ -305,6 +320,8 @@ class Enzymes3_Engine {
     function __construct() {
         $this->init_grammar();
         $this->init_expressions();
+
+        $this->proxy_registry = array();
 
         $this->has_eval_recovered = true;
         register_shutdown_function( array( $this, 'echo_last_eval_error' ) );
@@ -752,19 +769,44 @@ class Enzymes3_Engine {
     }
 
     /**
+     * Get the registered proxy for the tag and the priority.
+     *
+     * @param string $tag
      * @param int $priority
+     *
+     * @return array|bool
      */
-    protected
-    function set_priority( $priority ) {
-//        if ( $current_priority == $priority ) {
-//            // process the injection
-//        } else {
-//            // add_filter(  );
-//            // and don't process the injection
-//
+    public
+    function registered_proxy($tag, $priority) {
+        if ( ! isset( $this->proxy_registry[ $tag ] ) ) {
+            return null;
+        }
+        if ( ! isset( $this->proxy_registry[ $tag ][ $priority ] ) ) {
+            return null;
+        }
+        return $this->proxy_registry[ $tag ][ $priority ];
+    }
 
-
-
+    /**
+     * Register a proxy for metabolizing later at a certain priority.
+     *
+     * @param string $tag
+     * @param int    $priority
+     */
+    public
+    function metabolize_later( $tag, $priority ) {
+        if ( ! isset( $this->proxy_registry[ $tag ] ) ) {
+            $this->proxy_registry[ $tag ] = array();
+        }
+        if ( ! isset( $this->proxy_registry[ $tag ][ $priority ] ) ) {
+            $this->proxy_registry[ $tag ][ $priority ] = Ando_StarFunc::def( array( $this, 'metabolize' ), array(
+                'extra' => array( $priority ),
+                'order' => '1 2 0',
+            ) );
+            // $this->metabolize() gets 3 arguments, the 3rd being the priority it's running at.
+            // Filters here must pass 2 arguments at most, for the priority to work as expected.
+            add_filter( $tag, $this->proxy_registry[ $tag ][ $priority ], $priority, 2 );
+        }
     }
 
     /**
@@ -781,6 +823,7 @@ class Enzymes3_Engine {
         $post_item   = $this->value( $matches, 'post_item' );
         $author_item = $this->value( $matches, 'author_item' );
         $num_args    = (int) $this->value( $matches, 'num_args' );
+        $result      = null;
         switch ( true ) {
             case ( strpos( $execution, 'array(' ) === 0 && $num_args > 0 ):
                 $result = $this->catalyzed->pop( $num_args );
@@ -794,9 +837,12 @@ class Enzymes3_Engine {
                     $result[ $key ] = $value;
                 }
                 break;
-            case ( strpos( $execution, 'priority(' ) === 0 && $num_args > 0 ):
-                $this->set_priority( $num_args );
-                $result = null;
+            case ( strpos( $execution, 'priority(' ) === 0 ):
+                $priority = $num_args;
+                if ( $this->current_priority < $priority ) {
+                    $this->metabolize_later( current_filter(), $priority );
+                    $this->undo_processing = true;
+                }
                 break;
             case ( $post_item != '' ):
                 $result = $this->execute_post_item( $post_item, $num_args );
@@ -805,7 +851,6 @@ class Enzymes3_Engine {
                 $result = $this->execute_author_item( $author_item, $num_args );
                 break;
             default:
-                $result = null;
                 break;
         }
 
@@ -1077,31 +1122,25 @@ class Enzymes3_Engine {
      * Get the post the injection belongs to.
      * It can be null when forced to NO_POST.
      *
-     * @param $args
+     * @param int|WP_Post $post
      *
      * @return array
      */
     protected
-    function get_injection_post( $args ) {
-        list( , $post ) = array_pad( $args, 2, null );
-        if ( $post instanceof WP_Post ) {
-            return array( true, $post );
+    function get_injection_post( $post_id ) {
+        if ( $post_id instanceof WP_Post ) {
+            return $post_id;
         }
-        if ( $post == self::NO_POST ) {
-            return array( true, null );
+        if ( $post_id == self::NO_POST ) {
+            return null;
         }
-        // Some filters of ours do not pass the 2nd argument, while others pass a post ID, but
-        // 'wp_title' pass a string separator, so we fix this occurrence.
-        $post_id = current_filter() == 'wp_title'
-            ? null
-            : $post;
-        $post    = get_post( $post_id );
+        $post = get_post( $post_id );
         if ( is_null( $post ) ) {
             // Consider this an error, because the developer didn't force no post.
-            return array( false, null );
+            return false;
         }
 
-        return array( true, $post );
+        return $post;
     }
 
     /**
@@ -1130,14 +1169,20 @@ class Enzymes3_Engine {
      * Process the injected sequences in the content we are filtering.
      *
      * @param string $content
+     * @param int    $post_id
+     * @param int    $priority
      *
      * @return array|null|string
      */
     public
-    function metabolize( $content ) {
-        $args = func_get_args();
-        list( $continue, $this->injection_post ) = $this->get_injection_post( $args );
-        if ( ! $continue ) {
+    function metabolize( $content, $post_id = self::GLOBAL_POST, $priority = null ) {
+        // Some filters of ours do not pass the 2nd argument, while others pass a post ID, but
+        // 'wp_title' pass a string separator, so we fix this occurrence.
+        if ( current_filter() == 'wp_title' ) {
+            $post_id = null;
+        }
+        $this->injection_post = $this->get_injection_post( $post_id );
+        if ( false === $this->injection_post ) {
             return $content;
         }
         if ( ! $this->injection_author_can( Enzymes3_Capabilities::inject ) ) {
@@ -1146,7 +1191,8 @@ class Enzymes3_Engine {
         if ( ! $this->there_is_an_injection( $content, $matches ) ) {
             return $content;
         }
-        $this->new_content = '';
+        $this->current_priority = $priority;
+        $this->new_content      = '';
         do {
             $before            = $this->value( $matches, 'before' );
             $could_be_sequence = $this->value( $matches, 'could_be_sequence' );
@@ -1157,8 +1203,9 @@ class Enzymes3_Engine {
             if ( $was_escaped ) {
                 $result = $injection;
             } else {
-                $result = $this->process( $could_be_sequence );
-                if ( ! $this->continue_processing ) {
+                $this->undo_processing = false;
+                $result                = $this->process( $could_be_sequence );
+                if ( $this->undo_processing ) {
                     $result = $injection;
                 }
             }

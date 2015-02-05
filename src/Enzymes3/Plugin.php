@@ -43,16 +43,19 @@ class Enzymes3_Plugin {
         }
     }
 
+    /**
+     * Attach filters to tags.
+     */
     static public
     function on_init() {
         $enzymes = self::engine();  // singleton
 //@formatter:off
-        add_filter('wp_title',        array($enzymes, 'metabolize'), self::PRIORITY, 1);
-        add_filter('the_title',       array($enzymes, 'metabolize'), self::PRIORITY, 2);
-        add_filter('the_title_rss',   array($enzymes, 'metabolize'), self::PRIORITY, 2);
-        add_filter('the_excerpt',     array($enzymes, 'metabolize'), self::PRIORITY, 2);
-        add_filter('the_excerpt_rss', array($enzymes, 'metabolize'), self::PRIORITY, 2);
-        add_filter('the_content',     array($enzymes, 'metabolize'), self::PRIORITY, 2);
+        $enzymes->metabolize_later('wp_title',        self::PRIORITY);
+        $enzymes->metabolize_later('the_title',       self::PRIORITY);
+        $enzymes->metabolize_later('the_title_rss',   self::PRIORITY);
+        $enzymes->metabolize_later('the_excerpt',     self::PRIORITY);
+        $enzymes->metabolize_later('the_excerpt_rss', self::PRIORITY);
+        $enzymes->metabolize_later('the_content',     self::PRIORITY);
 //@formatter:on
     }
 
