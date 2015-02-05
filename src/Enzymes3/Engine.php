@@ -71,6 +71,13 @@ class Enzymes3_Engine {
     protected $origin_post;
 
     /**
+     * True if we can continue processing enzymes of the current injection.
+     *
+     * @var bool
+     */
+    protected $continue_processing;
+
+    /**
      * Regular expression for matching "{[ .. ]}".
      *
      * @var Ando_Regex
@@ -744,8 +751,19 @@ class Enzymes3_Engine {
         return $result;
     }
 
+    /**
+     * @param int $priority
+     */
     protected
-    function set_priority() {
+    function set_priority( $priority ) {
+//        if ( $current_priority == $priority ) {
+//            // process the injection
+//        } else {
+//            // add_filter(  );
+//            // and don't process the injection
+//
+
+
 
     }
 
@@ -1087,6 +1105,28 @@ class Enzymes3_Engine {
     }
 
     /**
+     * Make Enzymes 3 injections work with Enzymes 2 later auto-un-escaping.
+     *
+     * @param string $could_be_sequence
+     * @param bool   $was_escaped
+     *
+     * @return string
+     */
+    protected
+    function escape_for_enzyme2( $could_be_sequence, $was_escaped ) {
+        $result = '';
+        if ( ! $was_escaped ) {
+            $result .= '{';  // To have a valid injection we need to start with a '{'.
+        }
+        if ( is_plugin_active( 'enzymes/enzymes.php' ) ) {
+            $result .= '{';  // Escape now: version 2 will un-escape it later.
+        }
+        $result .= '[' . $could_be_sequence . ']}';
+
+        return $result;
+    }
+
+    /**
      * Process the injected sequences in the content we are filtering.
      *
      * @param string $content
@@ -1112,15 +1152,15 @@ class Enzymes3_Engine {
             $could_be_sequence = $this->value( $matches, 'could_be_sequence' );
             $after             = $this->value( $matches, 'after' );
             $this->new_content .= $before;
-            $escaped_injection = '{' == substr( $before, - 1 );  // "{{[ .. ]}"
-            if ( $escaped_injection ) {
-                if ( is_plugin_active( 'enzymes/enzymes.php' ) ) {
-                    $result = '{[' . $could_be_sequence . ']}';  // Do not unescape now: version 2 will do it later.
-                } else {
-                    $result = '[' . $could_be_sequence . ']}';   // Unescape now: version 2 is not active.
-                }
+            $was_escaped = '{' == substr( $before, - 1 );  // True if it was "{{[ .. ]}".
+            $injection   = $this->escape_for_enzyme2( $could_be_sequence, $was_escaped );
+            if ( $was_escaped ) {
+                $result = $injection;
             } else {
                 $result = $this->process( $could_be_sequence );
+                if ( ! $this->continue_processing ) {
+                    $result = $injection;
+                }
             }
             $this->new_content .= $result;
         } while ( $this->there_is_an_injection( $after, $matches ) );
