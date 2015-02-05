@@ -58,6 +58,27 @@ class Enzymes3_Engine {
     protected $new_content;
 
     /**
+     * Sequence of catalyzed enzymes, which are meant to be used as arguments for other enzymes.
+     *
+     * @var Enzymes3_Sequence
+     */
+    protected $catalyzed;
+
+    /**
+     * True if eval recovered.
+     *
+     * @var bool
+     */
+    protected $has_eval_recovered;
+
+    /**
+     * Last error in eval.
+     *
+     * @var
+     */
+    protected $last_eval_error;
+
+    /**
      * The code that is being evaluated.
      *
      * @var string
@@ -157,13 +178,6 @@ class Enzymes3_Engine {
     protected $e_escaped_string_delimiter;
 
     /**
-     * Sequence of catalyzed enzymes, which are meant to be used as arguments for other enzymes.
-     *
-     * @var Enzymes3_Sequence
-     */
-    protected $catalyzed;
-
-    /**
      * Grammar (top down).
      * ---
      * injection := "{[" sequence "]}"
@@ -196,13 +210,6 @@ class Enzymes3_Engine {
     protected $grammar;
 
     /**
-     * Last error in eval.
-     *
-     * @var
-     */
-    protected $last_eval_error;
-
-    /**
      * Init the grammar.
      *
      * Notice that $grammar rules are sorted bottom up here to allow complete interpolation.
@@ -211,24 +218,24 @@ class Enzymes3_Engine {
     function init_grammar() {
 //@formatter:off
         $grammar = array(
-                'number'       => '(?<number>\d+(\.\d+)?)',
-                'string'       => '(?<string>' . Ando_Regex::pattern_quoted_string('=', '=') . ')',  // @=[^=\\]*(?:\\.[^=\\]*)*=@
-                'str_literal'  => '(?<str_literal>$string)',
-                'literal'      => '(?<literal>$number|$str_literal)',
-                'slug'         => '(?<slug>[\w+~-]+)',
-                'post'         => '(?<post>\d+|@$slug|)',
-                'field'        => '(?<field>[^|.=\]}]+|$string)',  // REM: spaces outside of strings are stripped out.
-                'post_item'    => '(?<post_item>$post\.$field)',
-                'author_item'  => '(?<author_item>$post/author\.$field)',
-                'item'         => '(?<item>$post_item|$author_item)',
-                'post_attr'    => '(?<post_attr>$post:$field)',
-                'author_attr'  => '(?<author_attr>$post/author:$field)',
-                'attr'         => '(?<attr>$post_attr|$author_attr)',
-                'transclusion' => '(?<transclusion>$item|$attr)',
-                'execution'    => '(?<execution>(?:\b(?:array|hash|priority)\b|$item)\((?<num_args>\d*)\))',
-                'enzyme'       => '(?<enzyme>(?:$execution|$transclusion|$literal))',
-                'sequence'     => '(?<sequence>$enzyme(\|$enzyme)*)',
-                'injection'    => '(?<injection>{[$sequence]})',
+            'number'       => '(?<number>\d+(\.\d+)?)',
+            'string'       => '(?<string>' . Ando_Regex::pattern_quoted_string('=', '=') . ')',  // @=[^=\\]*(?:\\.[^=\\]*)*=@
+            'str_literal'  => '(?<str_literal>$string)',
+            'literal'      => '(?<literal>$number|$str_literal)',
+            'slug'         => '(?<slug>[\w+~-]+)',
+            'post'         => '(?<post>\d+|@$slug|)',
+            'field'        => '(?<field>[^|.=\]}]+|$string)',  // REM: spaces outside of strings are stripped out.
+            'post_item'    => '(?<post_item>$post\.$field)',
+            'author_item'  => '(?<author_item>$post/author\.$field)',
+            'item'         => '(?<item>$post_item|$author_item)',
+            'post_attr'    => '(?<post_attr>$post:$field)',
+            'author_attr'  => '(?<author_attr>$post/author:$field)',
+            'attr'         => '(?<attr>$post_attr|$author_attr)',
+            'transclusion' => '(?<transclusion>$item|$attr)',
+            'execution'    => '(?<execution>(?:\b(?:array|hash|priority)\b|$item)\((?<num_args>\d*)\))',
+            'enzyme'       => '(?<enzyme>(?:$execution|$transclusion|$literal))',
+            'sequence'     => '(?<sequence>$enzyme(\|$enzyme)*)',
+            'injection'    => '(?<injection>{[$sequence]})',
         );
 //@formatter:on
         $result = array();
@@ -368,8 +375,6 @@ class Enzymes3_Engine {
         $output = "<script>if(window.console){if(window.console.log){$lines}}</script>";
         echo $output;
     }
-
-    protected $has_eval_recovered;
 
     /**
      * Add a title and some context to the output.
@@ -1123,7 +1128,7 @@ class Enzymes3_Engine {
      * Get the post the injection belongs to.
      * It can be null when forced to NO_POST.
      *
-     * @param int|WP_Post $post
+     * @param int|WP_Post $post_id
      *
      * @return array
      */
