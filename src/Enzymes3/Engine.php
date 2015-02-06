@@ -1164,7 +1164,10 @@ class Enzymes3_Engine {
             $result .= '{';  // To have a valid injection we need to start with a '{'.
         }
         if ( is_plugin_active( 'enzymes/enzymes.php' ) ) {
-            $result .= '{';  // Escape now: version 2 will un-escape it later.
+            global $enzymes;
+            if ( $this->current_priority < has_action(current_filter(), array($enzymes, 'metabolism')) ) {
+                $result .= '{';  // Escape now: version 2 will un-escape it later.
+            }
         }
         $result .= '[' . $could_be_sequence . ']}';
 
