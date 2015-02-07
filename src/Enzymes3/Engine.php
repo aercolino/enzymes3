@@ -33,7 +33,7 @@ class Enzymes3_Engine {
      *
      * @var string
      */
-    protected $current_sequence;
+    protected $current_injection;
 
     /**
      * Current enzyme.
@@ -388,8 +388,8 @@ class Enzymes3_Engine {
     function decorate( $title, $output ) {
         $result   = array();
         $result[] = $title;
-        $result[] = sprintf( __( 'Post: %1$s - Enzyme: %3$s - Injection: {[%2$s]}' ), $this->injection_post->ID,
-            $this->current_sequence, $this->current_enzyme );
+        $result[] = sprintf( __( 'Post: %1$s - Enzyme: %3$s - Injection: %2$s' ), $this->injection_post->ID,
+            $this->current_injection, $this->current_enzyme );
         $result[] = $output;
         if ( $this->evaluating_code ) {
             // add line numbers
@@ -1075,9 +1075,9 @@ class Enzymes3_Engine {
         if ( ! $there_are_only_chained_enzymes ) {
             $result = '{[' . $could_be_sequence . ']}';  // skip this injection AS IS
         } else {
-            $this->current_sequence = $could_be_sequence;
-            $this->catalyzed        = new Enzymes3_Sequence();
-            $rest                   = $sequence;
+            $this->current_injection = '{[' . $could_be_sequence . ']}';
+            $this->catalyzed         = new Enzymes3_Sequence();
+            $rest                    = $sequence;
             while ( preg_match( $this->e_sequence_start, $rest, $matches ) ) {
                 $execution    = $this->value( $matches, 'execution' );
                 $transclusion = $this->value( $matches, 'transclusion' );
@@ -1165,7 +1165,7 @@ class Enzymes3_Engine {
         }
         if ( is_plugin_active( 'enzymes/enzymes.php' ) ) {
             global $enzymes;
-            if ( $this->current_priority < has_action(current_filter(), array($enzymes, 'metabolism')) ) {
+            if ( $this->current_priority < has_action( current_filter(), array( $enzymes, 'metabolism' ) ) ) {
                 $result .= '{';  // Escape now: version 2 will un-escape it later.
             }
         }
