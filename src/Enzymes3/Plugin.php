@@ -66,7 +66,6 @@ class Enzymes3_Plugin {
      */
     static public
     function on_activation() {
-        self::$options->keysSet( array( 'activated_on' => date( 'Y-m-d H:i:s' ) ) );
         self::add_roles_and_capabilities();
 
         return true;
@@ -79,7 +78,6 @@ class Enzymes3_Plugin {
      */
     static public
     function on_deactivation() {
-        self::$options->keysSet( array( 'activated_on' => null ) );
         self::remove_roles_and_capabilities();
 
         return true;
@@ -131,17 +129,8 @@ class Enzymes3_Plugin {
         }
 
         foreach ( Enzymes3_Capabilities::all() as $cap ) {
-            if ( 0 === strpos( $cap, Enzymes3_Capabilities::PREFIX ) ) {
-                $wp_roles->remove_cap( 'administrator', $cap );
-            }
+            $wp_roles->remove_cap( 'administrator', $cap );
         }
-    }
-
-    static public
-    function activated_on() {
-        $options = self::$options->keysGet( array( 'activated_on' ) );
-
-        return $options['activated_on'];
     }
 
 }

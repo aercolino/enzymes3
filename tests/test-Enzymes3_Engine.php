@@ -206,8 +206,7 @@ class Enzymes3_EngineTest
         $enzymes = new Enzymes3_Engine();
         list(, $error, $output) = $this->call_method('clean_eval', array($code, array()), $enzymes);
 
-        $this->assertEquals('Troubles with the code.', $error);
-        $this->assertRegExp('@^Parse error:@m', $output);
+        $this->assertEquals("Parse error: syntax error, unexpected end of file, expecting ',' or ';' on line 1", $error);
     }
 
     public

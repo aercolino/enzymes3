@@ -442,6 +442,34 @@ class Enzymes3_Engine {
     }
 
     /**
+     * Check the syntax of a code snippet.
+     *
+     * @param $code
+     *
+     * @return mixed|null|string
+     */
+    protected
+    function php_lint( $code ) {
+        $result = null;
+        if ( ! function_exists( 'shell_exec' ) ) {
+            return $result;
+        }
+        $temp     = tmpfile();
+        $meta     = stream_get_meta_data( $temp );
+        $filename = $meta['uri'];
+        fwrite( $temp, "<?php $code" );
+        $result = shell_exec( "php -n -l $filename" );  // -n = no ini, -l = only lint
+        fclose( $temp );
+
+        $result = trim( $result );
+        $result = str_replace( "in $filename on", 'on', $result );
+        $result = str_replace( "\nErrors parsing $filename", '', $result );
+
+        return $result;
+    }
+
+
+    /**
      * Evaluate code, putting arguments in the execution context ($this is always available).
      * Return an indexed array with the PHP returned value and possible error.
      *
@@ -462,6 +490,8 @@ class Enzymes3_Engine {
         if ( empty( $code ) ) {
             return array( null, 'No code to execute.', '' );
         }
+        $this->evaluating_code = $code;
+
         $previous_ini = array();
         if ( function_exists( 'xdebug_is_enabled' ) && xdebug_is_enabled() ) {
             $previous_ini['xdebug.scream'] = ini_set( 'xdebug.scream', false );
@@ -471,17 +501,15 @@ class Enzymes3_Engine {
         ob_start();
         $this->has_eval_recovered = false;
         $this->last_eval_error    = null;
-        $this->evaluating_code    = $code;
         // -------------------------------------------------------------------------------------------------------------
         try {
-            $result = eval( $code );
+            $result = eval( $this->evaluating_code );
             $error  = $this->last_eval_error;
         } catch ( Exception $e ) {
             $result = false;  // Let's force the same error treatment
             $error  = $e;     // and take the exception as the error.
         }
         // -------------------------------------------------------------------------------------------------------------
-        $this->evaluating_code    = null;
         $this->last_eval_error    = null;
         $this->has_eval_recovered = true;
         $output                   = ob_get_clean();
@@ -492,8 +520,11 @@ class Enzymes3_Engine {
 
         if ( false === $result ) {
             if ( ! $error instanceof Exception ) {
-                $error = "Troubles with the code."; // Assume error info is into $output.
+                // In VVV the error info is captured into $output, but not so in my remote site. Why?
+                $error = $this->php_lint( $this->evaluating_code );
             }
+        } else {
+            $this->evaluating_code = null;
         }
 
         // Note that $error can be true, array, or exception.
@@ -709,7 +740,8 @@ class Enzymes3_Engine {
             list( $result, $error, $output ) = $this->clean_eval( $code, $arguments );
             if ( $error ) {
                 $this->console_log( $this->decorate( __( 'ENZYMES ERROR' ), $error ) );
-                $result = null;
+                $this->evaluating_code = null;  // Log the code only once.
+                $result                = null;
             }
             if ( $output ) {
                 $this->console_log( $this->decorate( __( 'ENZYMES OUTPUT' ), $output ) );
