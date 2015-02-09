@@ -108,8 +108,9 @@ class Enzymes3_EngineTest
 //        $enzymes->debug_on = false;
 
         $content1 = 'This is something before {{[ whatever ]} and this is after.';
-        $content2 = 'This is something before {[ whatever ]} and this is after.';
+        $content2 = 'This is something before {' . Enzymes3_Engine::ESCAPE_CHAR . '[ whatever ]} and this is after.';
         $this->assertEquals($content2, $enzymes->metabolize($content1));
+        $this->assertEquals(Enzymes3_Engine::UNESCAPE_PRIORITY, has_action(current_filter(), array($enzymes, 'unescape')));
 
         // TODO make two tests out of this one, for both the cases Enzymes 2 active and not active
     }

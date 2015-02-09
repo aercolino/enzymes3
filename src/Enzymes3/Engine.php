@@ -10,6 +10,17 @@ require_once dirname( ENZYMES3_PRIMARY ) . '/src/Enzymes3/Options.php';
 
 class Enzymes3_Engine {
     /**
+     * Used internally for converting escaped injections '{{[..]}' to non matching strings '{-[..]}'.
+     * If escaped injections are found they are converted and an additional last un-escaping filter is setup.
+     */
+    const ESCAPE_CHAR = '-';
+
+    /**
+     * This is not to be executed absolutely last, but only after all Enzymes3_Engine::metabolize() filter executions.
+     */
+    const UNESCAPE_PRIORITY = 1000;
+
+    /**
      *  When calling the engine directly, for forcing the global post, use one of the following:
      * - Enzymes3_Plugin::engine()->metabolize($content);
      * - Enzymes3_Plugin::engine()->metabolize($content, null);
@@ -1181,24 +1192,26 @@ class Enzymes3_Engine {
         return $post;
     }
 
+    public
+    function unescape( $content ) {
+        $result = str_replace('{' . self::ESCAPE_CHAR . '[', '{[', $content);
+        return $result;
+    }
+
     /**
-     * Make Enzymes 3 injections work with Enzymes 2 later auto-un-escaping.
+     * Make Enzymes 3 undone injections jump over Enzymes 2 later auto-un-escaping.
      *
      * @param string $could_be_sequence
-     * @param bool   $was_escaped
      *
      * @return string
      */
     protected
-    function escape_for_enzyme2( $could_be_sequence, $was_escaped ) {
-        $result = '';
-        if ( ! $was_escaped ) {
-            $result .= '{';  // To have a valid injection we need to start with a '{'.
-        }
+    function escape_for_enzymes2( $could_be_sequence ) {
+        $result = '{';  // To have a valid injection we need to start with a '{'.
         if ( is_plugin_active( 'enzymes/enzymes.php' ) ) {
             global $enzymes;
             if ( $this->current_priority < has_action( current_filter(), array( $enzymes, 'metabolism' ) ) ) {
-                $result .= '{';  // Escape now: version 2 will un-escape it later.
+                $result .= '{';  // Escape now: Enzymes 2 will un-escape it later.
             }
         }
         $result .= '[' . $could_be_sequence . ']}';
@@ -1239,15 +1252,15 @@ class Enzymes3_Engine {
             $could_be_sequence = $this->value( $matches, 'could_be_sequence' );
             $after             = $this->value( $matches, 'after' );
             $this->new_content .= $before;
-            $was_escaped  = '{' == substr( $before, - 1 );  // True if it was "{{[ .. ]}".
-            $re_injection = $this->escape_for_enzyme2( $could_be_sequence, $was_escaped );
+            $was_escaped = '{' == substr( $before, - 1 );  // True if it was "{{[ .. ]}".
             if ( $was_escaped ) {
-                $result = $re_injection;
+                add_filter( current_filter(), array( $this, 'unescape' ), self::UNESCAPE_PRIORITY, 1 );
+                $result = self::ESCAPE_CHAR . "[$could_be_sequence]}";  // It will be "{-[..]}".
             } else {
                 $this->undo_processing = false;
                 $result                = $this->process( $could_be_sequence );
                 if ( $this->undo_processing ) {
-                    $result = $re_injection;
+                    $result = $this->escape_for_enzymes2( $could_be_sequence );
                 }
             }
             $this->new_content .= $result;
