@@ -104,13 +104,13 @@ class Enzymes3_EngineTest
         $enzymes = new Enzymes3_Engine();
 
 //        $enzymes->debug_on = true;
-//        $enzymes->debug_print(get_post()->post_title);
-//        $enzymes->debug_on = false;
 
         $content1 = 'This is something before {{[ whatever ]} and this is after.';
-        $content2 = 'This is something before {' . Enzymes3_Engine::ESCAPE_CHAR . '[ whatever ]} and this is after.';
-        $this->assertEquals($content2, $enzymes->metabolize($content1));
-        $this->assertEquals(Enzymes3_Engine::UNESCAPE_PRIORITY, has_action(current_filter(), array($enzymes, 'unescape')));
+        $content2 = 'This is something before {[ whatever ]} and this is after.';
+        $this->assertEquals($content2, $enzymes->metabolize($content1, null, null));
+
+//        $enzymes->debug_print(get_post()->post_title);
+//        $enzymes->debug_on = false;
 
         // TODO make two tests out of this one, for both the cases Enzymes 2 active and not active
     }
@@ -414,7 +414,7 @@ class Enzymes3_EngineTest
         $enzymes = new Enzymes3_Engine();
 
         // this must return the global post
-        $enzymes->metabolize('This post has a {[ fake ]} injection.');
+        $enzymes->metabolize('This post has a {[ fake ]} injection.', Enzymes3_Engine::GLOBAL_POST, false);
         $result = $this->call_method('wp_post', array(array()), $enzymes);
         $this->assertEquals($post->ID, $result->ID);
 

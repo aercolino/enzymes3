@@ -16,7 +16,7 @@ class Enzymes3_PluginTest
         );
         $enzymes = Enzymes3_Plugin::engine();
         foreach ( $tags as $tag ) {
-            $this->assertEquals( Enzymes3_Plugin::PRIORITY, has_filter( $tag, $enzymes->registered_proxy($tag, Enzymes3_Plugin::PRIORITY) ),
+            $this->assertEquals( Enzymes3_Plugin::PRIORITY, has_filter( $tag, $enzymes->registered_proxy('metabolize', $tag, Enzymes3_Plugin::PRIORITY) ),
                 "Enzymes3 didn't attach to '$tag'." );
         }
     }

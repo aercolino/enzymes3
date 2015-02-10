@@ -10,6 +10,12 @@ require_once dirname( ENZYMES3_PRIMARY ) . '/src/Enzymes3/Options.php';
 
 class Enzymes3_Engine {
     /**
+     * When Enzymes3_Engine::metabolize() is called directly, this special filter tag is internally used, so that
+     * metabolize really works always on filters.
+     */
+    const DIRECT_FILTER = 'enzymes3_metabolize_direct';
+
+    /**
      * Used internally for converting escaped injections '{{[..]}' to non matching strings '{-[..]}'.
      * If escaped injections are found they are converted and an additional last un-escaping filter is setup.
      */
@@ -108,7 +114,14 @@ class Enzymes3_Engine {
      *
      * @var bool
      */
-    protected $undo_processing;
+    protected $restore_injection;
+
+    /**
+     * Filter tag for which the metabolize method is running.
+     *
+     * @var string
+     */
+    protected $current_filter;
 
     /**
      * Priority at which the metabolize method is running.
@@ -817,23 +830,93 @@ class Enzymes3_Engine {
     }
 
     /**
+     * ksort without resetting the internal pointer.
+     *
+     * @param array $array
+     */
+    protected
+    function ksort_fixed( &$array ) {
+        $original = key( $array );
+        ksort( $array );
+        foreach ( $array as $key => $value ) {
+            if ( $key == $original ) {
+                break;
+            }
+        }
+        prev( $array );
+    }
+
+
+    /**
+     * Add a filter in the correct position, without changing the internal pointer of $wp_filter[ $tag ].
+     *
+     * @param string $tag
+     * @param string $function_to_add
+     * @param int    $priority
+     * @param int    $accepted_args
+     *
+     * @return bool
+     */
+    protected
+    function add_filter( $tag, $function_to_add, $priority = 10, $accepted_args = 1 ) {
+        if ( ! doing_filter( $tag ) ) {
+            $result = add_filter( $tag, $function_to_add, $priority, $accepted_args );
+
+            return $result;
+        }
+
+        global $wp_filter;
+
+        // apply_filters() is currently iterating over $wp_filter[ $tag ] with foreach, so its internal pointer is at a
+        // certain key in the middle now and we do not want to have changed that priority after exiting this method.
+
+        // $current_priority_for_tag is the same as $this->current_priority only if $tag is the current_filter.
+        $current_priority_for_tag = key( $wp_filter[ $tag ] );
+
+        // $function_to_add cannot be called in the future, so we do not add the filter at all.
+        if ( $priority < $current_priority_for_tag ) {
+            return true;
+        }
+
+        // If $wp_filter[ $tag ][ $priority ] was correctly sorted, then it will be still so after add_filter().
+        if ( isset( $wp_filter[ $tag ][ $priority ] ) ) {
+            $result = add_filter( $tag, $function_to_add, $priority, $accepted_args );
+
+            return $result;
+        }
+
+        // Surely add_filter() will append $wp_filter[ $tag ][ $priority ] at the end of $wp_filter[ $tag ].
+        $result = add_filter( $tag, $function_to_add, $priority, $accepted_args );
+
+        // It's quite possible that $wp_filter[ $tag ][ $priority ] is out of place, so we sort again.
+        $this->ksort_fixed( $wp_filter[ $tag ] );
+
+//        // ksort() resets the internal pointer to the start so we move it again to the $current_priority_for_tag.
+//        foreach ( $wp_filter[ $tag ] as $key => $value ) {
+//            if ( $key == $current_priority_for_tag ) {
+//                break;
+//            }
+//        }
+
+        return $result;
+    }
+
+    /**
      * Get the registered proxy for the tag and the priority.
      *
+     * @param string $method
      * @param string $tag
      * @param int    $priority
      *
      * @return array|bool
      */
     public
-    function registered_proxy( $tag, $priority ) {
-        if ( ! isset( $this->proxy_registry[ $tag ] ) ) {
-            return null;
-        }
-        if ( ! isset( $this->proxy_registry[ $tag ][ $priority ] ) ) {
+    function registered_proxy( $method, $tag, $priority ) {
+        if ( ! isset( $this->proxy_registry["$method $tag $priority"] ) ) {
             return null;
         }
 
-        return $this->proxy_registry[ $tag ][ $priority ];
+        return $this->proxy_registry["$method $tag $priority"];
     }
 
     /**
@@ -841,20 +924,51 @@ class Enzymes3_Engine {
      *
      * @param string $tag
      * @param int    $priority
+     *
+     * @return bool
      */
     public
     function metabolize_later( $tag, $priority ) {
-        if ( ! isset( $this->proxy_registry[ $tag ] ) ) {
-            $this->proxy_registry[ $tag ] = array();
+        if ( empty( $tag ) ) {
+            return true;
         }
-        if ( ! isset( $this->proxy_registry[ $tag ][ $priority ] ) ) {
-            $this->proxy_registry[ $tag ][ $priority ] = Ando_StarFunc::def( array( $this, 'metabolize' ), array(
-                'extra' => array( $priority ),
-                'order' => '1 2 0',
-            ) );
-            // $this->metabolize() gets 3 arguments, the 3rd being the priority it's running at.
-            // Filters here must pass 2 arguments at most, for the priority trick to work as expected.
-            add_filter( $tag, $this->proxy_registry[ $tag ][ $priority ], $priority, 2 );
+        if ( ! isset( $this->proxy_registry["metabolize $tag $priority"] ) ) {
+//            $this->proxy_registry["metabolize $tag $priority"] = Ando_StarFunc::def( array( $this, 'metabolize' ),
+//                array(
+//                    'extra' => array( $priority ),
+//                    'order' => '1 2 0',
+//                ) );
+            $this->proxy_registry["metabolize $tag $priority"] = array( $this, 'metabolize' );
+            $result                                            = $this->add_filter( $tag,
+                $this->proxy_registry["metabolize $tag $priority"], $priority, 2 );
+
+            return $result;
+        }
+    }
+
+    /**
+     * Add a filter for un-escaping later at a certain priority.
+     *
+     * @param string $tag
+     * @param int    $priority
+     *
+     * @return bool
+     */
+    public
+    function unescape_later( $tag, $priority ) {
+        if ( empty( $tag ) ) {
+            return true;
+        }
+        if ( ! isset( $this->proxy_registry["unescape $tag $priority"] ) ) {
+//            $this->proxy_registry["unescape $tag $priority"] = Ando_StarFunc::def( array( $this, 'unescape' ), array(
+//                'extra' => array( $priority ),
+//                'order' => '1 0',
+//            ) );
+            $this->proxy_registry["unescape $tag $priority"] = array( $this, 'unescape' );
+            $result                                          = $this->add_filter( $tag,
+                $this->proxy_registry["unescape $tag $priority"], $priority, 1 );
+
+            return $result;
         }
     }
 
@@ -889,8 +1003,8 @@ class Enzymes3_Engine {
             case ( strpos( $execution, 'priority(' ) === 0 ):
                 $priority = $num_args;
                 if ( $this->current_priority < $priority ) {
-                    $this->metabolize_later( current_filter(), $priority );
-                    $this->undo_processing = true;
+                    $this->metabolize_later( $this->current_filter, $priority );
+                    $this->restore_injection = true;
                 }
                 break;
             case ( $post_item != '' ):
@@ -1192,9 +1306,17 @@ class Enzymes3_Engine {
         return $post;
     }
 
+    /**
+     * Unescape escaped injections, so the viewer can see them as they are meant to be.
+     *
+     * @param string $content
+     *
+     * @return string
+     */
     public
     function unescape( $content ) {
-        $result = str_replace('{' . self::ESCAPE_CHAR . '[', '{[', $content);
+        $result = str_replace( '{' . self::ESCAPE_CHAR . '[', '{[', $content );
+
         return $result;
     }
 
@@ -1210,7 +1332,7 @@ class Enzymes3_Engine {
         $result = '{';  // To have a valid injection we need to start with a '{'.
         if ( is_plugin_active( 'enzymes/enzymes.php' ) ) {
             global $enzymes;
-            if ( $this->current_priority < has_action( current_filter(), array( $enzymes, 'metabolism' ) ) ) {
+            if ( $this->current_priority < has_action( $this->current_filter, array( $enzymes, 'metabolism' ) ) ) {
                 $result .= '{';  // Escape now: Enzymes 2 will un-escape it later.
             }
         }
@@ -1220,19 +1342,37 @@ class Enzymes3_Engine {
     }
 
     /**
-     * Process the injected sequences in the content we are filtering.
+     * Process all the sequences injected into the $content.
      *
-     * @param string $content
-     * @param int    $post_id
-     * @param int    $priority
+     * This method can be called from apply filters or directly.
+     * When called from a filter, $filter will retain its default (true) value because filters do not pass it.
+     * When called directly,
+     *   -- if the caller passes $filter = false, then metabolize will be called from apply_filters on a DIRECT_FILTER.
+     *   -- if the caller passes $filter = true, then the content won't be processed if no current filter is defined.
+     *
+     * @param string    $content
+     * @param int       $post_id
+     * @param null|bool $filter
      *
      * @return array|null|string
      */
     public
-    function metabolize( $content, $post_id = self::GLOBAL_POST, $priority = null ) {
+    function metabolize( $content, $post_id = self::GLOBAL_POST, $filter = true ) {
+        if ( ! $filter ) {
+            $this->metabolize_later( self::DIRECT_FILTER, Enzymes3_Plugin::PRIORITY );
+            $result = apply_filters( self::DIRECT_FILTER, $content, $post_id );
+
+            return $result;
+        }
+        // We should get here only when called from apply_filters, directly or indirectly, so a current filter exists.
+        $this->current_filter = current_filter();
+        if ( false === $this->current_filter ) {
+            return $content;
+        }
+        $this->current_priority = key( $GLOBALS['wp_filter'][ $this->current_filter ] );
         // Some filters of ours do not pass the 2nd argument, while others pass a post ID, but
         // 'wp_title' pass a string separator, so we fix this occurrence.
-        if ( current_filter() == 'wp_title' ) {
+        if ( 'wp_title' == $this->current_filter ) {
             $post_id = null;
         }
         $this->injection_post = $this->get_injection_post( $post_id );
@@ -1245,21 +1385,20 @@ class Enzymes3_Engine {
         if ( ! $this->there_is_an_injection( $content, $matches ) ) {
             return $content;
         }
-        $this->current_priority = $priority;
-        $this->new_content      = '';
+        $this->new_content = '';
         do {
             $before            = $this->value( $matches, 'before' );
             $could_be_sequence = $this->value( $matches, 'could_be_sequence' );
             $after             = $this->value( $matches, 'after' );
             $this->new_content .= $before;
-            $was_escaped = '{' == substr( $before, - 1 );  // True if it was "{{[ .. ]}".
+            $was_escaped = '{' == substr( $before, - 1 );  // True if it was "{{[..]}".
             if ( $was_escaped ) {
-                add_filter( current_filter(), array( $this, 'unescape' ), self::UNESCAPE_PRIORITY, 1 );
                 $result = self::ESCAPE_CHAR . "[$could_be_sequence]}";  // It will be "{-[..]}".
+                $this->unescape_later( $this->current_filter, self::UNESCAPE_PRIORITY );
             } else {
-                $this->undo_processing = false;
-                $result                = $this->process( $could_be_sequence );
-                if ( $this->undo_processing ) {
+                $this->restore_injection = false;
+                $result                  = $this->process( $could_be_sequence );
+                if ( $this->restore_injection ) {
                     $result = $this->escape_for_enzymes2( $could_be_sequence );
                 }
             }
@@ -1300,7 +1439,7 @@ class Enzymes3_Engine {
      * @param mixed $something
      */
     public
-    function debug_print( $something ) {
+    function debug_print( $something = '(debug_print)' ) {
         if ( ! $this->debug_on ) {
             return;
         }
