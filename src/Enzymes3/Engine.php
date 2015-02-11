@@ -1350,9 +1350,9 @@ class Enzymes3_Engine {
      *   -- if the caller passes $filter = false, then metabolize will be called from apply_filters on a DIRECT_FILTER.
      *   -- if the caller passes $filter = true, then the content won't be processed if no current filter is defined.
      *
-     * @param string    $content
-     * @param int       $post_id
-     * @param null|bool $filter
+     * @param string      $content
+     * @param int|WP_Post $post_id
+     * @param null|bool   $filter
      *
      * @return array|null|string
      */
