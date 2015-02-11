@@ -1,31 +1,31 @@
 <?php
 
-class Enzymes3_SequenceTest
+class Enzymes3_StackTest
         extends WP_UnitTestCase
 {
 
     function test_peek_for_empty_store_is_null()
     {
-        $s = new Enzymes3_Sequence();
+        $s = new Enzymes3_Stack();
         $this->assertEquals(null, $s->peek());
         $this->assertEquals(null, $s->peek(2));
     }
 
     function test_pop_for_empty_store_is_null()
     {
-        $s = new Enzymes3_Sequence();
+        $s = new Enzymes3_Stack();
         $this->assertEquals(null, $s->pop());
         $this->assertEquals(null, $s->pop(2));
     }
 
     function test_push() {
-        $s = new Enzymes3_Sequence();
+        $s = new Enzymes3_Stack();
         $this->assertEquals(1, $s->push('hello'));
         $this->assertEquals(2, $s->push('world'));
     }
 
     function test_peek() {
-        $s = new Enzymes3_Sequence();
+        $s = new Enzymes3_Stack();
         $s->push('hello');
         $this->assertEquals(array('hello'), $s->peek());
 
@@ -38,7 +38,7 @@ class Enzymes3_SequenceTest
     }
 
     function test_pop() {
-        $s = new Enzymes3_Sequence();
+        $s = new Enzymes3_Stack();
         $s->push('hello');
         $s->push('world');
         $this->assertEquals(array('world'), $s->pop());
@@ -49,19 +49,6 @@ class Enzymes3_SequenceTest
         $this->assertEquals(array('hello', 'world 2'), $pop);
 
         $this->assertEquals(1, $s->push('first'));
-    }
-
-    function test_replace() {
-        $s = new Enzymes3_Sequence();
-        $s->push('hello');
-        $s->push('world');
-        $replace = $s->replace('world 2');
-        $this->assertEquals(array('world'), $replace);
-        $this->assertEquals(array('world 2'), $s->peek());
-
-        $replace = $s->replace(array('hello 3', 'world 3'), 2);
-        $this->assertEquals(array('hello', 'world 2'), $replace);
-        $this->assertEquals(array('hello 3', 'world 3'), $s->peek(2));
     }
 
 }

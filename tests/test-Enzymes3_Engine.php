@@ -107,7 +107,7 @@ class Enzymes3_EngineTest
 
         $content1 = 'This is something before {{[ whatever ]} and this is after.';
         $content2 = 'This is something before {[ whatever ]} and this is after.';
-        $this->assertEquals($content2, $enzymes->metabolize($content1, null, null));
+        $this->assertEquals($content2, $enzymes->process($content1, null));
 
 //        $enzymes->debug_print(get_post()->post_title);
 //        $enzymes->debug_on = false;
@@ -121,7 +121,7 @@ class Enzymes3_EngineTest
         $enzymes = new Enzymes3_Engine();
 
         $content = 'This is some content with no injections.';
-        $this->assertEquals($content, $enzymes->metabolize($content));
+        $this->assertEquals($content, $enzymes->process($content));
     }
 
     public
@@ -130,16 +130,16 @@ class Enzymes3_EngineTest
         // compare with test_dangling_enzymes_are_ignored
 
         $mock = $this->getMockBuilder('Enzymes3_Engine')
-                     ->setMethods(array('process'))
+                     ->setMethods(array('catalyze'))
                 //->disableOriginalConstructor()
                      ->getMock();
         $mock->expects($this->any())
-             ->method('process')
+             ->method('catalyze')
              ->will($this->returnValue('"Hello, World!"'));
 
         $content1 = 'This is something before {[ whatever ]} and in between {[ whatever else ]} but this is after.';
         $content2 = 'This is something before "Hello, World!" and in between "Hello, World!" but this is after.';
-        $this->assertEquals($content2, $mock->metabolize($content1, null, null));
+        $this->assertEquals($content2, $mock->process($content1));
     }
 
     public
@@ -148,11 +148,11 @@ class Enzymes3_EngineTest
         // compare with test_content_with_injections_is_filtered
 
         $mock = $this->getMockBuilder('Enzymes3_Engine')
-                     ->setMethods(array('process'))
+                     ->setMethods(array('catalyze'))
                 //->disableOriginalConstructor()
                      ->getMock();
         $mock->expects($this->any())
-             ->method('process')
+             ->method('catalyze')
              ->will($this->returnValue('"Hello, World!"'));
 
         global $post;
@@ -160,7 +160,7 @@ class Enzymes3_EngineTest
 
         $content1 = 'This is something before {[ whatever ]} and this is after.';
         $content2 = 'This is something before {[ whatever ]} and this is after.';
-        $this->assertEquals($content2, $mock->metabolize($content1));
+        $this->assertEquals($content2, $mock->process($content1));
     }
 
     public
@@ -414,22 +414,22 @@ class Enzymes3_EngineTest
         $enzymes = new Enzymes3_Engine();
 
         // this must return the global post
-        $enzymes->metabolize('This post has a {[ fake ]} injection.', Enzymes3_Engine::GLOBAL_POST, null);
+        $enzymes->process('This post has a {[ fake ]} injection.', Enzymes3_Engine::GLOBAL_POST);
         $result = $this->call_method('wp_post', array(array()), $enzymes);
         $this->assertEquals($post->ID, $result->ID);
 
         // this must return the target post (default)
-        $enzymes->metabolize('This post has a {[ fake ]} injection.', $target_post_id, null);
+        $enzymes->process('This post has a {[ fake ]} injection.', $target_post_id);
         $result = $this->call_method('wp_post', array(array()), $enzymes);
         $this->assertEquals($target_post_id, $result->ID);
 
         // this must return the target post (numeric)
-        $enzymes->metabolize('This post has a {[ fake ]} injection.', $target_post_id, null);
+        $enzymes->process('This post has a {[ fake ]} injection.', $target_post_id);
         $result = $this->call_method('wp_post', array(array('post' => $post->ID)), $enzymes);
         $this->assertEquals($post->ID, $result->ID);
 
         // this must return the target post (slug)
-        $enzymes->metabolize('This post has a {[ fake ]} injection.', $target_post_id, null);
+        $enzymes->process('This post has a {[ fake ]} injection.', $target_post_id);
         $result = $this->call_method('wp_post', array(
                 array(
                         'post' => '@this-is-the-global-post',
@@ -520,7 +520,7 @@ class Enzymes3_EngineTest
 
         $content1 = 'This is something before {[123]} and in between {[456]} but this is after.';
         $content2 = 'This is something before 123 and in between 456 but this is after.';
-        $this->assertEquals($content2, $enzymes->metabolize($content1, null, null));
+        $this->assertEquals($content2, $enzymes->process($content1, null));
     }
 
     public
@@ -530,7 +530,7 @@ class Enzymes3_EngineTest
 
         $content1 = 'This is something before {[ ="Hello World!"= ]} and in between {[ ="How are you today?"= ]} but this is after.';
         $content2 = 'This is something before "Hello World!" and in between "How are you today?" but this is after.';
-        $this->assertEquals($content2, $enzymes->metabolize($content1, null, null));
+        $this->assertEquals($content2, $enzymes->process($content1, null));
     }
 
     public
@@ -545,7 +545,7 @@ class Enzymes3_EngineTest
 
         $content1 = 'Before "{[ .sample-name ]}" between "{[ .=sample name= ]}" and after.';
         $content2 = 'Before "sample-value" between "sample value" and after.';
-        $this->assertEquals($content2, $enzymes->metabolize($content1, $post, null));
+        $this->assertEquals($content2, $enzymes->process($content1, $post));
     }
 
     public
@@ -559,7 +559,7 @@ class Enzymes3_EngineTest
 
         $content1 = 'Before "{[ .sample-name | 123 ]}" and after.';
         $content2 = 'Before "123" and after.';
-        $this->assertEquals($content2, $enzymes->metabolize($content1, $post, null));
+        $this->assertEquals($content2, $enzymes->process($content1, $post));
     }
 
     public
@@ -576,7 +576,7 @@ class Enzymes3_EngineTest
 
         $content1 = 'Before "{[ ' . $post_2_id . '.sample-name ]}" and after.';
         $content2 = 'Before "sample value 2" and after.';
-        $this->assertEquals($content2, $enzymes->metabolize($content1, $post_1, null));
+        $this->assertEquals($content2, $enzymes->process($content1, $post_1));
     }
 
     public
@@ -593,7 +593,7 @@ class Enzymes3_EngineTest
 
         $content1 = 'Before "{[ @this-is-the-target-post.sample-name ]}" and after.';
         $content2 = 'Before "sample value 2" and after.';
-        $this->assertEquals($content2, $enzymes->metabolize($content1, $post_1, null));
+        $this->assertEquals($content2, $enzymes->process($content1, $post_1));
     }
 
     public
@@ -613,7 +613,7 @@ class Enzymes3_EngineTest
 
         $content1 = 'Before "{[ =whatever here= | .sample-name() ]}" and after.';
         $content2 = 'Before "123" and after.';
-        $this->assertEquals($content2, $enzymes->metabolize($content1, $post, null));
+        $this->assertEquals($content2, $enzymes->process($content1, $post));
     }
 
     public
@@ -633,7 +633,7 @@ class Enzymes3_EngineTest
 
         $content1 = 'Before "{[ =whatever here= | 100 | .sample-name(1) ]}" and after.';
         $content2 = 'Before "123" and after.';
-        $this->assertEquals($content2, $enzymes->metabolize($content1, $post, null));
+        $this->assertEquals($content2, $enzymes->process($content1, $post));
     }
 
     public
@@ -651,7 +651,7 @@ class Enzymes3_EngineTest
 
         $content1 = 'Before "{[ =whatever here= | 100 | 20 | 3 | .sample-name(3) ]}" and after.';
         $content2 = 'Before "1997" and after.';
-        $this->assertEquals($content2, $enzymes->metabolize($content1, $post, null));
+        $this->assertEquals($content2, $enzymes->process($content1, $post));
     }
 
     public
@@ -669,7 +669,7 @@ class Enzymes3_EngineTest
 
         $content1 = 'Before "{[ =whatever here= | 100 | 20 | 3 | array(2) | .sample-name(2) ]}" and after.';
         $content2 = 'Before "2300" and after.';
-        $this->assertEquals($content2, $enzymes->metabolize($content1, $post, null));
+        $this->assertEquals($content2, $enzymes->process($content1, $post));
     }
 
     public
@@ -686,7 +686,7 @@ class Enzymes3_EngineTest
 
         $content1 = 'Before "{[ =whatever here= | =a hundred= | 100 | =twenty and three= | 20 | 3 | array(2) | hash(2) | .sample-name(1) ]}" and after.';
         $content2 = 'Before "2300" and after.';
-        $this->assertEquals($content2, $enzymes->metabolize($content1, $post, null));
+        $this->assertEquals($content2, $enzymes->process($content1, $post));
     }
 
     public
@@ -761,7 +761,7 @@ class Enzymes3_EngineTest
 
         $content1 = "Before \"{[ $attrs_seq | array($attrs_count) | .implode(1) ]}\" and after.";
         $content2 = "Before \"$data\" and after.";
-        $this->assertEquals($content2, $enzymes->metabolize($content1, $post, null));
+        $this->assertEquals($content2, $enzymes->process($content1, $post));
     }
 
     public
@@ -777,7 +777,7 @@ class Enzymes3_EngineTest
 
         $content1 = 'Before "{[ /author.sample-name ]}" between "{[ /author.=sample name= ]}" and after.';
         $content2 = 'Before "sample-value" between "sample value" and after.';
-        $this->assertEquals($content2, $enzymes->metabolize($content1, $post, null));
+        $this->assertEquals($content2, $enzymes->process($content1, $post));
     }
 
     public
@@ -796,7 +796,7 @@ class Enzymes3_EngineTest
 
         $content1 = 'Before "{[ ' . $post_2_id . '/author.sample-name ]}" and after.';
         $content2 = 'Before "sample value 2" and after.';
-        $this->assertEquals($content2, $enzymes->metabolize($content1, $post_1, null));
+        $this->assertEquals($content2, $enzymes->process($content1, $post_1));
     }
 
     public
@@ -818,7 +818,7 @@ class Enzymes3_EngineTest
 
         $content1 = 'Before "{[ @this-is-the-target-post/author.sample-name ]}" and after.';
         $content2 = 'Before "sample value 2" and after.';
-        $this->assertEquals($content2, $enzymes->metabolize($content1, $post_1, null));
+        $this->assertEquals($content2, $enzymes->process($content1, $post_1));
     }
 
     public
@@ -880,7 +880,7 @@ class Enzymes3_EngineTest
 
         $content1 = "Before \"{[ $attrs_seq | array($attrs_count) | .implode(1) ]}\" and after.";
         $content2 = "Before \"$data\" and after.";
-        $this->assertEquals($content2, $enzymes->metabolize($content1, $post, null));
+        $this->assertEquals($content2, $enzymes->process($content1, $post));
     }
 
     public
@@ -901,7 +901,7 @@ class Enzymes3_EngineTest
 
         $content1 = 'Before "{[ =whatever here= | /author.sample-name() ]}" and after.';
         $content2 = 'Before "123" and after.';
-        $this->assertEquals($content2, $enzymes->metabolize($content1, $post, null));
+        $this->assertEquals($content2, $enzymes->process($content1, $post));
     }
 
     public
@@ -922,7 +922,7 @@ class Enzymes3_EngineTest
 
         $content1 = 'Before "{[ =whatever here= | 100 | /author.sample-name(1) ]}" and after.';
         $content2 = 'Before "123" and after.';
-        $this->assertEquals($content2, $enzymes->metabolize($content1, $post, null));
+        $this->assertEquals($content2, $enzymes->process($content1, $post));
     }
 
     public
@@ -941,7 +941,7 @@ class Enzymes3_EngineTest
 
         $content1 = 'Before "{[ =whatever here= | 100 | 20 | 3 | /author.sample-name(3) ]}" and after.';
         $content2 = 'Before "1997" and after.';
-        $this->assertEquals($content2, $enzymes->metabolize($content1, $post, null));
+        $this->assertEquals($content2, $enzymes->process($content1, $post));
     }
 
     public
@@ -960,7 +960,7 @@ class Enzymes3_EngineTest
 
         $content1 = 'Before "{[ =whatever here= | 100 | 20 | 3 | array(2) | /author.sample-name(2) ]}" and after.';
         $content2 = 'Before "2300" and after.';
-        $this->assertEquals($content2, $enzymes->metabolize($content1, $post, null));
+        $this->assertEquals($content2, $enzymes->process($content1, $post));
     }
 
     public
@@ -979,7 +979,7 @@ class Enzymes3_EngineTest
 
         $content1 = 'Before "{[ =whatever here= | =a hundred= | 100 | =twenty and three= | 20 | 3 | array(2) | hash(2) | /author.sample-name(1) ]}" and after.';
         $content2 = 'Before "2300" and after.';
-        $this->assertEquals($content2, $enzymes->metabolize($content1, $post, null));
+        $this->assertEquals($content2, $enzymes->process($content1, $post));
     }
 
 }

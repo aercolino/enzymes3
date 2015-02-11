@@ -4,16 +4,15 @@ require_once( ABSPATH . 'wp-admin/includes/plugin.php' );
 require_once dirname( ENZYMES3_PRIMARY ) . '/vendor/Ando/Regex.php';
 require_once dirname( ENZYMES3_PRIMARY ) . '/vendor/Ando/StarFunc.php';
 require_once dirname( ENZYMES3_PRIMARY ) . '/vendor/Ando/ErrorFactory.php';
-require_once dirname( ENZYMES3_PRIMARY ) . '/src/Enzymes3/Sequence.php';
+require_once dirname( ENZYMES3_PRIMARY ) . '/src/Enzymes3/Stack.php';
 require_once dirname( ENZYMES3_PRIMARY ) . '/src/Enzymes3/Capabilities.php';
 require_once dirname( ENZYMES3_PRIMARY ) . '/src/Enzymes3/Options.php';
 
 class Enzymes3_Engine {
     /**
-     * When Enzymes3_Engine::metabolize() is called directly, this special filter tag is internally used, so that
-     * metabolize really works always on filters.
+     * When Enzymes3_Engine::process() is called, this special filter tag is internally used.
      */
-    const DIRECT_FILTER = 'enzymes3_metabolize_direct';
+    const DIRECT_FILTER = 'enzymes3_process';
 
     /**
      * Used internally for converting escaped injections '{{[..]}' to non matching strings '{-[..]}'.
@@ -22,26 +21,22 @@ class Enzymes3_Engine {
     const ESCAPE_CHAR = '-';
 
     /**
-     * This is not to be executed absolutely last, but only after all Enzymes3_Engine::metabolize() filter executions.
+     * This is not to be executed absolutely last, but only after all Enzymes3_Engine::absorb() filter executions.
      */
     const UNESCAPE_PRIORITY = 1000;
 
     /**
-     *  When calling the engine directly, for forcing the global post, use one of the following:
-     * - Enzymes3_Plugin::engine()->metabolize($content);
-     * - Enzymes3_Plugin::engine()->metabolize($content, null);
-     * - Enzymes3_Plugin::engine()->metabolize($content, Enzymes3_Engine::GLOBAL_POST);
+     *  Use to make it explicit that the content belongs to the current post.
      */
     const GLOBAL_POST = null;
 
     /**
-     * When calling the engine directly, for forcing no post at all, use one of the following:
-     * - Enzymes3_Plugin::engine()->metabolize($content, Enzymes3_Engine::NO_POST);
+     * Use to make it explicit that the content belongs to no post at all.
      */
     const NO_POST = - 1;
 
     /**
-     * When calling the engine directly, ID of the user to consider the author after forcing no post.
+     * If the content does not belong to any post, use this user ID when referring to the "author".
      */
     const NO_POST_AUTHOR = 1;
 
@@ -61,7 +56,6 @@ class Enzymes3_Engine {
 
     /**
      * The post which the content belongs to.
-     * It can be null if the developer forced no post with ->metabolize($content, Enzymes3_Engine::NO_POST).
      *
      * @var WP_Post
      */
@@ -75,9 +69,9 @@ class Enzymes3_Engine {
     protected $new_content;
 
     /**
-     * Sequence of catalyzed enzymes, which are meant to be used as arguments for other enzymes.
+     * Internal stack.
      *
-     * @var Enzymes3_Sequence
+     * @var Enzymes3_Stack
      */
     protected $catalyzed;
 
@@ -114,28 +108,28 @@ class Enzymes3_Engine {
      *
      * @var bool
      */
-    protected $restore_injection;
+    protected $reject_injection;
 
     /**
-     * Filter tag for which the metabolize method is running.
+     * Filter tag for which the absorb method is running.
      *
      * @var string
      */
     protected $current_filter;
 
     /**
-     * Priority at which the metabolize method is running.
+     * Priority at which the absorb method is running.
      *
      * @var int
      */
     protected $current_priority;
 
     /**
-     * Registry of proxy functions, by tag and priority.
+     * Registry of attached handlers, by tag and priority.
      *
      * @var array
      */
-    protected $proxy_registry;
+    protected $attached_handlers;
 
     /**
      * Regular expression for matching "{[ .. ]}".
@@ -352,7 +346,7 @@ class Enzymes3_Engine {
         $this->init_grammar();
         $this->init_expressions();
 
-        $this->proxy_registry = array();
+        $this->attached_handlers = array();
 
         $this->has_eval_recovered = true;
         register_shutdown_function( array( $this, 'echo_last_eval_error' ) );
@@ -867,8 +861,8 @@ class Enzymes3_Engine {
 
         global $wp_filter;
 
-        // apply_filters() is currently iterating over $wp_filter[ $tag ] with foreach, so its internal pointer is at a
-        // certain key in the middle now and we do not want to have changed that priority after exiting this method.
+        // apply_filters() is currently iterating over $wp_filter[ $tag ], so its internal pointer is at a
+        // certain key in the middle now and we do not want to have that priority changed after exiting.
 
         // $current_priority_for_tag is the same as $this->current_priority only if $tag is the current_filter.
         $current_priority_for_tag = key( $wp_filter[ $tag ] );
@@ -891,36 +885,11 @@ class Enzymes3_Engine {
         // It's quite possible that $wp_filter[ $tag ][ $priority ] is out of place, so we sort again.
         $this->ksort_fixed( $wp_filter[ $tag ] );
 
-//        // ksort() resets the internal pointer to the start so we move it again to the $current_priority_for_tag.
-//        foreach ( $wp_filter[ $tag ] as $key => $value ) {
-//            if ( $key == $current_priority_for_tag ) {
-//                break;
-//            }
-//        }
-
         return $result;
     }
 
     /**
-     * Get the registered proxy for the tag and the priority.
-     *
-     * @param string $method
-     * @param string $tag
-     * @param int    $priority
-     *
-     * @return array|bool
-     */
-    public
-    function registered_proxy( $method, $tag, $priority ) {
-        if ( ! isset( $this->proxy_registry["$method $tag $priority"] ) ) {
-            return null;
-        }
-
-        return $this->proxy_registry["$method $tag $priority"];
-    }
-
-    /**
-     * Register a proxy for metabolizing later at a certain priority.
+     * Attach a handler for absorbing later at a certain priority.
      *
      * @param string $tag
      * @param int    $priority
@@ -928,26 +897,22 @@ class Enzymes3_Engine {
      * @return bool
      */
     public
-    function metabolize_later( $tag, $priority ) {
+    function absorb_later( $tag, $priority ) {
         if ( empty( $tag ) ) {
+            return false;
+        }
+        if ( isset( $this->attached_handlers["absorb $tag $priority"] ) ) {
             return true;
         }
-        if ( ! isset( $this->proxy_registry["metabolize $tag $priority"] ) ) {
-//            $this->proxy_registry["metabolize $tag $priority"] = Ando_StarFunc::def( array( $this, 'metabolize' ),
-//                array(
-//                    'extra' => array( $priority ),
-//                    'order' => '1 2 0',
-//                ) );
-            $this->proxy_registry["metabolize $tag $priority"] = array( $this, 'metabolize' );
-            $result                                            = $this->add_filter( $tag,
-                $this->proxy_registry["metabolize $tag $priority"], $priority, 2 );
+        $this->attached_handlers["absorb $tag $priority"] = array( $this, 'absorb' );
 
-            return $result;
-        }
+        $result = $this->add_filter( $tag, $this->attached_handlers["absorb $tag $priority"], $priority, 2 );
+
+        return $result;
     }
 
     /**
-     * Add a filter for un-escaping later at a certain priority.
+     * Attach a handler for unescaping later at a certain priority.
      *
      * @param string $tag
      * @param int    $priority
@@ -957,19 +922,16 @@ class Enzymes3_Engine {
     public
     function unescape_later( $tag, $priority ) {
         if ( empty( $tag ) ) {
+            return false;
+        }
+        if ( isset( $this->attached_handlers["unescape $tag $priority"] ) ) {
             return true;
         }
-        if ( ! isset( $this->proxy_registry["unescape $tag $priority"] ) ) {
-//            $this->proxy_registry["unescape $tag $priority"] = Ando_StarFunc::def( array( $this, 'unescape' ), array(
-//                'extra' => array( $priority ),
-//                'order' => '1 0',
-//            ) );
-            $this->proxy_registry["unescape $tag $priority"] = array( $this, 'unescape' );
-            $result                                          = $this->add_filter( $tag,
-                $this->proxy_registry["unescape $tag $priority"], $priority, 1 );
+        $this->attached_handlers["unescape $tag $priority"] = array( $this, 'unescape' );
 
-            return $result;
-        }
+        $result = $this->add_filter( $tag, $this->attached_handlers["unescape $tag $priority"], $priority, 1 );
+
+        return $result;
     }
 
     /**
@@ -1003,8 +965,8 @@ class Enzymes3_Engine {
             case ( strpos( $execution, 'priority(' ) === 0 ):
                 $priority = $num_args;
                 if ( $this->current_priority < $priority ) {
-                    $this->metabolize_later( $this->current_filter, $priority );
-                    $this->restore_injection = true;
+                    $this->absorb_later( $this->current_filter, $priority );
+                    $this->reject_injection = true;
                 }
                 break;
             case ( $post_item != '' ):
@@ -1226,14 +1188,14 @@ class Enzymes3_Engine {
      * @return array|null|string
      */
     protected
-    function process( $could_be_sequence ) {
+    function catalyze( $could_be_sequence ) {
         $sequence                       = $this->clean_up( $could_be_sequence );
         $there_are_only_chained_enzymes = preg_match( $this->e_sequence_valid, '|' . $sequence );
         if ( ! $there_are_only_chained_enzymes ) {
             $result = '{[' . $could_be_sequence . ']}';  // skip this injection AS IS
         } else {
-            $this->current_injection = '{[' . $could_be_sequence . ']}';
-            $this->catalyzed         = new Enzymes3_Sequence();
+            $this->current_injection = "{[$could_be_sequence]}";
+            $this->catalyzed         = new Enzymes3_Stack();
             $rest                    = $sequence;
             while ( preg_match( $this->e_sequence_start, $rest, $matches ) ) {
                 $execution    = $this->value( $matches, 'execution' );
@@ -1342,38 +1304,50 @@ class Enzymes3_Engine {
     }
 
     /**
-     * Process all the sequences injected into the $content.
+     * Process all the injections applied to the $content, not necessarily in the context of apply_filters().
      *
-     * This method can be called from apply filters or directly.
-     * When called from a filter, $filter will retain its default (true) value because filters do not pass it.
-     * When called directly,
-     *   -- if the caller passes $filter = false, then metabolize will be called from apply_filters on a DIRECT_FILTER.
-     *   -- if the caller passes $filter = true, then the content won't be processed if no current filter is defined.
+     * @param                  $content
+     * @param null|int|WP_Post $post_id  Null means Enzymes3_Engine::GLOBAL_POST.
+     * @param null|string      $filter   Null means Enzymes3_Engine::DIRECT_FILTER.
+     * @param null|int         $priority Null means Enzymes3_Plugin::PRIORITY.
+     *
+     * @return mixed|void
+     */
+    public
+    function process( $content, $post_id = null, $filter = null, $priority = null ) {
+        $post_id  = ! is_null( $post_id )
+            ? $post_id
+            : self::GLOBAL_POST;
+        $filter   = ! is_null( $filter )
+            ? strval( $filter )
+            : self::DIRECT_FILTER;
+        $priority = ! is_null( $priority )
+            ? intval( $priority )
+            : Enzymes3_Plugin::PRIORITY;
+
+        $this->absorb_later( $filter, $priority );
+        $result = apply_filters( $filter, $content, $post_id );
+
+        return $result;
+    }
+
+    /**
+     * Process all the injections applied to the $content, always in the context of apply_filters().
      *
      * @param string      $content
      * @param int|WP_Post $post_id
-     * @param null|bool   $filter
      *
-     * @return array|null|string
+     * @return string
      */
     public
-    function metabolize( $content, $post_id = self::GLOBAL_POST, $filter = true ) {
-        if ( ! $filter ) {
-            $this->metabolize_later( self::DIRECT_FILTER, Enzymes3_Plugin::PRIORITY );
-            $result = apply_filters( self::DIRECT_FILTER, $content, $post_id );
-
-            return $result;
-        }
-        // We should get here only when called from apply_filters, directly or indirectly, so a current filter exists.
-        $this->current_filter = current_filter();
-        if ( false === $this->current_filter ) {
+    function absorb( $content, $post_id = self::GLOBAL_POST ) {
+        if ( ! doing_filter() ) {
             return $content;
         }
+        $this->current_filter   = current_filter();
         $this->current_priority = key( $GLOBALS['wp_filter'][ $this->current_filter ] );
-        // Some filters of ours do not pass the 2nd argument, while others pass a post ID, but
-        // 'wp_title' pass a string separator, so we fix this occurrence.
         if ( 'wp_title' == $this->current_filter ) {
-            $post_id = null;
+            $post_id = null;  // 'wp_title' pass a string separator into $post_id
         }
         $this->injection_post = $this->get_injection_post( $post_id );
         if ( false === $this->injection_post ) {
@@ -1396,9 +1370,9 @@ class Enzymes3_Engine {
                 $result = self::ESCAPE_CHAR . "[$could_be_sequence]}";  // It will be "{-[..]}".
                 $this->unescape_later( $this->current_filter, self::UNESCAPE_PRIORITY );
             } else {
-                $this->restore_injection = false;
-                $result                  = $this->process( $could_be_sequence );
-                if ( $this->restore_injection ) {
+                $this->reject_injection = false;
+                $result                 = $this->catalyze( $could_be_sequence );
+                if ( $this->reject_injection ) {
                     $result = $this->escape_for_enzymes2( $could_be_sequence );
                 }
             }

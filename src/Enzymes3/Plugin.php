@@ -50,12 +50,12 @@ class Enzymes3_Plugin {
     function on_init() {
         $enzymes = self::engine();  // singleton
 //@formatter:off
-        $enzymes->metabolize_later('wp_title',        self::PRIORITY);
-        $enzymes->metabolize_later('the_title',       self::PRIORITY);
-        $enzymes->metabolize_later('the_title_rss',   self::PRIORITY);
-        $enzymes->metabolize_later('the_excerpt',     self::PRIORITY);
-        $enzymes->metabolize_later('the_excerpt_rss', self::PRIORITY);
-        $enzymes->metabolize_later('the_content',     self::PRIORITY);
+        $enzymes->absorb_later('wp_title',        self::PRIORITY);
+        $enzymes->absorb_later('the_title',       self::PRIORITY);
+        $enzymes->absorb_later('the_title_rss',   self::PRIORITY);
+        $enzymes->absorb_later('the_excerpt',     self::PRIORITY);
+        $enzymes->absorb_later('the_excerpt_rss', self::PRIORITY);
+        $enzymes->absorb_later('the_content',     self::PRIORITY);
 //@formatter:on
     }
 
