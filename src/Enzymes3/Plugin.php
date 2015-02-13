@@ -39,7 +39,7 @@ class Enzymes3_Plugin {
             register_activation_hook( ENZYMES3_PRIMARY, array( 'Enzymes3_Plugin', 'on_activation' ) );
             register_deactivation_hook( ENZYMES3_PRIMARY, array( 'Enzymes3_Plugin', 'on_deactivation' ) );
         } else {
-            add_action( 'init', array( 'Enzymes3_Plugin', 'on_init' ), 10, 2 );
+            add_action( 'init', array( 'Enzymes3_Plugin', 'on_init' ) );
         }
     }
 
@@ -97,6 +97,13 @@ class Enzymes3_Plugin {
 
     static protected
     function add_roles_and_capabilities() {
+        global $wp_roles;
+        /* @var $wp_roles WP_Roles */
+
+        if ( ! isset( $wp_roles ) ) {
+            $wp_roles = new WP_Roles();
+        }
+
         self::remove_roles_and_capabilities();
 //@formatter:off
         add_role(Enzymes3_Capabilities::User,           __('Enzymes User'),            Enzymes3_Capabilities::for_User() );
@@ -105,9 +112,6 @@ class Enzymes3_Plugin {
         add_role(Enzymes3_Capabilities::Coder,          __('Enzymes Coder'),           Enzymes3_Capabilities::for_Coder() );
         add_role(Enzymes3_Capabilities::TrustedCoder,   __('Enzymes Trusted Coder'),   Enzymes3_Capabilities::for_TrustedCoder() );
 //@formatter:on
-
-        global $wp_roles;
-        /* @var $wp_roles WP_Roles */
 
         foreach ( Enzymes3_Capabilities::all() as $cap ) {
             $wp_roles->add_cap( 'administrator', $cap );
@@ -121,6 +125,10 @@ class Enzymes3_Plugin {
     function remove_roles_and_capabilities() {
         global $wp_roles;
         /* @var $wp_roles WP_Roles */
+
+        if ( ! isset( $wp_roles ) ) {
+            $wp_roles = new WP_Roles();
+        }
 
         foreach ( $wp_roles->roles as $name => $role ) {
             if ( 0 === strpos( $name, Enzymes3_Capabilities::PREFIX ) ) {
