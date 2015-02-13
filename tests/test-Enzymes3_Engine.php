@@ -84,15 +84,11 @@ class Enzymes3_EngineTest
         if ( function_exists('xdebug_disable') ) {
             xdebug_disable();
         }
-
-        Enzymes3_Plugin::on_activation();
     }
 
     public static
     function tearDownAfterClass()
     {
-        Enzymes3_Plugin::on_deactivation();
-
         if ( function_exists('xdebug_enable') ) {
             xdebug_enable();
         }

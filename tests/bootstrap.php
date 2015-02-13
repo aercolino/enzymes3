@@ -5,8 +5,21 @@ if ( !$_tests_dir ) $_tests_dir = '/tmp/wordpress-tests-lib';
 
 require_once $_tests_dir . '/includes/functions.php';
 
+function _manually_activate_plugin() {
+	Enzymes3_Plugin::on_activation();
+
+	// Without the following call to WP_Roles->reinit(), my roles were right only when read from the database.
+	// If there was an empty database, like when starting tests from scratch, my enzymes3.* capabilities were absent,
+	// even if they had been just added with the call above!
+
+	global $wp_roles;
+	/* @var $wp_roles WP_Roles */
+	$wp_roles->reinit();
+}
+
 function _manually_load_plugin() {
 	require dirname( __FILE__ ) . '/../enzymes3.php';
+	add_action( 'init', '_manually_activate_plugin');
 }
 tests_add_filter( 'muplugins_loaded', '_manually_load_plugin' );
 
