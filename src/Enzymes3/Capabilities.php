@@ -44,6 +44,24 @@ class Enzymes3_Capabilities {
     }
 
     /**
+     * Indexed array of all the roles.
+     *
+     * @return array
+     */
+    static public
+    function all_roles() {
+        $result = array(
+            self::User,
+            self::PrivilegedUser,
+            self::TrustedUser,
+            self::Coder,
+            self::TrustedCoder,
+        );
+
+        return $result;
+    }
+
+    /**
      * Associative array of the capabilities for an Enzymes User.
      *
      * @return array

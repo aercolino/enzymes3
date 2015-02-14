@@ -38,6 +38,8 @@ class Enzymes3_Plugin {
         if ( is_admin() ) {
             register_activation_hook( ENZYMES3_PRIMARY, array( 'Enzymes3_Plugin', 'on_activation' ) );
             register_deactivation_hook( ENZYMES3_PRIMARY, array( 'Enzymes3_Plugin', 'on_deactivation' ) );
+
+            add_filter( 'editable_roles', array( 'Enzymes3_Plugin', 'on_editable_roles' ) );
         } else {
             add_action( 'init', array( 'Enzymes3_Plugin', 'on_init' ) );
         }
@@ -86,11 +88,31 @@ class Enzymes3_Plugin {
     /**
      * Uninstalls this plugin, cleaning up all data.
      * This is called from uninstall.php without instantiating an object of this class.
-     *
      */
     static public
     function on_uninstall() {
         self::$options->remove_all();
+    }
+
+    /**
+     * Remove Enzymes 3 roles from the user-edit screen because they are not meant to be primary roles.
+     *
+     * @param array $all_roles
+     *
+     * @return array
+     */
+    public static
+    function on_editable_roles( $all_roles ) {
+        $screen = get_current_screen();
+        if ( 'user-edit' == $screen->id ) {
+            foreach ( $all_roles as $name => $role ) {
+                if ( 0 === strpos( $name, Enzymes3_Capabilities::PREFIX ) ) {
+                    unset( $all_roles[ $name ] );
+                }
+            }
+        }
+
+        return $all_roles;
     }
 
     //------------------------------------------------------------------------------------------------------------------
