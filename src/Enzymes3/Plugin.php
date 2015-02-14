@@ -59,6 +59,11 @@ class Enzymes3_Plugin {
         $enzymes->absorb_later('the_excerpt_rss', self::PRIORITY);
         $enzymes->absorb_later('the_content',     self::PRIORITY);
 //@formatter:on
+
+        global $wp_version;
+        if (version_compare($wp_version, '3.9', '<')) {
+            require dirname(ENZYMES3_PRIMARY) . '/compat/3_8.php';
+        }
     }
 
     /**
