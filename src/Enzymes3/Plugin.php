@@ -1,5 +1,6 @@
 <?php
-require_once dirname( ENZYMES3_PRIMARY ) . '/src/Enzymes3/Engine.php';
+require_once dirname( ENZYMES3_PRIMARY ) . '/src/Enzymes3/Capabilities.php';
+require_once dirname( ENZYMES3_PRIMARY ) . '/src/Enzymes3/Options.php';
 
 class Enzymes3_Plugin {
     /**
@@ -50,6 +51,12 @@ class Enzymes3_Plugin {
      */
     static public
     function on_init() {
+        global $wp_version;
+        if ( version_compare( $wp_version, '3.9', '<' ) ) {
+            require dirname( ENZYMES3_PRIMARY ) . '/compat/3_8.php';
+        }
+
+        require_once dirname( ENZYMES3_PRIMARY ) . '/src/Enzymes3/Engine.php';
         $enzymes = self::engine();  // singleton
 //@formatter:off
         $enzymes->absorb_later('wp_title',        self::PRIORITY);
@@ -59,11 +66,6 @@ class Enzymes3_Plugin {
         $enzymes->absorb_later('the_excerpt_rss', self::PRIORITY);
         $enzymes->absorb_later('the_content',     self::PRIORITY);
 //@formatter:on
-
-        global $wp_version;
-        if (version_compare($wp_version, '3.9', '<')) {
-            require dirname(ENZYMES3_PRIMARY) . '/compat/3_8.php';
-        }
     }
 
     /**

@@ -5,8 +5,6 @@ require_once dirname( ENZYMES3_PRIMARY ) . '/vendor/Ando/Regex.php';
 require_once dirname( ENZYMES3_PRIMARY ) . '/vendor/Ando/StarFunc.php';
 require_once dirname( ENZYMES3_PRIMARY ) . '/vendor/Ando/ErrorFactory.php';
 require_once dirname( ENZYMES3_PRIMARY ) . '/src/Enzymes3/Stack.php';
-require_once dirname( ENZYMES3_PRIMARY ) . '/src/Enzymes3/Capabilities.php';
-require_once dirname( ENZYMES3_PRIMARY ) . '/src/Enzymes3/Options.php';
 
 class Enzymes3_Engine {
     /**
