@@ -248,7 +248,7 @@ class Enzymes3_Engine {
             'author_attr'  => '(?<author_attr>$post/author:$field)',
             'attr'         => '(?<attr>$post_attr|$author_attr)',
             'transclusion' => '(?<transclusion>$item|$attr)',
-            'execution'    => '(?<execution>(?:\b(?:array|hash|priority)\b|$item)\((?<num_args>\d*)\))',
+            'execution'    => '(?<execution>(?:\b(?:array|hash|defer)\b|$item)\((?<num_args>\d*)\))',
             'enzyme'       => '(?<enzyme>(?:$execution|$transclusion|$literal))',
             'sequence'     => '(?<sequence>$enzyme(\|$enzyme)*)',
             'injection'    => '(?<injection>{[$sequence]})',
@@ -960,7 +960,7 @@ class Enzymes3_Engine {
                     $result[ $key ] = $value;
                 }
                 break;
-            case ( strpos( $execution, 'priority(' ) === 0 ):
+            case ( strpos( $execution, 'defer(' ) === 0 ):
                 $priority = $num_args;
                 if ( $this->current_priority < $priority ) {
                     $this->absorb_later( $this->current_filter, $priority );
