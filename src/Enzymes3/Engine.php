@@ -130,6 +130,22 @@ class Enzymes3_Engine {
     protected $attached_handlers;
 
     /**
+     * Property for exchanging data between injections inside the same content.
+     * It's unset before beginning and after finishing the processing of the content.
+     *
+     * @var mixed
+     */
+    protected $intra;
+
+    /**
+     * Property for exchanging data between injections outside the same content.
+     * It's never unset nor it persists between page generation cycles.
+     *
+     * @var mixed
+     */
+    public $extra;
+
+    /**
      * Regular expression for matching "{[ .. ]}".
      *
      * @var Ando_Regex
@@ -348,6 +364,8 @@ class Enzymes3_Engine {
 
         $this->has_eval_recovered = true;
         register_shutdown_function( array( $this, 'echo_last_eval_error' ) );
+
+        $this->extra = new stdClass();
     }
 
     /**
@@ -1357,6 +1375,7 @@ class Enzymes3_Engine {
         if ( ! $this->there_is_an_injection( $content, $matches ) ) {
             return $content;
         }
+        $this->intra = new stdClass();
         $this->new_content = '';
         do {
             $before            = $this->value( $matches, 'before' );
@@ -1377,6 +1396,7 @@ class Enzymes3_Engine {
             $this->new_content .= $result;
         } while ( $this->there_is_an_injection( $after, $matches ) );
         $result = $this->new_content . $after;
+        $this->intra = null;
 
         return $result;
     }
