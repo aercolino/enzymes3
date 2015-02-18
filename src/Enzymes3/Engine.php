@@ -60,6 +60,13 @@ class Enzymes3_Engine {
     protected $injection_post;
 
     /**
+     * The content of the post, not modified by Enzymes.
+     *
+     * @var string
+     */
+    protected $content;
+
+    /**
      * The content of the post, modified by Enzymes.
      *
      * @var string
@@ -882,11 +889,6 @@ class Enzymes3_Engine {
         // $current_priority_for_tag is the same as $this->current_priority only if $tag is the current_filter.
         $current_priority_for_tag = key( $wp_filter[ $tag ] );
 
-        // $function_to_add cannot be called in the future, so we do not add the filter at all.
-        if ( $priority < $current_priority_for_tag ) {
-            return true;
-        }
-
         // If $wp_filter[ $tag ][ $priority ] was correctly sorted, then it will be still so after add_filter().
         if ( isset( $wp_filter[ $tag ][ $priority ] ) ) {
             $result = add_filter( $tag, $function_to_add, $priority, $accepted_args );
@@ -1236,6 +1238,9 @@ class Enzymes3_Engine {
                         break;
                 }
                 $this->catalyzed->push( $argument );
+                if ( $this->reject_injection ) {
+                    break;
+                }
             }
             list( $result ) = $this->catalyzed->peek();
         }
@@ -1309,7 +1314,8 @@ class Enzymes3_Engine {
         $result = '{';  // To have a valid injection we need to start with a '{'.
         if ( is_plugin_active( 'enzymes/enzymes.php' ) ) {
             global $enzymes;
-            if ( $this->current_priority < has_action( $this->current_filter, array( $enzymes, 'metabolism' ) ) ) {
+            $enzymes2_priority = has_action( $this->current_filter, array( $enzymes, 'metabolism' ) );
+            if ( $enzymes2_priority && $this->current_priority < $enzymes2_priority ) {
                 $result .= '{';  // Escape now: Enzymes 2 will un-escape it later.
             }
         }
@@ -1341,7 +1347,7 @@ class Enzymes3_Engine {
             : Enzymes3_Plugin::PRIORITY;
 
         $this->absorb_later( $filter, $priority );
-        if (self::DIRECT_FILTER == $filter) {
+        if ( self::DIRECT_FILTER == $filter ) {
             $result = apply_filters( $filter, $content, $post_id );
         }
 
@@ -1376,7 +1382,8 @@ class Enzymes3_Engine {
         if ( ! $this->there_is_an_injection( $content, $matches ) ) {
             return $content;
         }
-        $this->intra = new stdClass();
+        $this->intra       = new stdClass();
+        $this->content     = $content;
         $this->new_content = '';
         do {
             $before            = $this->value( $matches, 'before' );
@@ -1396,7 +1403,7 @@ class Enzymes3_Engine {
             }
             $this->new_content .= $result;
         } while ( $this->there_is_an_injection( $after, $matches ) );
-        $result = $this->new_content . $after;
+        $result      = $this->new_content . $after;
         $this->intra = null;
 
         return $result;
