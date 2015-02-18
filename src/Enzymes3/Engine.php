@@ -856,7 +856,6 @@ class Enzymes3_Engine {
         prev( $array );
     }
 
-
     /**
      * Add a filter in the correct position, without changing the internal pointer of $wp_filter[ $tag ].
      *
@@ -1342,7 +1341,9 @@ class Enzymes3_Engine {
             : Enzymes3_Plugin::PRIORITY;
 
         $this->absorb_later( $filter, $priority );
-        $result = apply_filters( $filter, $content, $post_id );
+        if (self::DIRECT_FILTER == $filter) {
+            $result = apply_filters( $filter, $content, $post_id );
+        }
 
         return $result;
     }
