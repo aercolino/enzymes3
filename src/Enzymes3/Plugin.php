@@ -83,6 +83,8 @@ class Enzymes3_Plugin {
     /**
      * Callback used when the plugin is deactivated by the user.
      *
+     * In general, remember not to undo anything that on_activation() would not be able to restore intact.
+     *
      * @return boolean
      */
     static public

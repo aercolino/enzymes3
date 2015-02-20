@@ -864,6 +864,25 @@ class Enzymes3_Engine {
     }
 
     /**
+     * Spy on the current filters for the given tag. Used for debugging.
+     *
+     * @param string $tag
+     *
+     * @return array
+     */
+    protected
+    function current_filters( $tag ) {
+        $result = array();
+        global $wp_filter;
+        $the_content = $wp_filter[ $tag ];
+        foreach ( $the_content as $pri => $han ) {
+            $result[ $pri ] = array_keys( $han );
+        }
+
+        return $result;
+    }
+
+    /**
      * Add a filter in the correct position, without changing the internal pointer of $wp_filter[ $tag ].
      *
      * @param string $tag
@@ -886,10 +905,7 @@ class Enzymes3_Engine {
         // apply_filters() is currently iterating over $wp_filter[ $tag ], so its internal pointer is at a
         // certain key in the middle now and we do not want to have that priority changed after exiting.
 
-        // $current_priority_for_tag is the same as $this->current_priority only if $tag is the current_filter.
-        $current_priority_for_tag = key( $wp_filter[ $tag ] );
-
-        // If $wp_filter[ $tag ][ $priority ] was correctly sorted, then it will be still so after add_filter().
+        // If $wp_filter[ $tag ][ $priority ] was correctly sorted, then it will be still sorted after add_filter().
         if ( isset( $wp_filter[ $tag ][ $priority ] ) ) {
             $result = add_filter( $tag, $function_to_add, $priority, $accepted_args );
 
@@ -1315,7 +1331,7 @@ class Enzymes3_Engine {
         if ( is_plugin_active( 'enzymes/enzymes.php' ) ) {
             global $enzymes;
             $enzymes2_priority = has_action( $this->current_filter, array( $enzymes, 'metabolism' ) );
-            if ( $enzymes2_priority && $this->current_priority < $enzymes2_priority ) {
+            if ( false !== $enzymes2_priority && $this->current_priority < $enzymes2_priority ) {
                 $result .= '{';  // Escape now: Enzymes 2 will un-escape it later.
             }
         }
@@ -1390,6 +1406,7 @@ class Enzymes3_Engine {
             $could_be_sequence = $this->value( $matches, 'could_be_sequence' );
             $after             = $this->value( $matches, 'after' );
             $this->new_content .= $before;
+
             $was_escaped = '{' == substr( $before, - 1 );  // True if it was "{{[..]}".
             if ( $was_escaped ) {
                 $result = self::ESCAPE_CHAR . "[$could_be_sequence]}";  // It will be "{-[..]}".
@@ -1401,6 +1418,7 @@ class Enzymes3_Engine {
                     $result = $this->escape_for_enzymes2( $could_be_sequence );
                 }
             }
+
             $this->new_content .= $result;
         } while ( $this->there_is_an_injection( $after, $matches ) );
         $result      = $this->new_content . $after;
