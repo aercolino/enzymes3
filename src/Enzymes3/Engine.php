@@ -153,6 +153,13 @@ class Enzymes3_Engine {
     public $extra;
 
     /**
+     * True means injections in the rest of the content will continue to be processed.
+     *
+     * @var bool
+     */
+    protected $continue_injecting;
+
+    /**
      * Regular expression for matching "{[ .. ]}".
      *
      * @var Ando_Regex
@@ -1230,7 +1237,7 @@ class Enzymes3_Engine {
             $this->current_injection = "{[$could_be_sequence]}";
             $this->catalyzed         = new Enzymes3_Stack();
             $rest                    = $sequence;
-            while ( preg_match( $this->e_sequence_start, $rest, $matches ) ) {
+            while ( ! $this->reject_injection && preg_match( $this->e_sequence_start, $rest, $matches ) ) {
                 $execution    = $this->value( $matches, 'execution' );
                 $transclusion = $this->value( $matches, 'transclusion' );
                 $literal      = $this->value( $matches, 'literal' );
@@ -1254,9 +1261,6 @@ class Enzymes3_Engine {
                         break;
                 }
                 $this->catalyzed->push( $argument );
-                if ( $this->reject_injection ) {
-                    break;
-                }
             }
             list( $result ) = $this->catalyzed->peek();
         }
@@ -1398,9 +1402,10 @@ class Enzymes3_Engine {
         if ( ! $this->there_is_an_injection( $content, $matches ) ) {
             return $content;
         }
-        $this->intra       = new stdClass();
-        $this->content     = $content;
-        $this->new_content = '';
+        $this->intra              = new stdClass();
+        $this->content            = $content;
+        $this->new_content        = '';
+        $this->continue_injecting = true;
         do {
             $before            = $this->value( $matches, 'before' );
             $could_be_sequence = $this->value( $matches, 'could_be_sequence' );
@@ -1420,7 +1425,7 @@ class Enzymes3_Engine {
             }
 
             $this->new_content .= $result;
-        } while ( $this->there_is_an_injection( $after, $matches ) );
+        } while ( $this->continue_injecting && $this->there_is_an_injection( $after, $matches ) );
         $result      = $this->new_content . $after;
         $this->intra = null;
 
