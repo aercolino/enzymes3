@@ -1423,7 +1423,6 @@ class Enzymes3_Engine {
                     $result = $this->escape_for_enzymes2( $could_be_sequence );
                 }
             }
-
             $this->new_content .= $result;
         } while ( $this->continue_injecting && $this->there_is_an_injection( $after, $matches ) );
         $result      = $this->new_content . $after;
