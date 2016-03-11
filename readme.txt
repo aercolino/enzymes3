@@ -1,52 +1,59 @@
-=== Enzymes ===
+=== Nzymes ===
 Contributors: aercolino
-Donate link: http://noteslog.com/
-Tags: enzymes, custom fields, properties, transclusion, inclusion, evaluation, content, retrieve, post, page, author
-Requires at least: 3.0
-Tested up to: 3.0
-Stable tag: 2.3
+Donate link: http://andowebsit.es/blog/noteslog.com/
+Tags: inject, custom fields, attributes, post, author, php code, enzymes
+Requires at least: 3.0.1
+Tested up to: 4.5
+Stable tag: 1.0
+License: GPLv2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Retrieve properties and custom fields of posts, pages, and authors, right into the visual editor of posts and pages, and everywhere else.
+Boost your blog with PHP injections.
 
 == Description ==
 
-While editing the content (the visual editor is supported), Enzymes let's you retrieve properties and custom fields of posts, pages, and authors, and have them appear right there (transclusion). 
+[Nzymes](https://wordpress.org/plugins/nzymes/) is the 3rd major release of my [Enzymes](https://wordpress.org/plugins/enzymes/) plugin. See the [Appendix](http://andowebsit.es/blog/noteslog.com/nzymes/appendix/) of the [Manual](http://andowebsit.es/blog/noteslog.com/nzymes/) to learn why I had to change its name.
 
-If you want something to appear elsewhere, outside the content, you can use Enzymes directly from WordPress theme files. 
+Nzymes allows authors to inject static and dynamic content at exact locations of a WordPress blog.
 
-You can also format and modify any transcluded content on the fly, using reusable code snippets stored inside files or custom fields.
+There is nothing an enzyme cannot do: Sky is the limit.
 
-Enzymes makes it very easy to re-use parts of your content around your blog, just by referencing it.
+* Are you looking for something?
+ 1. Head to http://gist.github.com and add *#nzymes* to your query.
+ 1. You'll get a list on available enzymes, with their sample injections and documentation.
+ 1. Copy the enzymes REPO.CF and paste it into an injection.
+ 1. Done.
+ 
+* Do you want to share anything?
+ 1. Export the post with your CFs.
+ 1. Upload the XML file to a gist of your GitHub account.
+ 1. Add a small manual called "#nzymes My Super Code.md"
+ 1. Done.
 
-Here are two little samples, whose preconditions are these:
-*   you have a post with the slug `postcard-from-barcelona`, with a custom field with the key `report` and the value `warm and sunny (Feb, 2008)`
-*   in the post with the id 1 you have a custom field with the key <u>marker</u> and the value `return '<span style="background-color:' . $this->substrate . ';">' . $this->pathway . '</span>';`
-
-
-= Simple transclusion: a custom field of a post is made appear in another post =
-<blockquote>The weather in Barcelona was always {[ @postcard-from-barcelona.report ]} and we stayed outdoor most of the day.</blockquote>
-is sent to the browser as
-<blockquote>The weather in Barcelona was always warm and sunny (Feb, 2008) and we stayed outdoor most of the day.</blockquote>
-
-
-= Simple evaluation: a custom field is transcluded and highlighed with a yellow marker =
-<blockquote>The weather in Barcelona was always {[ @postcard-from-barcelona.report | 1.marker( =yellow= ) ]} and we stayed outdoor most of the day.</blockquote>
-is sent to the browser as
-<blockquote>The weather in Barcelona was always &lt;span style="background-color:yellow;">warm and sunny (Feb, 2008)&lt;/span> and we stayed outdoor most of the day.</blockquote>
-
-
-= Enzymes Manual =
-I've set up a page with [all you need to know about Enzymes](http://noteslog.com/enzymes/ "manual and examples").
 
 == Installation ==
 
-1. Copy to your plugins folder
-1. Activate Enzymes
+This section describes how to install the plugin and get it working.
+
+1. Upload the plugin files to the `/wp-content/plugins/nzymes` directory, or install the plugin through the WordPress plugins screen directly.
+1. Activate the plugin through the 'Plugins' screen in WordPress
+
 
 == Frequently Asked Questions ==
 
-none
+Read the [Manual](http://andowebsit.es/blog/noteslog.com/nzymes/).
 
 == Screenshots ==
 
-none
+Nothing to show. There is no admin interface. The result can be anything.
+
+== Changelog ==
+
+= 1.0 =
+First version of Nzymes, actually version 3 of Enzymes.
+
+
+== Upgrade Notice ==
+
+= 1.0 =
+Lots of goodies in this version. Info: http://andowebsit.es/blog/noteslog.com/nzymes/
