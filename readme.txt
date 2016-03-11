@@ -8,7 +8,7 @@ Stable tag: 1.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Boost your blog with PHP injections.
+Boost your WordPress blog with PHP injections.
 
 == Description ==
 
