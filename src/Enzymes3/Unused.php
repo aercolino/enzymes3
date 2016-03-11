@@ -3,7 +3,7 @@
 /**
  * This is a collection of snippets that I developed and couldn't decide to delete.
  */
-class Enzymes3_Unused {
+class Nzymes_Unused {
 
     protected
     function get_header_data( $package_dir, $type ) {

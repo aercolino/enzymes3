@@ -1,7 +1,7 @@
 <?php
 
-class Enzymes3_Options {
-    const PREFIX = 'enzymes3.';
+class Nzymes_Options {
+    const PREFIX = 'nzymes.';
 
     /**
      * Returns the site/user option name.

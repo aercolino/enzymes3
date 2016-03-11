@@ -1,32 +1,32 @@
 <?php
-require_once dirname( ENZYMES3_PRIMARY ) . '/src/Enzymes3/Capabilities.php';
-require_once dirname( ENZYMES3_PRIMARY ) . '/src/Enzymes3/Options.php';
+require_once dirname( NZYMES_PRIMARY ) . '/src/Nzymes/Capabilities.php';
+require_once dirname( NZYMES_PRIMARY ) . '/src/Nzymes/Options.php';
 
-class Enzymes3_Plugin {
+class Nzymes_Plugin {
     /**
      * Use a higher priority than Enzymes <3.
      */
     const PRIORITY = 9;
 
     /**
-     * @var Enzymes3_Options
+     * @var Nzymes_Options
      */
     static public $options;
 
     /**
      * Singleton
      *
-     * @var Enzymes3_Engine
+     * @var Nzymes_Engine
      */
     static protected $enzymes;
 
     /**
-     * @return Enzymes3_Engine
+     * @return Nzymes_Engine
      */
     static public
     function engine() {
         if ( is_null( self::$enzymes ) ) {
-            self::$enzymes = new Enzymes3_Engine();
+            self::$enzymes = new Nzymes_Engine();
         }
 
         return self::$enzymes;
@@ -34,15 +34,15 @@ class Enzymes3_Plugin {
 
     public
     function __construct() {
-        self::$options = new Enzymes3_Options();
+        self::$options = new Nzymes_Options();
 
         if ( is_admin() ) {
-            register_activation_hook( ENZYMES3_PRIMARY, array( 'Enzymes3_Plugin', 'on_activation' ) );
-            register_deactivation_hook( ENZYMES3_PRIMARY, array( 'Enzymes3_Plugin', 'on_deactivation' ) );
+            register_activation_hook( NZYMES_PRIMARY, array( 'Nzymes_Plugin', 'on_activation' ) );
+            register_deactivation_hook( NZYMES_PRIMARY, array( 'Nzymes_Plugin', 'on_deactivation' ) );
 
-            add_filter( 'editable_roles', array( 'Enzymes3_Plugin', 'on_editable_roles' ) );
+            add_filter( 'editable_roles', array( 'Nzymes_Plugin', 'on_editable_roles' ) );
         } else {
-            add_action( 'init', array( 'Enzymes3_Plugin', 'on_init' ) );
+            add_action( 'init', array( 'Nzymes_Plugin', 'on_init' ) );
         }
     }
 
@@ -53,10 +53,10 @@ class Enzymes3_Plugin {
     function on_init() {
         global $wp_version;
         if ( version_compare( $wp_version, '3.9', '<' ) ) {
-            require dirname( ENZYMES3_PRIMARY ) . '/compat/3_8.php';
+            require dirname( NZYMES_PRIMARY ) . '/compat/3_8.php';
         }
 
-        require_once dirname( ENZYMES3_PRIMARY ) . '/src/Enzymes3/Engine.php';
+        require_once dirname( NZYMES_PRIMARY ) . '/src/Nzymes/Engine.php';
         $enzymes = self::engine();  // singleton
 //@formatter:off
         $enzymes->absorb_later('wp_title',        self::PRIORITY);
@@ -104,7 +104,7 @@ class Enzymes3_Plugin {
     }
 
     /**
-     * Remove Enzymes 3 roles from the user-edit screen because they are not meant to be primary roles.
+     * Remove Nzymes roles from the user-edit screen because they are not meant to be primary roles.
      *
      * @param array $all_roles
      *
@@ -115,7 +115,7 @@ class Enzymes3_Plugin {
         $screen = get_current_screen();
         if ( 'user-edit' == $screen->id ) {
             foreach ( $all_roles as $name => $role ) {
-                if ( 0 === strpos( $name, Enzymes3_Capabilities::PREFIX ) ) {
+                if ( 0 === strpos( $name, Nzymes_Capabilities::PREFIX ) ) {
                     unset( $all_roles[ $name ] );
                 }
             }
@@ -137,14 +137,14 @@ class Enzymes3_Plugin {
 
         self::remove_roles_and_capabilities();
 //@formatter:off
-        add_role(Enzymes3_Capabilities::User,           __('Enzymes User'),            Enzymes3_Capabilities::for_User() );
-        add_role(Enzymes3_Capabilities::PrivilegedUser, __('Enzymes Privileged User'), Enzymes3_Capabilities::for_PrivilegedUser() );
-        add_role(Enzymes3_Capabilities::TrustedUser,    __('Enzymes Trusted User'),    Enzymes3_Capabilities::for_TrustedUser() );
-        add_role(Enzymes3_Capabilities::Coder,          __('Enzymes Coder'),           Enzymes3_Capabilities::for_Coder() );
-        add_role(Enzymes3_Capabilities::TrustedCoder,   __('Enzymes Trusted Coder'),   Enzymes3_Capabilities::for_TrustedCoder() );
+        add_role(Nzymes_Capabilities::User,           __('Enzymes User'),            Nzymes_Capabilities::for_User() );
+        add_role(Nzymes_Capabilities::PrivilegedUser, __('Enzymes Privileged User'), Nzymes_Capabilities::for_PrivilegedUser() );
+        add_role(Nzymes_Capabilities::TrustedUser,    __('Enzymes Trusted User'),    Nzymes_Capabilities::for_TrustedUser() );
+        add_role(Nzymes_Capabilities::Coder,          __('Enzymes Coder'),           Nzymes_Capabilities::for_Coder() );
+        add_role(Nzymes_Capabilities::TrustedCoder,   __('Enzymes Trusted Coder'),   Nzymes_Capabilities::for_TrustedCoder() );
 //@formatter:on
 
-        foreach ( Enzymes3_Capabilities::all() as $cap ) {
+        foreach ( Nzymes_Capabilities::all() as $cap ) {
             $wp_roles->add_cap( 'administrator', $cap );
         }
     }
@@ -162,12 +162,12 @@ class Enzymes3_Plugin {
         }
 
         foreach ( $wp_roles->roles as $name => $role ) {
-            if ( 0 === strpos( $name, Enzymes3_Capabilities::PREFIX ) ) {
+            if ( 0 === strpos( $name, Nzymes_Capabilities::PREFIX ) ) {
                 remove_role( $name );
             }
         }
 
-        foreach ( Enzymes3_Capabilities::all() as $cap ) {
+        foreach ( Nzymes_Capabilities::all() as $cap ) {
             $wp_roles->remove_cap( 'administrator', $cap );
         }
     }

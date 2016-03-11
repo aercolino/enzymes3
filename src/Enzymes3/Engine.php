@@ -1,16 +1,16 @@
 <?php
 require_once( ABSPATH . 'wp-admin/includes/plugin.php' );
 
-require_once dirname( ENZYMES3_PRIMARY ) . '/vendor/Ando/Regex.php';
-require_once dirname( ENZYMES3_PRIMARY ) . '/vendor/Ando/StarFunc.php';
-require_once dirname( ENZYMES3_PRIMARY ) . '/vendor/Ando/ErrorFactory.php';
-require_once dirname( ENZYMES3_PRIMARY ) . '/src/Enzymes3/Stack.php';
+require_once dirname( NZYMES_PRIMARY ) . '/vendor/Ando/Regex.php';
+require_once dirname( NZYMES_PRIMARY ) . '/vendor/Ando/StarFunc.php';
+require_once dirname( NZYMES_PRIMARY ) . '/vendor/Ando/ErrorFactory.php';
+require_once dirname( NZYMES_PRIMARY ) . '/src/Nzymes/Stack.php';
 
-class Enzymes3_Engine {
+class Nzymes_Engine {
     /**
-     * When Enzymes3_Engine::process() is called, this special filter tag is internally used.
+     * When Nzymes_Engine::process() is called, this special filter tag is internally used.
      */
-    const DIRECT_FILTER = 'enzymes3_process';
+    const DIRECT_FILTER = 'nzymes_process';
 
     /**
      * Used internally for converting escaped injections '{{[..]}' to non matching strings '{-[..]}'.
@@ -19,7 +19,7 @@ class Enzymes3_Engine {
     const ESCAPE_CHAR = '-';
 
     /**
-     * This is not to be executed absolutely last, but only after all Enzymes3_Engine::absorb() filter executions.
+     * This is not to be executed absolutely last, but only after all Nzymes_Engine::absorb() filter executions.
      */
     const UNESCAPE_PRIORITY = 1000;
 
@@ -76,7 +76,7 @@ class Enzymes3_Engine {
     /**
      * Internal stack.
      *
-     * @var Enzymes3_Stack
+     * @var Nzymes_Stack
      */
     protected $catalyzed;
 
@@ -779,10 +779,10 @@ class Enzymes3_Engine {
      */
     protected
     function execute_code( $code, $arguments, $post_object ) {
-        if ( author_can( $post_object, Enzymes3_Capabilities::create_dynamic_custom_fields ) &&
+        if ( author_can( $post_object, Nzymes_Capabilities::create_dynamic_custom_fields ) &&
              ( $this->injection_author_owns( $post_object ) ||
-               author_can( $post_object, Enzymes3_Capabilities::share_dynamic_custom_fields ) &&
-               $this->injection_author_can( Enzymes3_Capabilities::use_others_custom_fields ) )
+               author_can( $post_object, Nzymes_Capabilities::share_dynamic_custom_fields ) &&
+               $this->injection_author_can( Nzymes_Capabilities::use_others_custom_fields ) )
         ) {
             $this->origin_post = $post_object;
             list( $result, $error, $output ) = $this->clean_eval( $code, $arguments );
@@ -1032,10 +1032,10 @@ class Enzymes3_Engine {
      */
     protected
     function transclude_code( $code, $post_object ) {
-        if ( author_can( $post_object, Enzymes3_Capabilities::create_static_custom_fields ) &&
+        if ( author_can( $post_object, Nzymes_Capabilities::create_static_custom_fields ) &&
              ( $this->injection_author_owns( $post_object ) ||
-               author_can( $post_object, Enzymes3_Capabilities::share_static_custom_fields ) &&
-               $this->injection_author_can( Enzymes3_Capabilities::use_others_custom_fields ) )
+               author_can( $post_object, Nzymes_Capabilities::share_static_custom_fields ) &&
+               $this->injection_author_can( Nzymes_Capabilities::use_others_custom_fields ) )
         ) {
             $result = $code;
         } else {
@@ -1094,9 +1094,9 @@ class Enzymes3_Engine {
     protected
     function transclude_post_attr( $post_attr, $post_object ) {
         $same_author = $this->injection_author_owns( $post_object );
-        if ( $same_author && author_can( $post_object, Enzymes3_Capabilities::use_own_attributes ) ||
+        if ( $same_author && author_can( $post_object, Nzymes_Capabilities::use_own_attributes ) ||
              ! $same_author &&
-             $this->injection_author_can( Enzymes3_Capabilities::use_others_attributes )
+             $this->injection_author_can( Nzymes_Capabilities::use_others_attributes )
         ) {
             preg_match( $this->grammar_rule( 'post_attr' ), $post_attr, $matches );
             $result = $this->wp_post_attribute( $post_object, $matches );
@@ -1119,9 +1119,9 @@ class Enzymes3_Engine {
     protected
     function transclude_author_attr( $author_attr, $post_object ) {
         $same_author = $this->injection_author_owns( $post_object );
-        if ( $same_author && author_can( $post_object, Enzymes3_Capabilities::use_own_attributes ) ||
+        if ( $same_author && author_can( $post_object, Nzymes_Capabilities::use_own_attributes ) ||
              ! $same_author &&
-             $this->injection_author_can( Enzymes3_Capabilities::use_others_attributes )
+             $this->injection_author_can( Nzymes_Capabilities::use_others_attributes )
         ) {
             preg_match( $this->grammar_rule( 'author_attr' ), $author_attr, $matches );
             $user_object = $this->wp_author( $post_object );
@@ -1235,7 +1235,7 @@ class Enzymes3_Engine {
             $result = '{[' . $could_be_sequence . ']}';  // skip this injection AS IS
         } else {
             $this->current_injection = "{[$could_be_sequence]}";
-            $this->catalyzed         = new Enzymes3_Stack();
+            $this->catalyzed         = new Nzymes_Stack();
             $rest                    = $sequence;
             while ( ! $this->reject_injection && preg_match( $this->e_sequence_start, $rest, $matches ) ) {
                 $execution    = $this->value( $matches, 'execution' );
@@ -1323,7 +1323,7 @@ class Enzymes3_Engine {
     }
 
     /**
-     * Make Enzymes 3 undone injections jump over Enzymes 2 later auto-un-escaping.
+     * Make Nzymes undone injections jump over Enzymes 2 later auto-un-escaping.
      *
      * @param string $could_be_sequence
      *
@@ -1348,9 +1348,9 @@ class Enzymes3_Engine {
      * Process all the injections applied to the $content, not necessarily in the context of apply_filters().
      *
      * @param                  $content
-     * @param null|int|WP_Post $post_id  Null means Enzymes3_Engine::GLOBAL_POST.
-     * @param null|string      $filter   Null means Enzymes3_Engine::DIRECT_FILTER.
-     * @param null|int         $priority Null means Enzymes3_Plugin::PRIORITY.
+     * @param null|int|WP_Post $post_id  Null means Nzymes_Engine::GLOBAL_POST.
+     * @param null|string      $filter   Null means Nzymes_Engine::DIRECT_FILTER.
+     * @param null|int         $priority Null means Nzymes_Plugin::PRIORITY.
      *
      * @return mixed|void
      */
@@ -1364,7 +1364,7 @@ class Enzymes3_Engine {
             : self::DIRECT_FILTER;
         $priority = ! is_null( $priority )
             ? intval( $priority )
-            : Enzymes3_Plugin::PRIORITY;
+            : Nzymes_Plugin::PRIORITY;
 
         $this->absorb_later( $filter, $priority );
         if ( self::DIRECT_FILTER == $filter ) {
@@ -1396,7 +1396,7 @@ class Enzymes3_Engine {
         if ( false === $this->injection_post ) {
             return $content;
         }
-        if ( ! $this->injection_author_can( Enzymes3_Capabilities::inject ) ) {
+        if ( ! $this->injection_author_can( Nzymes_Capabilities::inject ) ) {
             return $content;
         }
         if ( ! $this->there_is_an_injection( $content, $matches ) ) {

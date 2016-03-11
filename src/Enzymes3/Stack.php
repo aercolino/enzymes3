@@ -1,6 +1,6 @@
 <?php
 
-class Enzymes3_Stack {
+class Nzymes_Stack {
     protected $stack = array();
 
     public
