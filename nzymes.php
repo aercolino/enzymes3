@@ -2,11 +2,12 @@
 /*
 Plugin Name: Nzymes
 Plugin URI: http://wordpress.org/plugins/nzymes/
-Description: Boost your content injecting custom fields and properties.
-Version: 1.0
+Description: Boost your WordPress blog with PHP injections.
+Version: 1.0.0
 Author: Andrea Ercolino
 Author URI: http://andowebsit.es/blog/noteslog.com
 License: GPLv2 or later
+License URI: http://www.gnu.org/licenses/gpl-2.0.html
 */
 
 // Prohibit direct script loading.
