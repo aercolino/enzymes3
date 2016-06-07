@@ -17,12 +17,12 @@ Boost your WordPress blog with PHP injections.
 Nzymes allows blog authors to inject static and dynamic content at exact locations.
 
 * Are you looking for some functionality?
- 1. Head to http://gist.github.com and add *#nzymes* to your query. You'll get a list on available enzymes, with their sample injections and documentation.
+ 1. Head to http://gist.github.com and add *#nzymes* to your query. You'll get a list of available enzymes, with their sample injections and documentation.
  1. Copy the enzymes ID (something like "GHS aercolino Chili 1.0.0") and paste it into an injection. Nzymes will automatically import it.
  1. Done.
  
 * Do you want to share some functionality?
- 1. Head to http://gist.github.com and add *#nzymes* to your query. You'll get a list on available enzymes, with their sample injections and documentation.
+ 1. Head to http://gist.github.com and add *#nzymes* to your query. You'll get a list of available enzymes, with their sample injections and documentation.
  1. Fork a result or create your own gist with your functionality, abiding by the formatting conventions documented in the [Manual](http://andowebsit.es/blog/noteslog.com/nzymes/).
  1. Done.
 
