@@ -854,23 +854,6 @@ class Nzymes_Engine {
     }
 
     /**
-     * ksort without resetting the internal pointer.
-     *
-     * @param array $array
-     */
-    protected
-    function ksort_fixed( &$array ) {
-        $original = key( $array );
-        ksort( $array );
-        foreach ( $array as $key => $value ) {
-            if ( $key == $original ) {
-                break;
-            }
-        }
-        prev( $array );
-    }
-
-    /**
      * Spy on the current filters for the given tag. Used for debugging.
      *
      * @param string $tag
@@ -890,65 +873,24 @@ class Nzymes_Engine {
     }
 
     /**
-     * Add a filter in the correct position, without changing the internal pointer of $wp_filter[ $tag ].
-     *
-     * @param string $tag
-     * @param string $function_to_add
-     * @param int    $priority
-     * @param int    $accepted_args
-     *
-     * @return bool
-     */
-    protected
-    function add_filter( $tag, $function_to_add, $priority = 10, $accepted_args = 1 ) {
-        if ( ! doing_filter( $tag ) ) {
-            $result = add_filter( $tag, $function_to_add, $priority, $accepted_args );
-
-            return $result;
-        }
-
-        global $wp_filter;
-
-        // apply_filters() is currently iterating over $wp_filter[ $tag ], so its internal pointer is at a
-        // certain key in the middle now and we do not want to have that priority changed after exiting.
-
-        // If $wp_filter[ $tag ][ $priority ] was correctly sorted, then it will be still sorted after add_filter().
-        if ( isset( $wp_filter[ $tag ][ $priority ] ) ) {
-            $result = add_filter( $tag, $function_to_add, $priority, $accepted_args );
-
-            return $result;
-        }
-
-        // Surely add_filter() will append $wp_filter[ $tag ][ $priority ] at the end of $wp_filter[ $tag ].
-        $result = add_filter( $tag, $function_to_add, $priority, $accepted_args );
-
-        // It's quite possible that $wp_filter[ $tag ][ $priority ] is out of place, so we sort again.
-        $this->ksort_fixed( $wp_filter[ $tag ] );
-
-        return $result;
-    }
-
-    /**
      * Attach a handler for absorbing later at a certain priority.
      *
      * @param string $tag
      * @param int    $priority
      *
-     * @return bool
+     * @return void
      */
     public
     function absorb_later( $tag, $priority ) {
         if ( empty( $tag ) ) {
-            return false;
+            return;
         }
         if ( isset( $this->attached_handlers["absorb $tag $priority"] ) ) {
-            return true;
+            return;
         }
         $this->attached_handlers["absorb $tag $priority"] = array( $this, 'absorb' );
 
-        $result = $this->add_filter( $tag, $this->attached_handlers["absorb $tag $priority"], $priority, 2 );
-
-        return $result;
+        add_filter( $tag, $this->attached_handlers["absorb $tag $priority"], $priority, 2 );
     }
 
     /**
@@ -957,21 +899,19 @@ class Nzymes_Engine {
      * @param string $tag
      * @param int    $priority
      *
-     * @return bool
+     * @return void
      */
     public
     function unescape_later( $tag, $priority ) {
         if ( empty( $tag ) ) {
-            return false;
+            return;
         }
         if ( isset( $this->attached_handlers["unescape $tag $priority"] ) ) {
-            return true;
+            return;
         }
         $this->attached_handlers["unescape $tag $priority"] = array( $this, 'unescape' );
 
-        $result = $this->add_filter( $tag, $this->attached_handlers["unescape $tag $priority"], $priority, 1 );
-
-        return $result;
+        add_filter( $tag, $this->attached_handlers["unescape $tag $priority"], $priority, 1 );
     }
 
     /**
@@ -1289,7 +1229,7 @@ class Nzymes_Engine {
      *
      * @param int|WP_Post $post_id
      *
-     * @return array
+     * @return mixed
      */
     protected
     function get_injection_post( $post_id ) {
@@ -1352,7 +1292,7 @@ class Nzymes_Engine {
      * @param null|string      $filter   Null means Nzymes_Engine::DIRECT_FILTER.
      * @param null|int         $priority Null means Nzymes_Plugin::PRIORITY.
      *
-     * @return mixed|void
+     * @return mixed
      */
     public
     function process( $content, $post_id = null, $filter = null, $priority = null ) {
@@ -1367,6 +1307,7 @@ class Nzymes_Engine {
             : Nzymes_Plugin::PRIORITY;
 
         $this->absorb_later( $filter, $priority );
+        $result = null;
         if ( self::DIRECT_FILTER == $filter ) {
             $result = apply_filters( $filter, $content, $post_id );
         }
@@ -1388,7 +1329,8 @@ class Nzymes_Engine {
             return $content;
         }
         $this->current_filter   = current_filter();
-        $this->current_priority = key( $GLOBALS['wp_filter'][ $this->current_filter ] );
+        global $wp_filter;
+        $this->current_priority = $wp_filter[ $this->current_filter ]->current_priority();
         if ( 'wp_title' == $this->current_filter ) {
             $post_id = null;  // 'wp_title' pass a string separator into $post_id
         }
