@@ -2,8 +2,8 @@
 Contributors: aercolino
 Donate link: http://andowebsit.es/blog/noteslog.com/
 Tags: inject, custom fields, attributes, post, author, php code, enzymes
-Requires at least: 3.0.1
-Tested up to: 4.5
+Requires at least: 4.7
+Tested up to: 4.7.3
 Stable tag: 1.0.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html

@@ -52,8 +52,8 @@ class Nzymes_Plugin {
     static public
     function on_init() {
         global $wp_version;
-        if ( version_compare( $wp_version, '3.9', '<' ) ) {
-            require dirname( NZYMES_PRIMARY ) . '/compat/3_8.php';
+        if ( version_compare( $wp_version, '4.7', '<' ) ) {
+            throw new Ando_Exception('Invalid WordPress version. Required at least 4.7.');
         }
 
         require_once dirname( NZYMES_PRIMARY ) . '/src/Nzymes/Engine.php';
