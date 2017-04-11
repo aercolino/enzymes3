@@ -792,26 +792,6 @@ class Ando_ErrorFactory
     }
 
     /**
-     * Code for E_STRICT error by accessing static property as non static.
-     *
-     * @return string
-     */
-    public static
-    function E_STRICT_code()
-    {
-        $name = uniqid('oops_');
-        $result = "
-            class Parent_$name {
-                function oops(\$arg = array()) {}
-            }
-            class Child_$name extends Parent_$name {
-                function oops() {}
-            }
-        ";
-        return $result;
-    }
-
-    /**
      * Code for E_RECOVERABLE_ERROR error by converting to string an object of a class without __toString.
      *
      * @return string

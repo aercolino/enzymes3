@@ -283,27 +283,6 @@ class Nzymes_EngineTest
     }
 
     public
-    function test_clean_eval_E_STRICT()
-    {
-        $this->expectOutputString('');
-
-        $code    = Ando_ErrorFactory::E_STRICT_code();
-        $enzymes = new Nzymes_Engine();
-        list(, $error, $output) = $this->call_method('clean_eval', array($code, array()), $enzymes);
-
-        $this->assertTrue(is_array($error));
-        extract($error);
-        /**
-         * @var $type
-         * @var $message
-         */
-        $this->assertEquals(E_STRICT, $type);
-        $this->assertNotEmpty($message);
-
-        $this->assertEmpty($output);
-    }
-
-    public
     function test_clean_eval_E_DEPRECATED()
     {
         $this->expectOutputString('');
