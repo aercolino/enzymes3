@@ -556,6 +556,9 @@ class Nzymes_Engine {
         } catch ( Exception $e ) {
             $result = false;  // Let's force the same error treatment
             $error  = $e;     // and take the exception as the error.
+        } catch ( Throwable $t ) {
+            $result = false;  // Let's force the same error treatment
+            $error  = $t;     // and take the throwable as the error.
         }
         // -------------------------------------------------------------------------------------------------------------
         $this->last_eval_error    = null;
