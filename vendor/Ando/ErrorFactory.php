@@ -649,18 +649,14 @@ class Ando_ErrorFactory
     }
 
     /**
-     * Code for E_WARNING error by calling a function with less arguments.
+     * Code for E_WARNING error by calling a PHP function with less arguments.
      *
      * @return string
      */
     public static
     function E_WARNING_code()
     {
-        $name = uniqid('oops_');
-        $result = "
-            function $name(\$required){}
-            $name();
-        ";
+        $result = "strpos();";
         return $result;
     }
 
@@ -685,8 +681,7 @@ class Ando_ErrorFactory
     public static
     function E_PARSE_code()
     {
-        $name = uniqid('oops_');
-        $result = "echo '$name'";
+        $result = "echo ''";
         return $result;
     }
 
@@ -815,14 +810,8 @@ class Ando_ErrorFactory
     public static
     function E_DEPRECATED_code()
     {
-        $name = uniqid('oops_');
-        $result = "
-            class $name {
-                function oops(){}
-            }
-            \$oops = new $name();
-            call_user_method('oops', \$oops);
-        ";
+        $data = uniqid('oops_');
+        $result = "mb_ereg_replace('(.)',\"strtoupper('\\1')\",'$data','e');";
         return $result;
     }
 
