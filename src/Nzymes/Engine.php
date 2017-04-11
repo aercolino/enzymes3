@@ -746,8 +746,10 @@ class Nzymes_Engine {
     function injection_author_can( $capability ) {
         if ( is_null( $this->injection_post ) ) {
             $result = user_can( self::NO_POST_AUTHOR, $capability );
+            $this->debug_print('injection user with ID 1');
         } else {
             $result = author_can( $this->injection_post, $capability );
+            $this->debug_print('injection author with ID ' . $this->injection_post->post_author);
         }
 
         return $result;
@@ -1329,7 +1331,7 @@ class Nzymes_Engine {
     public
     function absorb( $content, $post_id = self::GLOBAL_POST ) {
         if ( ! doing_filter() ) {
-            $this->debug_print('exit: not in a filter');
+            $this->debug_print('absorb exit: not in a filter');
             return $content;
         }
         $this->current_filter   = current_filter();
@@ -1340,15 +1342,15 @@ class Nzymes_Engine {
         }
         $this->injection_post = $this->get_injection_post( $post_id );
         if ( false === $this->injection_post ) {
-            $this->debug_print('exit: no post');
+            $this->debug_print('absorb exit: no post');
             return $content;
         }
         if ( ! $this->injection_author_can( Nzymes_Capabilities::inject ) ) {
-            $this->debug_print('exit: not authorized');
+            $this->debug_print('absorb exit: not authorized');
             return $content;
         }
         if ( ! $this->there_is_an_injection( $content, $matches ) ) {
-            $this->debug_print('exit: no injection');
+            $this->debug_print('absorb exit: no injection');
             return $content;
         }
         $this->intra              = new stdClass();

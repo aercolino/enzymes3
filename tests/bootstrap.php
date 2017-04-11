@@ -15,7 +15,7 @@ function _manually_activate_plugin() {
 	// Without the following call, my roles were right only when read from the database.
 	// If there was an empty database, like when starting tests from scratch, my nzymes.*
     // capabilities were absent, even if they had been just added with the call above!
-	WP_Roles();
+//	WP_Roles();
 
     global $wp_version;
 	echo "\nnzymes plugin activated on WP $wp_version\n";
