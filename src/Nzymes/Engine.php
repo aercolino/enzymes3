@@ -1329,6 +1329,7 @@ class Nzymes_Engine {
     public
     function absorb( $content, $post_id = self::GLOBAL_POST ) {
         if ( ! doing_filter() ) {
+            $this->debug_print('exit: not in a filter');
             return $content;
         }
         $this->current_filter   = current_filter();
@@ -1339,12 +1340,15 @@ class Nzymes_Engine {
         }
         $this->injection_post = $this->get_injection_post( $post_id );
         if ( false === $this->injection_post ) {
+            $this->debug_print('exit: no post');
             return $content;
         }
         if ( ! $this->injection_author_can( Nzymes_Capabilities::inject ) ) {
+            $this->debug_print('exit: not authorized');
             return $content;
         }
         if ( ! $this->there_is_an_injection( $content, $matches ) ) {
+            $this->debug_print('exit: no injection');
             return $content;
         }
         $this->intra              = new stdClass();
@@ -1379,7 +1383,7 @@ class Nzymes_Engine {
     /**
      * Cleanly get a default for undefined keys and the set value otherwise.
      *
-     * Prefixing the error suppression operator (@) accomplishes he same result,
+     * Prefixing the error suppression operator (@) accomplishes the same result,
      * but I wanted to get rid of all these notices still present while debugging.
      *
      * @param array  $matches
@@ -1400,7 +1404,7 @@ class Nzymes_Engine {
     /**
      * @var bool
      */
-    public $debug_on = false;
+    public $debug_on = !false;
 
     /**
      * @param mixed $something
