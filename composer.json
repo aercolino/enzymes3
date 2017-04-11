@@ -1,0 +1,13 @@
+{
+    "name": "aercolino/nzymes",
+    "type": "project",
+    "description": "Boost your WordPress blog with PHP injections.",
+    "homepage": "https://github.com/aercolino/nzymes",
+    "license": "GPL-3.0+",
+    "require": {
+        "php": ">=7.1"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^5.7"
+    }
+}
