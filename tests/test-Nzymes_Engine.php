@@ -103,7 +103,7 @@ class Nzymes_EngineTest
 
         $content1 = 'This is something before {{[ whatever ]} and this is after.';
         $content2 = 'This is something before {[ whatever ]} and this is after.';
-        $this->assertEquals($content2, $enzymes->process($content1, null));
+        $this->assertEquals($content2, $enzymes->process($content1));
 
 //        $enzymes->debug_print(get_post()->post_title);
 //        $enzymes->debug_on = false;
