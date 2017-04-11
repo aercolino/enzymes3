@@ -128,13 +128,6 @@ class Nzymes_Plugin {
 
     static protected
     function add_roles_and_capabilities() {
-        global $wp_roles;
-        /* @var $wp_roles WP_Roles */
-
-        if ( ! isset( $wp_roles ) ) {
-            $wp_roles = new WP_Roles();
-        }
-
         self::remove_roles_and_capabilities();
 //@formatter:off
         add_role(Nzymes_Capabilities::User,           __('Enzymes User'),            Nzymes_Capabilities::for_User() );
@@ -145,8 +138,10 @@ class Nzymes_Plugin {
 //@formatter:on
 
         foreach ( Nzymes_Capabilities::all() as $cap ) {
-            $wp_roles->add_cap( 'administrator', $cap );
+            wp_roles()->add_cap( 'administrator', $cap );
         }
+
+        echo "\nwith nzymes roles: " . join(', ', wp_roles()->get_names() ) . "\n";
     }
 
     /**
@@ -154,22 +149,17 @@ class Nzymes_Plugin {
      */
     static protected
     function remove_roles_and_capabilities() {
-        global $wp_roles;
-        /* @var $wp_roles WP_Roles */
-
-        if ( ! isset( $wp_roles ) ) {
-            $wp_roles = new WP_Roles();
-        }
-
-        foreach ( $wp_roles->roles as $name => $role ) {
+        foreach ( wp_roles()->roles as $name => $role ) {
             if ( 0 === strpos( $name, Nzymes_Capabilities::PREFIX ) ) {
                 remove_role( $name );
             }
         }
 
         foreach ( Nzymes_Capabilities::all() as $cap ) {
-            $wp_roles->remove_cap( 'administrator', $cap );
+            wp_roles()->remove_cap( 'administrator', $cap );
         }
+
+        echo "\nwithout nzymes roles: " . join(', ', wp_roles()->get_names() ) . "\n";
     }
 
 }

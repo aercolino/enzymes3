@@ -746,10 +746,8 @@ class Nzymes_Engine {
     function injection_author_can( $capability ) {
         if ( is_null( $this->injection_post ) ) {
             $result = user_can( self::NO_POST_AUTHOR, $capability );
-            $this->debug_print('injection user with ID 1');
         } else {
             $result = author_can( $this->injection_post, $capability );
-            $this->debug_print('injection author with ID ' . $this->injection_post->post_author);
         }
 
         return $result;
