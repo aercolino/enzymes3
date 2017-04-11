@@ -16,6 +16,7 @@ function _manually_activate_plugin() {
 	// If there was an empty database, like when starting tests from scratch, my nzymes.*
     // capabilities were absent, even if they had been just added with the call above!
 	WP_Roles();
+	echo "\nplugin activated\n";
 }
 
 function _manually_load_plugin() {
