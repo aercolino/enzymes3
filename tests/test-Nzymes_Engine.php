@@ -288,6 +288,10 @@ class Nzymes_EngineTest
         $this->expectOutputString('');
 
         $code    = Ando_ErrorFactory::E_DEPRECATED_code();
+        if (is_null($code)) {
+            $this->markTestSkipped();
+            return;
+        }
         $enzymes = new Nzymes_Engine();
         list(, $error, $output) = $this->call_method('clean_eval', array($code, array()), $enzymes);
 

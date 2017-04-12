@@ -811,8 +811,41 @@ class Ando_ErrorFactory
     function E_DEPRECATED_code()
     {
         $data = uniqid('oops_');
-        $result = "mb_ereg_replace('(.)',\"strtoupper('\\1')\",'$data','e');";
-        return $result;
+        $codes = [
+            // see http://php.net/manual/en/migration56.deprecated.php
+            '5.6' => "
+                class A {
+                    function f() { echo '$data'; }
+                }
+                
+                class B {
+                    function f() { A::f(); }
+                }
+                
+                (new B)->f();
+            ",
+            // see http://php.net/manual/en/migration70.deprecated.php
+            '7.0' => "
+                class foo {
+                    function bar() {
+                        echo '$data';
+                    }
+                }
+                
+                foo::bar();
+            ",
+            // see http://php.net/manual/en/migration71.deprecated.php
+            '7.1' => "
+                mb_ereg_replace('(.)',\"strtoupper('\\1')\",'$data','e');
+            "
+        ];
+        uksort($codes, function ($a, $b) { return -version_compare($a, $b); });
+        foreach ($codes as $version => $code) {
+            if (version_compare(PHP_VERSION, $version, '>=')) {
+                return $code;
+            }
+        }
+        return null;
     }
 
     /**
