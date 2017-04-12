@@ -137,11 +137,10 @@ class Nzymes_Plugin {
         add_role(Nzymes_Capabilities::TrustedCoder,   __('Enzymes Trusted Coder'),   Nzymes_Capabilities::for_TrustedCoder() );
 //@formatter:on
 
+        $administrator = get_role('administrator');
         foreach ( Nzymes_Capabilities::all() as $cap ) {
-            wp_roles()->add_cap( 'administrator', $cap );
+            $administrator->add_cap( $cap );
         }
-
-        echo "\nwith nzymes roles: " . join(', ', wp_roles()->get_names() ) . "\n";
     }
 
     /**
@@ -149,17 +148,16 @@ class Nzymes_Plugin {
      */
     static protected
     function remove_roles_and_capabilities() {
-        foreach ( wp_roles()->roles as $name => $role ) {
+        foreach ( wp_roles()->get_names() as $name ) {
             if ( 0 === strpos( $name, Nzymes_Capabilities::PREFIX ) ) {
                 remove_role( $name );
             }
         }
 
+        $administrator = get_role('administrator');
         foreach ( Nzymes_Capabilities::all() as $cap ) {
-            wp_roles()->remove_cap( 'administrator', $cap );
+            $administrator->remove_cap( $cap );
         }
-
-        echo "\nwithout nzymes roles: " . join(', ', wp_roles()->get_names() ) . "\n";
     }
 
 }
