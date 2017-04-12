@@ -1404,7 +1404,7 @@ class Nzymes_Engine {
     /**
      * @var bool
      */
-    public $debug_on = !false;
+    public $debug_on = false;
 
     /**
      * @param mixed $something
