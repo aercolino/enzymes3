@@ -12,13 +12,12 @@ require_once "$_tests_dir/includes/functions.php";
 function _manually_activate_plugin() {
 	Nzymes_Plugin::on_activation();
 
-	// Without the following call, my roles were right only when read from the database.
-	// If there was an empty database, like when starting tests from scratch, my nzymes.*
-    // capabilities were absent, even if they had been just added with the call above!
-//	WP_Roles();
+    echo "\nnzymes:";
 
     global $wp_version;
-	echo "\nnzymes plugin activated on WP $wp_version\n";
+    echo "\n  - WP_Version: $wp_version";
+    echo "\n  - Roles: " . join(', ', wp_roles()->get_names() );
+    echo "\n  - Administrator Capabilities: " . join(', ', array_keys(array_filter(get_role('administrator')->capabilities))) . "\n\n";
 }
 
 function _manually_load_plugin() {
