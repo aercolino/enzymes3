@@ -115,10 +115,10 @@ class Nzymes_Plugin {
     public static
     function on_editable_roles( $all_roles ) {
         $screen = get_current_screen();
-        if ( 'user-edit' == $screen->id ) {
-            foreach ( $all_roles as $name => $role ) {
-                if ( 0 === strpos( $name, Nzymes_Capabilities::PREFIX ) ) {
-                    unset( $all_roles[ $name ] );
+        if ( in_array($screen->id, ['user-new', 'user-edit']) ) {
+            foreach ( $all_roles as $slug => $role ) {
+                if ( 0 === strpos( $slug, Nzymes_Capabilities::PREFIX ) ) {
+                    unset( $all_roles[ $slug ] );
                 }
             }
         }
@@ -150,9 +150,9 @@ class Nzymes_Plugin {
      */
     static protected
     function remove_roles_and_capabilities() {
-        foreach ( wp_roles()->get_names() as $name ) {
-            if ( 0 === strpos( $name, Nzymes_Capabilities::PREFIX ) ) {
-                remove_role( $name );
+        foreach ( wp_roles()->get_names() as $slug => $name ) {
+            if ( 0 === strpos( $slug, Nzymes_Capabilities::PREFIX ) ) {
+                remove_role( $slug );
             }
         }
 
