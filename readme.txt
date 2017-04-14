@@ -1,7 +1,7 @@
 === Nzymes ===
 Contributors: aercolino
-Donate link: http://andowebsit.es/blog/noteslog.com/
-Tags: inject, custom fields, attributes, post, author, php code, enzymes
+Donate link: http://github.com/aercolino
+Tags: inject, custom fields, attributes, post, author, php code, enzymes, nzymes
 Requires at least: 4.7
 Tested up to: 4.7.3
 Stable tag: 1.0.0
