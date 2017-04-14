@@ -466,7 +466,7 @@ class Nzymes_Engine {
         }
         // We are shutting down, so $error is really the last (fatal) error.
         $error = error_get_last();
-        $this->console_log( $this->decorate( __( 'ENZYMES SHUTDOWN ERROR' ),
+        $this->console_log( $this->decorate( __( 'Nzymes SHUTDOWN ERROR' ),
             sprintf( __( '%1$s: %2$s on line %3$s.' ), Ando_ErrorFactory::to_str( $error['type'] ), $error['message'],
                 $error['line'] ) ) );
     }
@@ -790,12 +790,12 @@ class Nzymes_Engine {
             $this->origin_post = $post_object;
             list( $result, $error, $output ) = $this->clean_eval( $code, $arguments );
             if ( $error ) {
-                $this->console_log( $this->decorate( __( 'ENZYMES ERROR' ), $error ) );
+                $this->console_log( $this->decorate( __( 'Nzymes ERROR' ), $error ) );
                 $this->evaluating_code = null;  // Log the code only once.
                 $result                = null;
             }
             if ( $output ) {
-                $this->console_log( $this->decorate( __( 'ENZYMES OUTPUT' ), $output ) );
+                $this->console_log( $this->decorate( __( 'Nzymes OUTPUT' ), $output ) );
             }
         } else {
             $result = null;
