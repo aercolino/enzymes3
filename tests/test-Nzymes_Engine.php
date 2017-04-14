@@ -97,16 +97,16 @@ class Nzymes_EngineTest
     public
     function test_an_escaped_injection_is_ignored()
     {
-        $enzymes = new Nzymes_Engine();
+        $engine = new Nzymes_Engine();
 
-//        $enzymes->debug_on = true;
+//        $engine->debug_on = true;
 
         $content1 = 'This is something before {{[ whatever ]} and this is after.';
         $content2 = 'This is something before {[ whatever ]} and this is after.';
-        $this->assertEquals($content2, $enzymes->process($content1));
+        $this->assertEquals($content2, $engine->process($content1));
 
-//        $enzymes->debug_print(get_post()->post_title);
-//        $enzymes->debug_on = false;
+//        $engine->debug_print(get_post()->post_title);
+//        $engine->debug_on = false;
 
         // TODO make two tests out of this one, for both the cases Enzymes 2 active and not active
     }
@@ -114,10 +114,10 @@ class Nzymes_EngineTest
     public
     function test_content_with_no_injections_is_not_filtered()
     {
-        $enzymes = new Nzymes_Engine();
+        $engine = new Nzymes_Engine();
 
         $content = 'This is some content with no injections.';
-        $this->assertEquals($content, $enzymes->process($content));
+        $this->assertEquals($content, $engine->process($content));
     }
 
     public
@@ -179,8 +179,8 @@ class Nzymes_EngineTest
         $this->expectOutputString('');
 
         $code    = Ando_ErrorFactory::E_WARNING_code();
-        $enzymes = new Nzymes_Engine();
-        list(, $error, $output) = $this->call_method('clean_eval', array($code, array()), $enzymes);
+        $engine = new Nzymes_Engine();
+        list(, $error, $output) = $this->call_method('clean_eval', array($code, array()), $engine);
 
         $this->assertTrue(is_array($error));
         extract($error);
@@ -200,8 +200,8 @@ class Nzymes_EngineTest
         $this->expectOutputString('');
 
         $code    = Ando_ErrorFactory::E_PARSE_code();
-        $enzymes = new Nzymes_Engine();
-        list(, $error, $output) = $this->call_method('clean_eval', array($code, array()), $enzymes);
+        $engine = new Nzymes_Engine();
+        list(, $error, $output) = $this->call_method('clean_eval', array($code, array()), $engine);
 
         $this->assertEquals('Parse error: syntax error,', substr($error, 0, strlen('Parse error: syntax error,')));
     }
@@ -212,8 +212,8 @@ class Nzymes_EngineTest
         $this->expectOutputString('');
 
         $code    = Ando_ErrorFactory::E_NOTICE_code();
-        $enzymes = new Nzymes_Engine();
-        list(, $error, $output) = $this->call_method('clean_eval', array($code, array()), $enzymes);
+        $engine = new Nzymes_Engine();
+        list(, $error, $output) = $this->call_method('clean_eval', array($code, array()), $engine);
 
         $this->assertTrue(is_array($error));
         extract($error);
@@ -233,8 +233,8 @@ class Nzymes_EngineTest
         $this->expectOutputString('');
 
         $code    = Ando_ErrorFactory::E_COMPILE_WARNING_code();
-        $enzymes = new Nzymes_Engine();
-        list(, $error, $output) = $this->call_method('clean_eval', array($code, array()), $enzymes);
+        $engine = new Nzymes_Engine();
+        list(, $error, $output) = $this->call_method('clean_eval', array($code, array()), $engine);
 
         $this->assertFalse(is_array($error));
         $this->assertRegExp('@^Warning:@m', $output);
@@ -246,8 +246,8 @@ class Nzymes_EngineTest
         $this->expectOutputString('');
 
         $code    = Ando_ErrorFactory::E_USER_WARNING_code();
-        $enzymes = new Nzymes_Engine();
-        list(, $error, $output) = $this->call_method('clean_eval', array($code, array()), $enzymes);
+        $engine = new Nzymes_Engine();
+        list(, $error, $output) = $this->call_method('clean_eval', array($code, array()), $engine);
 
         $this->assertTrue(is_array($error));
         extract($error);
@@ -267,8 +267,8 @@ class Nzymes_EngineTest
         $this->expectOutputString('');
 
         $code    = Ando_ErrorFactory::E_USER_NOTICE_code();
-        $enzymes = new Nzymes_Engine();
-        list(, $error, $output) = $this->call_method('clean_eval', array($code, array()), $enzymes);
+        $engine = new Nzymes_Engine();
+        list(, $error, $output) = $this->call_method('clean_eval', array($code, array()), $engine);
 
         $this->assertTrue(is_array($error));
         extract($error);
@@ -292,8 +292,8 @@ class Nzymes_EngineTest
             $this->markTestSkipped();
             return;
         }
-        $enzymes = new Nzymes_Engine();
-        list(, $error, $output) = $this->call_method('clean_eval', array($code, array()), $enzymes);
+        $engine = new Nzymes_Engine();
+        list(, $error, $output) = $this->call_method('clean_eval', array($code, array()), $engine);
 
         $this->assertTrue(is_array($error));
         extract($error);
@@ -313,8 +313,8 @@ class Nzymes_EngineTest
         $this->expectOutputString('');
 
         $code    = Ando_ErrorFactory::E_USER_DEPRECATED_code();
-        $enzymes = new Nzymes_Engine();
-        list(, $error, $output) = $this->call_method('clean_eval', array($code, array()), $enzymes);
+        $engine = new Nzymes_Engine();
+        list(, $error, $output) = $this->call_method('clean_eval', array($code, array()), $engine);
 
         $this->assertTrue(is_array($error));
         extract($error);
@@ -334,8 +334,8 @@ class Nzymes_EngineTest
         $this->expectOutputString('');
 
         $code    = Ando_ErrorFactory::E_USER_ERROR_code();
-        $enzymes = new Nzymes_Engine();
-        list(, $error, $output) = $this->call_method('clean_eval', array($code, array()), $enzymes);
+        $engine = new Nzymes_Engine();
+        list(, $error, $output) = $this->call_method('clean_eval', array($code, array()), $engine);
 
         $this->assertTrue(is_array($error));
         extract($error);
@@ -355,8 +355,8 @@ class Nzymes_EngineTest
         $this->expectOutputString('');
 
         $code    = Ando_ErrorFactory::E_RECOVERABLE_ERROR_code();
-        $enzymes = new Nzymes_Engine();
-        list(, $error, $output) = $this->call_method('clean_eval', array($code, array()), $enzymes);
+        $engine = new Nzymes_Engine();
+        list(, $error, $output) = $this->call_method('clean_eval', array($code, array()), $engine);
 
         $this->assertTrue(is_array($error));
         extract($error);
@@ -375,8 +375,8 @@ class Nzymes_EngineTest
     {
         $code    = '
             throw new Exception("What did you expect?");';
-        $enzymes = new Nzymes_Engine();
-        list(, $error, $output) = $this->call_method('clean_eval', array($code, array()), $enzymes);
+        $engine = new Nzymes_Engine();
+        list(, $error, $output) = $this->call_method('clean_eval', array($code, array()), $engine);
         $this->assertInstanceOf('Exception', $error);
         $this->assertEquals('What did you expect?', $error->getMessage());
         $this->assertEquals('', $output);
@@ -390,31 +390,31 @@ class Nzymes_EngineTest
 
         $target_post_id = $this->factory->post->create(array('post_title' => 'This is the target post.'));
 
-        $enzymes = new Nzymes_Engine();
+        $engine = new Nzymes_Engine();
 
         // this must return the global post
-        $enzymes->process('This post has a {[ fake ]} injection.', Nzymes_Engine::GLOBAL_POST);
-        $result = $this->call_method('wp_post', array(array()), $enzymes);
+        $engine->process('This post has a {[ fake ]} injection.', Nzymes_Engine::GLOBAL_POST);
+        $result = $this->call_method('wp_post', array(array()), $engine);
         $this->assertEquals($post->ID, $result->ID);
 
         // this must return the target post (default)
-        $enzymes->process('This post has a {[ fake ]} injection.', $target_post_id);
-        $result = $this->call_method('wp_post', array(array()), $enzymes);
+        $engine->process('This post has a {[ fake ]} injection.', $target_post_id);
+        $result = $this->call_method('wp_post', array(array()), $engine);
         $this->assertEquals($target_post_id, $result->ID);
 
         // this must return the target post (numeric)
-        $enzymes->process('This post has a {[ fake ]} injection.', $target_post_id);
-        $result = $this->call_method('wp_post', array(array('post' => $post->ID)), $enzymes);
+        $engine->process('This post has a {[ fake ]} injection.', $target_post_id);
+        $result = $this->call_method('wp_post', array(array('post' => $post->ID)), $engine);
         $this->assertEquals($post->ID, $result->ID);
 
         // this must return the target post (slug)
-        $enzymes->process('This post has a {[ fake ]} injection.', $target_post_id);
+        $engine->process('This post has a {[ fake ]} injection.', $target_post_id);
         $result = $this->call_method('wp_post', array(
                 array(
                         'post' => '@this-is-the-global-post',
                         'slug' => 'this-is-the-global-post',
                 )
-        ), $enzymes);
+        ), $engine);
         $this->assertEquals($post->ID, $result->ID);
     }
 
@@ -495,21 +495,21 @@ class Nzymes_EngineTest
     public
     function test_literal_integer_is_replaced_as_is()
     {
-        $enzymes = new Nzymes_Engine();
+        $engine = new Nzymes_Engine();
 
         $content1 = 'This is something before {[123]} and in between {[456]} but this is after.';
         $content2 = 'This is something before 123 and in between 456 but this is after.';
-        $this->assertEquals($content2, $enzymes->process($content1, null));
+        $this->assertEquals($content2, $engine->process($content1, null));
     }
 
     public
     function test_literal_string_is_replaced_unquoted()
     {
-        $enzymes = new Nzymes_Engine();
+        $engine = new Nzymes_Engine();
 
         $content1 = 'This is something before {[ ="Hello World!"= ]} and in between {[ ="How are you today?"= ]} but this is after.';
         $content2 = 'This is something before "Hello World!" and in between "How are you today?" but this is after.';
-        $this->assertEquals($content2, $enzymes->process($content1, null));
+        $this->assertEquals($content2, $engine->process($content1, null));
     }
 
     public
@@ -520,11 +520,11 @@ class Nzymes_EngineTest
         add_post_meta($post_id, 'sample name', 'sample value');
         $post = get_post($post_id);
 
-        $enzymes = new Nzymes_Engine();
+        $engine = new Nzymes_Engine();
 
         $content1 = 'Before "{[ .sample-name ]}" between "{[ .=sample name= ]}" and after.';
         $content2 = 'Before "sample-value" between "sample value" and after.';
-        $this->assertEquals($content2, $enzymes->process($content1, $post));
+        $this->assertEquals($content2, $engine->process($content1, $post));
     }
 
     public
@@ -534,11 +534,11 @@ class Nzymes_EngineTest
         add_post_meta($post_id, 'sample-name', 'sample-value');
         $post = get_post($post_id);
 
-        $enzymes = new Nzymes_Engine();
+        $engine = new Nzymes_Engine();
 
         $content1 = 'Before "{[ .sample-name | 123 ]}" and after.';
         $content2 = 'Before "123" and after.';
-        $this->assertEquals($content2, $enzymes->process($content1, $post));
+        $this->assertEquals($content2, $engine->process($content1, $post));
     }
 
     public
@@ -551,11 +551,11 @@ class Nzymes_EngineTest
         $post_2_id = $this->factory->post->create();
         add_post_meta($post_2_id, 'sample-name', 'sample value 2');
 
-        $enzymes = new Nzymes_Engine();
+        $engine = new Nzymes_Engine();
 
         $content1 = 'Before "{[ ' . $post_2_id . '.sample-name ]}" and after.';
         $content2 = 'Before "sample value 2" and after.';
-        $this->assertEquals($content2, $enzymes->process($content1, $post_1));
+        $this->assertEquals($content2, $engine->process($content1, $post_1));
     }
 
     public
@@ -568,11 +568,11 @@ class Nzymes_EngineTest
         $post_2_id = $this->factory->post->create(array('post_title' => 'This is the target post.'));
         add_post_meta($post_2_id, 'sample-name', 'sample value 2');
 
-        $enzymes = new Nzymes_Engine();
+        $engine = new Nzymes_Engine();
 
         $content1 = 'Before "{[ @this-is-the-target-post.sample-name ]}" and after.';
         $content2 = 'Before "sample value 2" and after.';
-        $this->assertEquals($content2, $enzymes->process($content1, $post_1));
+        $this->assertEquals($content2, $engine->process($content1, $post_1));
     }
 
     public
@@ -588,11 +588,11 @@ class Nzymes_EngineTest
         ');
         $post = get_post($post_id);
 
-        $enzymes = new Nzymes_Engine();
+        $engine = new Nzymes_Engine();
 
         $content1 = 'Before "{[ =whatever here= | .sample-name() ]}" and after.';
         $content2 = 'Before "123" and after.';
-        $this->assertEquals($content2, $enzymes->process($content1, $post));
+        $this->assertEquals($content2, $engine->process($content1, $post));
     }
 
     public
@@ -608,11 +608,11 @@ class Nzymes_EngineTest
         ');
         $post = get_post($post_id);
 
-        $enzymes = new Nzymes_Engine();
+        $engine = new Nzymes_Engine();
 
         $content1 = 'Before "{[ =whatever here= | 100 | .sample-name(1) ]}" and after.';
         $content2 = 'Before "123" and after.';
-        $this->assertEquals($content2, $enzymes->process($content1, $post));
+        $this->assertEquals($content2, $engine->process($content1, $post));
     }
 
     public
@@ -626,11 +626,11 @@ class Nzymes_EngineTest
         ');
         $post = get_post($post_id);
 
-        $enzymes = new Nzymes_Engine();
+        $engine = new Nzymes_Engine();
 
         $content1 = 'Before "{[ =whatever here= | 100 | 20 | 3 | .sample-name(3) ]}" and after.';
         $content2 = 'Before "1997" and after.';
-        $this->assertEquals($content2, $enzymes->process($content1, $post));
+        $this->assertEquals($content2, $engine->process($content1, $post));
     }
 
     public
@@ -644,11 +644,11 @@ class Nzymes_EngineTest
         ');
         $post = get_post($post_id);
 
-        $enzymes = new Nzymes_Engine();
+        $engine = new Nzymes_Engine();
 
         $content1 = 'Before "{[ =whatever here= | 100 | 20 | 3 | array(2) | .sample-name(2) ]}" and after.';
         $content2 = 'Before "2300" and after.';
-        $this->assertEquals($content2, $enzymes->process($content1, $post));
+        $this->assertEquals($content2, $engine->process($content1, $post));
     }
 
     public
@@ -661,11 +661,11 @@ class Nzymes_EngineTest
         return $result;
         ');
         $post    = get_post($post_id);
-        $enzymes = new Nzymes_Engine();
+        $engine = new Nzymes_Engine();
 
         $content1 = 'Before "{[ =whatever here= | =a hundred= | 100 | =twenty and three= | 20 | 3 | array(2) | hash(2) | .sample-name(1) ]}" and after.';
         $content2 = 'Before "2300" and after.';
-        $this->assertEquals($content2, $enzymes->process($content1, $post));
+        $this->assertEquals($content2, $engine->process($content1, $post));
     }
 
     public
@@ -681,7 +681,7 @@ class Nzymes_EngineTest
          * fill in all the columns and meta keys. Additionally there could be some properties like 'roles' which go on
          * another route.
          */
-        $enzymes = new Nzymes_Engine();
+        $engine = new Nzymes_Engine();
 
         $attrs       = array(
             // Properties extracted from the columns of the user table.
@@ -740,7 +740,7 @@ class Nzymes_EngineTest
 
         $content1 = "Before \"{[ $attrs_seq | array($attrs_count) | .implode(1) ]}\" and after.";
         $content2 = "Before \"$data\" and after.";
-        $this->assertEquals($content2, $enzymes->process($content1, $post));
+        $this->assertEquals($content2, $engine->process($content1, $post));
     }
 
     public
@@ -752,11 +752,11 @@ class Nzymes_EngineTest
         $post_id = $this->factory->post->create(array('post_author' => $user_id));
         $post    = get_post($post_id);
 
-        $enzymes = new Nzymes_Engine();
+        $engine = new Nzymes_Engine();
 
         $content1 = 'Before "{[ /author.sample-name ]}" between "{[ /author.=sample name= ]}" and after.';
         $content2 = 'Before "sample-value" between "sample value" and after.';
-        $this->assertEquals($content2, $enzymes->process($content1, $post));
+        $this->assertEquals($content2, $engine->process($content1, $post));
     }
 
     public
@@ -771,11 +771,11 @@ class Nzymes_EngineTest
         add_user_meta($user_2_id, 'sample-name', 'sample value 2');
         $post_2_id = $this->factory->post->create(array('post_author' => $user_2_id));
 
-        $enzymes = new Nzymes_Engine();
+        $engine = new Nzymes_Engine();
 
         $content1 = 'Before "{[ ' . $post_2_id . '/author.sample-name ]}" and after.';
         $content2 = 'Before "sample value 2" and after.';
-        $this->assertEquals($content2, $enzymes->process($content1, $post_1));
+        $this->assertEquals($content2, $engine->process($content1, $post_1));
     }
 
     public
@@ -793,11 +793,11 @@ class Nzymes_EngineTest
                 'post_title'  => 'This is the target post.'
         ));
 
-        $enzymes = new Nzymes_Engine();
+        $engine = new Nzymes_Engine();
 
         $content1 = 'Before "{[ @this-is-the-target-post/author.sample-name ]}" and after.';
         $content2 = 'Before "sample value 2" and after.';
-        $this->assertEquals($content2, $enzymes->process($content1, $post_1));
+        $this->assertEquals($content2, $engine->process($content1, $post_1));
     }
 
     public
@@ -810,7 +810,7 @@ class Nzymes_EngineTest
          *
          * This test is a bit "strange" because I had to put here the same code that is in the source to make it work.
          */
-        $enzymes = new Nzymes_Engine();
+        $engine = new Nzymes_Engine();
 
         $attrs       = array(
             // Properties extracted from the columns of the  table.
@@ -859,7 +859,7 @@ class Nzymes_EngineTest
 
         $content1 = "Before \"{[ $attrs_seq | array($attrs_count) | .implode(1) ]}\" and after.";
         $content2 = "Before \"$data\" and after.";
-        $this->assertEquals($content2, $enzymes->process($content1, $post));
+        $this->assertEquals($content2, $engine->process($content1, $post));
     }
 
     public
@@ -876,11 +876,11 @@ class Nzymes_EngineTest
         $post_id = $this->factory->post->create(array('post_author' => $user_id));
         $post    = get_post($post_id);
 
-        $enzymes = new Nzymes_Engine();
+        $engine = new Nzymes_Engine();
 
         $content1 = 'Before "{[ =whatever here= | /author.sample-name() ]}" and after.';
         $content2 = 'Before "123" and after.';
-        $this->assertEquals($content2, $enzymes->process($content1, $post));
+        $this->assertEquals($content2, $engine->process($content1, $post));
     }
 
     public
@@ -897,11 +897,11 @@ class Nzymes_EngineTest
         $post_id = $this->factory->post->create(array('post_author' => $user_id));
         $post    = get_post($post_id);
 
-        $enzymes = new Nzymes_Engine();
+        $engine = new Nzymes_Engine();
 
         $content1 = 'Before "{[ =whatever here= | 100 | /author.sample-name(1) ]}" and after.';
         $content2 = 'Before "123" and after.';
-        $this->assertEquals($content2, $enzymes->process($content1, $post));
+        $this->assertEquals($content2, $engine->process($content1, $post));
     }
 
     public
@@ -916,11 +916,11 @@ class Nzymes_EngineTest
         $post_id = $this->factory->post->create(array('post_author' => $user_id));
         $post    = get_post($post_id);
 
-        $enzymes = new Nzymes_Engine();
+        $engine = new Nzymes_Engine();
 
         $content1 = 'Before "{[ =whatever here= | 100 | 20 | 3 | /author.sample-name(3) ]}" and after.';
         $content2 = 'Before "1997" and after.';
-        $this->assertEquals($content2, $enzymes->process($content1, $post));
+        $this->assertEquals($content2, $engine->process($content1, $post));
     }
 
     public
@@ -935,11 +935,11 @@ class Nzymes_EngineTest
         $post_id = $this->factory->post->create(array('post_author' => $user_id));
         $post    = get_post($post_id);
 
-        $enzymes = new Nzymes_Engine();
+        $engine = new Nzymes_Engine();
 
         $content1 = 'Before "{[ =whatever here= | 100 | 20 | 3 | array(2) | /author.sample-name(2) ]}" and after.';
         $content2 = 'Before "2300" and after.';
-        $this->assertEquals($content2, $enzymes->process($content1, $post));
+        $this->assertEquals($content2, $engine->process($content1, $post));
     }
 
     public
@@ -954,11 +954,11 @@ class Nzymes_EngineTest
         $post_id = $this->factory->post->create(array('post_author' => $user_id));
         $post    = get_post($post_id);
 
-        $enzymes = new Nzymes_Engine();
+        $engine = new Nzymes_Engine();
 
         $content1 = 'Before "{[ =whatever here= | =a hundred= | 100 | =twenty and three= | 20 | 3 | array(2) | hash(2) | /author.sample-name(1) ]}" and after.';
         $content2 = 'Before "2300" and after.';
-        $this->assertEquals($content2, $enzymes->process($content1, $post));
+        $this->assertEquals($content2, $engine->process($content1, $post));
     }
 
 }

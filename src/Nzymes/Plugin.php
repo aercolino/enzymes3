@@ -18,18 +18,18 @@ class Nzymes_Plugin {
      *
      * @var Nzymes_Engine
      */
-    static protected $enzymes;
+    static protected $engine;
 
     /**
      * @return Nzymes_Engine
      */
     static public
     function engine() {
-        if ( is_null( self::$enzymes ) ) {
-            self::$enzymes = new Nzymes_Engine();
+        if ( is_null( self::$engine ) ) {
+            self::$engine = new Nzymes_Engine();
         }
 
-        return self::$enzymes;
+        return self::$engine;
     }
 
     public
@@ -59,14 +59,14 @@ class Nzymes_Plugin {
         }
 
         require_once dirname( NZYMES_PRIMARY ) . '/src/Nzymes/Engine.php';
-        $enzymes = self::engine();  // singleton
+        $engine = self::engine();  // singleton
 //@formatter:off
-        $enzymes->absorb_later('wp_title',        self::PRIORITY);
-        $enzymes->absorb_later('the_title',       self::PRIORITY);
-        $enzymes->absorb_later('the_title_rss',   self::PRIORITY);
-        $enzymes->absorb_later('the_excerpt',     self::PRIORITY);
-        $enzymes->absorb_later('the_excerpt_rss', self::PRIORITY);
-        $enzymes->absorb_later('the_content',     self::PRIORITY);
+        $engine->absorb_later('wp_title',        self::PRIORITY);
+        $engine->absorb_later('the_title',       self::PRIORITY);
+        $engine->absorb_later('the_title_rss',   self::PRIORITY);
+        $engine->absorb_later('the_excerpt',     self::PRIORITY);
+        $engine->absorb_later('the_excerpt_rss', self::PRIORITY);
+        $engine->absorb_later('the_content',     self::PRIORITY);
 //@formatter:on
     }
 

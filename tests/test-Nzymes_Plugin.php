@@ -14,9 +14,9 @@ class Nzymes_PluginTest
             'the_excerpt_rss',
             'the_content'
         );
-        $enzymes = Nzymes_Plugin::engine();
+        $engine = Nzymes_Plugin::engine();
         foreach ( $tags as $tag ) {
-            $this->assertEquals( Nzymes_Plugin::PRIORITY, has_filter( $tag, array($enzymes, 'absorb') ),
+            $this->assertEquals( Nzymes_Plugin::PRIORITY, has_filter( $tag, array($engine, 'absorb') ),
                 "Nzymes didn't attach to '$tag'." );
         }
     }
