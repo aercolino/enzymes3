@@ -40,6 +40,8 @@ class Nzymes_Plugin {
             register_activation_hook( NZYMES_PRIMARY, array( 'Nzymes_Plugin', 'on_activation' ) );
             register_deactivation_hook( NZYMES_PRIMARY, array( 'Nzymes_Plugin', 'on_deactivation' ) );
 
+            register_uninstall_hook(NZYMES_PRIMARY, array( 'Nzymes_Plugin', 'on_uninstall') );
+
             add_filter( 'editable_roles', array( 'Nzymes_Plugin', 'on_editable_roles' ) );
         } else {
             add_action( 'init', array( 'Nzymes_Plugin', 'on_init' ) );
