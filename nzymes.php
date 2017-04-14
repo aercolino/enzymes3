@@ -31,4 +31,4 @@ defined( 'ABSPATH' ) || die( '<script>
 define('NZYMES_PRIMARY', __FILE__);
 require_once dirname( NZYMES_PRIMARY ) . '/src/Nzymes/Plugin.php';
 
-$enzymesPlugin = new Nzymes_Plugin();
+$nzymesPlugin = new Nzymes_Plugin();

@@ -18,7 +18,7 @@ Nzymes allows blog authors to inject static and dynamic content at exact locatio
 
 * Are you looking for some functionality?
  1. Head to http://gist.github.com and add *#nzymes* to your query. You'll get a list of available enzymes, with their sample injections and documentation.
- 1. Copy the enzymes ID (something like "GHS aercolino Chili 1.0.0") and paste it into an injection. Nzymes will automatically import it.
+ 1. Copy the enzyme ID (something like "GHS aercolino Chili 1.0.0") and paste it into an injection. Nzymes will automatically import it.
  1. Done.
  
 * Do you want to share some functionality?

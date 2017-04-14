@@ -617,7 +617,7 @@ class Nzymes_Engine {
     }
 
     /**
-     * Unwrap an enzymes string from its quotes, while also un-escaping escaped quotes.
+     * Unwrap an enzyme from its quotes, while also un-escaping escaped quotes.
      *
      * @param string $string
      *
@@ -1276,8 +1276,8 @@ class Nzymes_Engine {
     function escape_for_enzymes2( $could_be_sequence ) {
         $result = '{';  // To have a valid injection we need to start with a '{'.
         if ( is_plugin_active( 'enzymes/enzymes.php' ) ) {
-            global $enzymes;
-            $enzymes2_priority = has_action( $this->current_filter, array( $enzymes, 'metabolism' ) );
+            global $enzymes2;
+            $enzymes2_priority = has_action( $this->current_filter, array( $enzymes2, 'metabolism' ) );
             if ( false !== $enzymes2_priority && $this->current_priority < $enzymes2_priority ) {
                 $result .= '{';  // Escape now: Enzymes 2 will un-escape it later.
             }
