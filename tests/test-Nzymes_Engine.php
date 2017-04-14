@@ -421,8 +421,8 @@ class Nzymes_EngineTest
     public
     function test_unquote()
     {
-        $result = $this->call_method('unquote', array('=This is how you quote a \=string\= in Enzymes.='));
-        $this->assertEquals('This is how you quote a =string= in Enzymes.', $result);
+        $result = $this->call_method('unquote', array('=This is how you quote a \=string\= in Nzymes.='));
+        $this->assertEquals('This is how you quote a =string= in Nzymes.', $result);
     }
 
     public

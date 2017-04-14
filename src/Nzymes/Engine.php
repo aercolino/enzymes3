@@ -60,14 +60,14 @@ class Nzymes_Engine {
     protected $injection_post;
 
     /**
-     * The content of the post, not modified by Enzymes.
+     * The content of the post, not modified by Nzymes.
      *
      * @var string
      */
     protected $content;
 
     /**
-     * The content of the post, modified by Enzymes.
+     * The content of the post, modified by Nzymes.
      *
      * @var string
      */

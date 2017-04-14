@@ -4,7 +4,7 @@ require_once dirname( NZYMES_PRIMARY ) . '/src/Nzymes/Options.php';
 
 class Nzymes_Plugin {
     /**
-     * Use a higher priority than Enzymes <3.
+     * Use a higher priority than Enzymes 2.
      */
     const PRIORITY = 9;
 
@@ -132,11 +132,11 @@ class Nzymes_Plugin {
     function add_roles_and_capabilities() {
         self::remove_roles_and_capabilities();
 //@formatter:off
-        add_role(Nzymes_Capabilities::User,           __('Enzymes User'),            Nzymes_Capabilities::for_User() );
-        add_role(Nzymes_Capabilities::PrivilegedUser, __('Enzymes Privileged User'), Nzymes_Capabilities::for_PrivilegedUser() );
-        add_role(Nzymes_Capabilities::TrustedUser,    __('Enzymes Trusted User'),    Nzymes_Capabilities::for_TrustedUser() );
-        add_role(Nzymes_Capabilities::Coder,          __('Enzymes Coder'),           Nzymes_Capabilities::for_Coder() );
-        add_role(Nzymes_Capabilities::TrustedCoder,   __('Enzymes Trusted Coder'),   Nzymes_Capabilities::for_TrustedCoder() );
+        add_role(Nzymes_Capabilities::User,           __('Nzymes User'),            Nzymes_Capabilities::for_User() );
+        add_role(Nzymes_Capabilities::PrivilegedUser, __('Nzymes Privileged User'), Nzymes_Capabilities::for_PrivilegedUser() );
+        add_role(Nzymes_Capabilities::TrustedUser,    __('Nzymes Trusted User'),    Nzymes_Capabilities::for_TrustedUser() );
+        add_role(Nzymes_Capabilities::Coder,          __('Nzymes Coder'),           Nzymes_Capabilities::for_Coder() );
+        add_role(Nzymes_Capabilities::TrustedCoder,   __('Nzymes Trusted Coder'),   Nzymes_Capabilities::for_TrustedCoder() );
 //@formatter:on
 
         $administrator = get_role('administrator');

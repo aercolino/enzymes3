@@ -62,7 +62,7 @@ class Nzymes_Capabilities {
     }
 
     /**
-     * Associative array of the capabilities for an Enzymes User.
+     * Associative array of the capabilities for an Nzymes User.
      *
      * @return array
      */
@@ -79,7 +79,7 @@ class Nzymes_Capabilities {
     }
 
     /**
-     * Associative array of the capabilities for an Enzymes PrivilegedUser.
+     * Associative array of the capabilities for an Nzymes PrivilegedUser.
      *
      * @return array
      */
@@ -93,7 +93,7 @@ class Nzymes_Capabilities {
     }
 
     /**
-     * Associative array of the capabilities for an Enzymes TrustedUser.
+     * Associative array of the capabilities for an Nzymes TrustedUser.
      *
      * @return array
      */
@@ -107,7 +107,7 @@ class Nzymes_Capabilities {
     }
 
     /**
-     * Associative array of the capabilities for an Enzymes Coder.
+     * Associative array of the capabilities for an Nzymes Coder.
      *
      * @return array
      */
@@ -121,7 +121,7 @@ class Nzymes_Capabilities {
     }
 
     /**
-     * Associative array of the capabilities for an Enzymes TrustedCoder.
+     * Associative array of the capabilities for an Nzymes TrustedCoder.
      *
      * @return array
      */
