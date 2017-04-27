@@ -12,9 +12,9 @@ Boost your WordPress blog with PHP injections.
 
 == Description ==
 
-[Nzymes](https://wordpress.org/plugins/nzymes/) is the 3rd major release of my [Enzymes](https://wordpress.org/plugins/enzymes/) plugin. See the [Appendix](http://andowebsit.es/blog/noteslog.com/nzymes/appendix/) of the [Manual](http://andowebsit.es/blog/noteslog.com/nzymes/) to learn why I had to change its name.
+[Nzymes](https://wordpress.org/plugins/nzymes/) is the 3rd major release of my [Enzymes](https://wordpress.org/plugins/enzymes/) plugin. Manual at http://andowebsit.es/blog/noteslog.com/nzymes/.
 
-Nzymes allows blog authors to inject static and dynamic content at exact locations.
+Nzymes allows blog authors to inject static and dynamic content at exact locations, in their posts.
 
 * Are you looking for some functionality?
  1. Head to http://gist.github.com and add *#nzymes* to your query. You'll get a list of available enzymes, with their sample injections and documentation.
@@ -31,8 +31,8 @@ Nzymes allows blog authors to inject static and dynamic content at exact locatio
 
 This section describes how to install the plugin and get it working.
 
-1. Upload the plugin files to the `/wp-content/plugins/nzymes` directory, or install the plugin through the WordPress plugins screen directly.
-1. Activate the plugin through the 'Plugins' screen in WordPress.
+1. Upload the plugin zip file.
+1. Activate the plugin.
 
 
 == Frequently Asked Questions ==
@@ -41,7 +41,7 @@ Read the [Manual](http://andowebsit.es/blog/noteslog.com/nzymes/).
 
 == Screenshots ==
 
-Nothing to show. There is no admin interface. The result can be anything.
+Read the [Manual](http://andowebsit.es/blog/noteslog.com/nzymes/).
 
 == Changelog ==
 
@@ -52,4 +52,4 @@ First version of Nzymes, actually version 3 of Enzymes.
 == Upgrade Notice ==
 
 = 1.0.0 =
-Lots of goodies in this version. Info: http://andowebsit.es/blog/noteslog.com/nzymes/
+Read the [Manual](http://andowebsit.es/blog/noteslog.com/nzymes/).
