@@ -246,7 +246,7 @@ class Nzymes_Engine {
      *   slug        := [\w+~-]+
      *   field       := [\w-]+ | string
      *
-     * execution := ("array" | "hash" | "priority" | item) "(" \d* ")"
+     * execution := ("array" | "hash" | "defer" | item) "(" \d* ")"
      * ---
      *
      * These (key, value) pairs follow the pattern: "'rule_left' => '(?<rule_left>rule_right)';".
