@@ -598,10 +598,8 @@ class Nzymes_Engine {
                 $result = $this->injection_post;
                 break;
             case ( $post[0] == '@' ):
-                // We can't use the following API call because we want all post types.
-                //$result = get_page_by_path($slug, OBJECT, 'post');
-                $host_id_query = apply_filters( 'nzymes_host_id_query', "SELECT `ID` FROM $wpdb->posts WHERE `post_name` = '$slug' LIMIT 1" );
                 global $wpdb; /* @var $wpdb wpdb */
+                $host_id_query = apply_filters( 'nzymes_host_id_query', "SELECT `ID` FROM $wpdb->posts WHERE `post_name` = '$slug' LIMIT 1" );
                 $post_id = $wpdb->get_var( $host_id_query );
                 $result  = get_post( $post_id );
                 break;
