@@ -115,7 +115,7 @@ class Nzymes_Plugin {
     public static
     function on_editable_roles( $all_roles ) {
         $screen = get_current_screen();
-        if ( in_array($screen->id, ['user-new', 'user-edit']) ) {
+        if ( in_array($screen->id, ['user-new', 'user-edit', 'users']) ) {
             foreach ( $all_roles as $slug => $role ) {
                 if ( 0 === strpos( $slug, Nzymes_Capabilities::PREFIX ) ) {
                     unset( $all_roles[ $slug ] );
