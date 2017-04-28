@@ -611,6 +611,12 @@ class Nzymes_Engine {
                 $result = null;
                 break;
         }
+        if ( ! is_null( $result ) ) {
+            $is_usable = 'publish' == $result->post_status || $this->injection_author_owns( $result );
+            if ( ! $is_usable ) {
+                $result = null;
+            }
+        }
 
         return $result;
     }

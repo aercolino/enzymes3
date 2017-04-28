@@ -997,4 +997,56 @@ class Nzymes_EngineTest
         $this->assertEquals($content2, $engine->process($content1, $injection_post));
     }
 
+    public
+    function test_enzyme_in_a_draft_host_visible_only_for_its_author() {
+        $draft_author_id = $this->factory->user->create(array('role' => Nzymes_Capabilities::TrustedUser));
+        $draft_post_id = $this->factory->post->create(array(
+            'post_name' => 'pepito',
+            'post_status' => 'draft',
+            'post_author' => $draft_author_id
+        ));
+        add_post_meta($draft_post_id, 'sample-name', 'sample value 1');
+        $draft_post    = get_post($draft_post_id);
+
+        $other_author_id = $this->factory->user->create(array('role' => Nzymes_Capabilities::PrivilegedUser));
+        $other_post_id = $this->factory->post->create(array('post_author' => $other_author_id));
+        $other_post    = get_post($other_post_id);
+
+        $engine = new Nzymes_Engine();
+
+        $content1 = 'Before "{[ @pepito.sample-name ]}" and after.';
+        $content2 = 'Before "sample value 1" and after.';
+        $this->assertEquals($content2, $engine->process($content1, $draft_post));
+
+        $content1 = 'Before "{[ @pepito.sample-name ]}" and after.';
+        $content2 = 'Before "" and after.';
+        $this->assertEquals($content2, $engine->process($content1, $other_post));
+    }
+
+    public
+    function test_enzyme_in_a_published_host_visible_for_everybody() {
+        $publish_author_id = $this->factory->user->create(array('role' => Nzymes_Capabilities::TrustedUser));
+        $publish_post_id = $this->factory->post->create(array(
+            'post_name' => 'pepito',
+            'post_status' => 'publish',
+            'post_author' => $publish_author_id
+        ));
+        add_post_meta($publish_post_id, 'sample-name', 'sample value 1');
+        $publish_post    = get_post($publish_post_id);
+
+        $other_author_id = $this->factory->user->create(array('role' => Nzymes_Capabilities::PrivilegedUser));
+        $other_post_id = $this->factory->post->create(array('post_author' => $other_author_id));
+        $other_post    = get_post($other_post_id);
+
+        $engine = new Nzymes_Engine();
+
+        $content1 = 'Before "{[ @pepito.sample-name ]}" and after.';
+        $content2 = 'Before "sample value 1" and after.';
+        $this->assertEquals($content2, $engine->process($content1, $publish_post));
+
+        $content1 = 'Before "{[ @pepito.sample-name ]}" and after.';
+        $content2 = 'Before "sample value 1" and after.';
+        $this->assertEquals($content2, $engine->process($content1, $other_post));
+    }
+
 }
