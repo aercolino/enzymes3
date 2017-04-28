@@ -388,7 +388,7 @@ class Nzymes_EngineTest
     {
         global $post;
 
-        $target_post_id = $this->factory->post->create(array('post_title' => 'This is the target post.'));
+        $injection_post_id = $this->factory->post->create(array('post_title' => 'This is the target post.'));
 
         $engine = new Nzymes_Engine();
 
@@ -397,18 +397,18 @@ class Nzymes_EngineTest
         $result = $this->call_method('wp_post', array(array()), $engine);
         $this->assertEquals($post->ID, $result->ID);
 
-        // this must return the target post (default)
-        $engine->process('This post has a {[ fake ]} injection.', $target_post_id);
+        // this must return the target post (using nothing)
+        $engine->process('This post has a {[ fake ]} injection.', $injection_post_id);
         $result = $this->call_method('wp_post', array(array()), $engine);
-        $this->assertEquals($target_post_id, $result->ID);
+        $this->assertEquals($injection_post_id, $result->ID);
 
-        // this must return the target post (numeric)
-        $engine->process('This post has a {[ fake ]} injection.', $target_post_id);
+        // this must return the global post (using its id)
+        $engine->process('This post has a {[ fake ]} injection.', $injection_post_id);
         $result = $this->call_method('wp_post', array(array('post' => $post->ID)), $engine);
         $this->assertEquals($post->ID, $result->ID);
 
-        // this must return the target post (slug)
-        $engine->process('This post has a {[ fake ]} injection.', $target_post_id);
+        // this must return the global post (using its slug)
+        $engine->process('This post has a {[ fake ]} injection.', $injection_post_id);
         $result = $this->call_method('wp_post', array(
                 array(
                         'post' => '@this-is-the-global-post',
