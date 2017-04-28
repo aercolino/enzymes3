@@ -978,4 +978,23 @@ class Nzymes_EngineTest
         $this->assertEquals($content2, $engine->process($content1, $injection_post));
     }
 
+    public
+    function test_nzymes_post_types_hook_works() {
+        $enzyme_post_id = $this->factory->post->create(array('post_type' => 'post', 'post_name' => 'pepito'));
+        add_post_meta($enzyme_post_id, 'sample-name', 'sample value 1');
+
+        $enzyme_page_id = $this->factory->post->create(array('post_type' => 'page', 'post_name' => 'pepito'));
+        add_post_meta($enzyme_page_id, 'sample-name', 'sample value 2');
+
+        $injection_post = $this->factory->post->create_and_get();
+
+        add_filter('nzymes_post_types', function ($post_types) { return array_reverse($post_types); });
+
+        $engine = new Nzymes_Engine();
+
+        $content1 = 'Before "{[ @pepito.sample-name ]}" and after.';
+        $content2 = 'Before "sample value 1" and after.';
+        $this->assertEquals($content2, $engine->process($content1, $injection_post));
+    }
+
 }
