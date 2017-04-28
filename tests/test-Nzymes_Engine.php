@@ -963,11 +963,11 @@ class Nzymes_EngineTest
 
     public
     function test_page_host_shadows_post_host() {
-        $enzyme_post_id = $this->factory->post->create(array('post_type' => 'post', 'post_name' => 'pepito'));
-        add_post_meta($enzyme_post_id, 'sample-name', 'sample value 1');
+        $post_id = $this->factory->post->create(array('post_type' => 'post', 'post_name' => 'pepito'));
+        add_post_meta($post_id, 'sample-name', 'sample value 1');
 
-        $enzyme_page_id = $this->factory->post->create(array('post_type' => 'page', 'post_name' => 'pepito'));
-        add_post_meta($enzyme_page_id, 'sample-name', 'sample value 2');
+        $page_id = $this->factory->post->create(array('post_type' => 'page', 'post_name' => 'pepito'));
+        add_post_meta($page_id, 'sample-name', 'sample value 2');
 
         $injection_post = $this->factory->post->create_and_get();
 
@@ -980,11 +980,11 @@ class Nzymes_EngineTest
 
     public
     function test_nzymes_post_types_hook_works() {
-        $enzyme_post_id = $this->factory->post->create(array('post_type' => 'post', 'post_name' => 'pepito'));
-        add_post_meta($enzyme_post_id, 'sample-name', 'sample value 1');
+        $post_id = $this->factory->post->create(array('post_type' => 'post', 'post_name' => 'pepito'));
+        add_post_meta($post_id, 'sample-name', 'sample value 1');
 
-        $enzyme_page_id = $this->factory->post->create(array('post_type' => 'page', 'post_name' => 'pepito'));
-        add_post_meta($enzyme_page_id, 'sample-name', 'sample value 2');
+        $page_id = $this->factory->post->create(array('post_type' => 'page', 'post_name' => 'pepito'));
+        add_post_meta($page_id, 'sample-name', 'sample value 2');
 
         $injection_post = $this->factory->post->create_and_get();
 
