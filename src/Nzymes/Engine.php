@@ -620,7 +620,7 @@ class Nzymes_Engine {
         global $wpdb;
         $post_types = array_map('esc_sql', apply_filters( 'nzymes_post_types', array('page', 'post') ) );
         $types = implode("', '", $post_types);
-        $order = implode(', ', $post_types);
+        $order = implode(',', $post_types);  // No spaces around commas here, please!
         $result = $wpdb->get_var( "
                     SELECT `ID` 
                     FROM $wpdb->posts 
