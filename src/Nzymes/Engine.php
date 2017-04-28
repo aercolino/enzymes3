@@ -600,8 +600,10 @@ class Nzymes_Engine {
             case ( $post[0] == '@' ):
                 $post_id = $this->post_id_from_slug( $slug );
                 $result = get_post( $post_id );
-                if ( is_null( $result ) && $this->injection_author_can( Nzymes_Capabilities::create_dynamic_custom_fields ) ) {
-                    $result = apply_filters( 'nzymes_post_object', $post );
+                if ( is_null( $result )
+                    && has_filter( 'nzymes_missing_post' )
+                    && $this->injection_author_can( Nzymes_Capabilities::create_dynamic_custom_fields ) ) {
+                    $result = apply_filters( 'nzymes_missing_post', $slug );
                 }
                 break;
             case ( is_numeric( $post ) ):
