@@ -630,7 +630,9 @@ class Nzymes_Engine {
     protected
     function post_id_from_slug($slug) {
         global $wpdb;
-        $post_types = array_map('esc_sql', apply_filters( 'nzymes_post_types', array('page', 'post') ) );
+        // nzymes_post_types filters take and return an array of post types to restrict lookup of slugs to.
+        $post_types = apply_filters( 'nzymes_post_types', array('page', 'post') );
+        $post_types = array_map('esc_sql', $post_types );
         $types = implode("', '", $post_types);
         $order = implode(',', $post_types);  // No spaces around commas here, please!
         $result = $wpdb->get_var( "
