@@ -230,10 +230,10 @@ class Nzymes_Engine {
      *   sequence := enzyme ("|" enzyme)*
      *   enzyme   := literal | transclusion | execution
      *
-     * literal := number | str_literal
-     *   number  := \d+(\.\d+)?
+     * literal := integer | str_literal
+     *   integer     := \d+
      *   str_literal := string
-     *   string  := "=" <a string where "=", "|", "]}", "\"  are escaped by a prefixed "\"> "="
+     *   string      := "=" <a string where "=", "|", "]}", "\"  are escaped by a prefixed "\"> "="
      *
      * transclusion := item | attr
      *   item        := post_item | author_item
@@ -242,7 +242,7 @@ class Nzymes_Engine {
      *   author_item := post "/author." field
      *   post_attr   := post ":" field
      *   author_attr := post "/author:" field
-     *   post        := \d+ | "@" slug | "@@" slug | ""
+     *   post        := \d+ | "@@" slug | "@" slug | ""
      *   slug        := [\w+~-]+
      *   field       := [\w-]+ | string
      *
@@ -264,10 +264,10 @@ class Nzymes_Engine {
     function init_grammar() {
 //@formatter:off
         $grammar = array(
-            'number'       => '(?<number>\d+(\.\d+)?)',
+            'integer'      => '(?<integer>\d+)',
             'string'       => '(?<string>' . Ando_Regex::pattern_quoted_string('=', '=') . ')',  // @=[^=\\]*(?:\\.[^=\\]*)*=@
             'str_literal'  => '(?<str_literal>$string)',
-            'literal'      => '(?<literal>$number|$str_literal)',
+            'literal'      => '(?<literal>$integer|$str_literal)',
             'slug'         => '(?<slug>[\w+~-]+)',
             'post'         => '(?<post>\d+|@@$slug|@$slug|)',
             'field'        => '(?<field>[^|.=\]}]+|$string)',  // REM: spaces outside of strings are stripped out.
@@ -1232,7 +1232,7 @@ class Nzymes_Engine {
                 $transclusion = $this->value( $matches, 'transclusion' );
                 $literal      = $this->value( $matches, 'literal' );
                 $str_literal  = $this->value( $matches, 'str_literal' );
-                $number       = $this->value( $matches, 'number' );
+                $integer      = $this->value( $matches, 'integer' );
                 $rest         = $this->value( $matches, 'rest' );
                 switch ( true ) {
                     case $execution != '':
@@ -1244,7 +1244,7 @@ class Nzymes_Engine {
                     case $literal != '':
                         $argument = $str_literal
                             ? $this->unquote( $str_literal )
-                            : floatval( $number );
+                            : intval( $integer );
                         break;
                     default:
                         $argument = null;

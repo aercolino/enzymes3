@@ -497,8 +497,8 @@ class Nzymes_EngineTest
     {
         $engine = new Nzymes_Engine();
 
-        $content1 = 'This is something before {[123]} and in between {[456]} but this is after.';
-        $content2 = 'This is something before 123 and in between 456 but this is after.';
+        $content1 = 'Before "{[ 12345 ]}" and after.';
+        $content2 = 'Before "12345" and after.';
         $this->assertEquals($content2, $engine->process($content1, null));
     }
 
