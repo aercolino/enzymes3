@@ -1063,17 +1063,14 @@ class Nzymes_EngineTest
 
         $engine = new Nzymes_Engine();
 
-        $content1 = 'Before "{[ @this-is-not-a-post.sample-name ]}" and after.';
+        $content1 = 'Before "{[ @@this-is-not-a-post.sample-name ]}" and after.';
         $content2 = 'Before "" and after.';
         $this->assertEquals($content2, $engine->process($content1, $post_1_id));
 
         add_filter('nzymes_missing_post', function ($slug) use ($post_2_id) { return get_post($post_2_id); });
 
-        $content1 = 'Before "{[ @this-is-not-a-post.sample-name ]}" and after.';
+        $content1 = 'Before "{[ @@this-is-not-a-post.sample-name ]}" and after.';
         $content2 = 'Before "sample value 2" and after.';
-
-        $engine->debug_on = true;
         $this->assertEquals($content2, $engine->process($content1, $post_1_id));
-        $engine->debug_on = false;
     }
 }

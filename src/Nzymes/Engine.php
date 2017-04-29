@@ -242,7 +242,7 @@ class Nzymes_Engine {
      *   author_item := post "/author." field
      *   post_attr   := post ":" field
      *   author_attr := post "/author:" field
-     *   post        := \d+ | "@" slug | ""
+     *   post        := \d+ | "@" slug | "@@" slug | ""
      *   slug        := [\w+~-]+
      *   field       := [\w-]+ | string
      *
@@ -269,7 +269,7 @@ class Nzymes_Engine {
             'str_literal'  => '(?<str_literal>$string)',
             'literal'      => '(?<literal>$number|$str_literal)',
             'slug'         => '(?<slug>[\w+~-]+)',
-            'post'         => '(?<post>\d+|@$slug|)',
+            'post'         => '(?<post>\d+|@@$slug|@$slug|)',
             'field'        => '(?<field>[^|.=\]}]+|$string)',  // REM: spaces outside of strings are stripped out.
             'post_item'    => '(?<post_item>$post\.$field)',
             'author_item'  => '(?<author_item>$post/author\.$field)',
@@ -597,15 +597,21 @@ class Nzymes_Engine {
             case ( $post == '' ):
                 $result = $this->injection_post;
                 break;
+            case ( $post[0] == '@' && $post[1] == '@' ):
+                $post_id = $this->post_id_from_slug( $slug, array() );
+                if ( is_null( $post_id )
+                    && has_filter( 'nzymes_missing_post' )
+                    && $this->injection_author_can( Nzymes_Capabilities::create_dynamic_custom_fields ) ) {
+                    // nzymes_missing_post filters take a slug and return a WP_Post or null.
+                    $result = apply_filters( 'nzymes_missing_post', $post );
+                } else {
+                    $result = null;
+                }
+                break;
             case ( $post[0] == '@' ):
                 $post_id = $this->post_id_from_slug( $slug );
                 if (is_null( $post_id )) {
                     $result = null;
-                    if ( has_filter( 'nzymes_missing_post' )
-                        && $this->injection_author_can( Nzymes_Capabilities::create_dynamic_custom_fields ) ) {
-                        // nzymes_missing_post filters take a slug and return a WP_Post or null.
-                        $result = apply_filters( 'nzymes_missing_post', $slug );
-                    }
                 } else {
                     $result = get_post( $post_id );
                 }
@@ -628,13 +634,16 @@ class Nzymes_Engine {
     }
 
     protected
-    function post_id_from_slug($slug) {
-        global $wpdb;
+    function post_id_from_slug( $slug, $post_types = array( 'page', 'post' ) ) {
+        if (empty($post_types)) {
+            $post_types = array('');
+        }
         // nzymes_post_types filters take and return an array of post types to restrict lookup of slugs to.
-        $post_types = apply_filters( 'nzymes_post_types', array('page', 'post') );
+        $post_types = apply_filters( 'nzymes_post_types', $post_types );
         $post_types = array_map('esc_sql', $post_types );
         $types = implode("', '", $post_types);
         $order = implode(',', $post_types);  // No spaces around commas here, please!
+        global $wpdb;
         $result = $wpdb->get_var( "
                     SELECT `ID` 
                     FROM $wpdb->posts 
