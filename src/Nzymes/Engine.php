@@ -633,6 +633,14 @@ class Nzymes_Engine {
         return $result;
     }
 
+    /**
+     * Get the id of the post corresponding to the slug.
+     *
+     * @param string $slug
+     * @param array $post_types  Array of post types to restrict lookup to. Types are searched in the same order.
+     *
+     * @return null|integer
+     */
     protected
     function post_id_from_slug( $slug, $post_types = array( 'page', 'post' ) ) {
         if (empty($post_types)) {
