@@ -1049,4 +1049,31 @@ class Nzymes_EngineTest
         $this->assertEquals($content2, $engine->process($content1, $other_post));
     }
 
+    public
+    function test_nzymes_missing_post_hook_works()
+    {
+        $post_1_id = $this->factory->post->create();
+        add_post_meta($post_1_id, 'sample-name', 'sample value 1');
+
+        $user_2_id = $this->factory->user->create(array('role' => Nzymes_Capabilities::TrustedUser));
+        $post_2_id = $this->factory->post->create(array(
+            'post_title' => 'This is the target post.',
+            'post_author' => $user_2_id));
+        add_post_meta($post_2_id, 'sample-name', 'sample value 2');
+
+        $engine = new Nzymes_Engine();
+
+        $content1 = 'Before "{[ @this-is-not-a-post.sample-name ]}" and after.';
+        $content2 = 'Before "" and after.';
+        $this->assertEquals($content2, $engine->process($content1, $post_1_id));
+
+        add_filter('nzymes_missing_post', function ($slug) use ($post_2_id) { return get_post($post_2_id); });
+
+        $content1 = 'Before "{[ @this-is-not-a-post.sample-name ]}" and after.';
+        $content2 = 'Before "sample value 2" and after.';
+
+        $engine->debug_on = true;
+        $this->assertEquals($content2, $engine->process($content1, $post_1_id));
+        $engine->debug_on = false;
+    }
 }

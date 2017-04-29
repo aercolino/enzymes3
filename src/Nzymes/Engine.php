@@ -599,11 +599,15 @@ class Nzymes_Engine {
                 break;
             case ( $post[0] == '@' ):
                 $post_id = $this->post_id_from_slug( $slug );
-                $result = get_post( $post_id );
-                if ( is_null( $result )
-                    && has_filter( 'nzymes_missing_post' )
-                    && $this->injection_author_can( Nzymes_Capabilities::create_dynamic_custom_fields ) ) {
-                    $result = apply_filters( 'nzymes_missing_post', $slug );
+                if (is_null( $post_id )) {
+                    $result = null;
+                    if ( has_filter( 'nzymes_missing_post' )
+                        && $this->injection_author_can( Nzymes_Capabilities::create_dynamic_custom_fields ) ) {
+                        // nzymes_missing_post filters take a slug and return a WP_Post or null.
+                        $result = apply_filters( 'nzymes_missing_post', $slug );
+                    }
+                } else {
+                    $result = get_post( $post_id );
                 }
                 break;
             case ( is_numeric( $post ) ):
