@@ -79,6 +79,20 @@ class Nzymes_Plugin {
     function on_activation() {
         self::add_roles_and_capabilities();
 
+        $options = self::$options->get();
+        if (empty($options['first-activation'])) {
+            $time = new DateTime();
+            $time->setTimestamp(filemtime(NZYMES_PRIMARY));
+            $options['installation-time'] = $time->format(DateTime::ATOM);
+        }
+        if (empty($options['process-posts-after'])) {
+            $options['process-posts-after'] = $options['installation-time'];
+        }
+        if (empty($options['process-also-posts'])) {
+            $options['process-also-posts'] = array();
+        }
+        self::$options->set($options);
+
         return true;
     }
 
@@ -98,7 +112,6 @@ class Nzymes_Plugin {
 
     /**
      * Uninstalls this plugin, cleaning up all data.
-     * This is called from uninstall.php without instantiating an object of this class.
      */
     static public
     function on_uninstall() {

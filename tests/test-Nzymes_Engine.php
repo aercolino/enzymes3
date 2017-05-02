@@ -1073,4 +1073,51 @@ class Nzymes_EngineTest
         $content2 = 'Before "sample value 2" and after.';
         $this->assertEquals($content2, $engine->process($content1, $post_1_id));
     }
+
+    public
+    function test_process_options_work() {
+        $one_day = DateInterval::createFromDateString('1 day');
+        $half_day = DateInterval::createFromDateString('12 hours');
+
+        $today = new DateTimeImmutable('now', new DateTimeZone('UTC'));
+        $yesterday = $today->sub($one_day);
+        $before_yesterday = $yesterday->sub($half_day);
+        $after_yesterday = $yesterday->add($half_day);
+
+        $options = array(
+            'process-posts-after' => $yesterday->format(DATE_ATOM),
+            'process-also-posts'  => array()
+        );
+        Nzymes_Plugin::$options->set($options);
+        $engine = new Nzymes_Engine();
+
+        $engine->debug_on = !true;
+        $engine->debug_print(Nzymes_Plugin::$options->keysGet(['process-posts-after']));
+
+        $post_1_id = $this->factory->post->create(array(
+            'post_title' => 'A post of 12 hours before yesterday',
+            'post_date'  => $before_yesterday->format('Y-m-d H:i:s')
+        ));
+        $engine->debug_print(['post_date 1' => get_post($post_1_id)->post_date]);
+
+        $post_2_id = $this->factory->post->create(array(
+            'post_title' => 'A post of 12 hours after yesterday',
+            'post_date'  => $after_yesterday->format('Y-m-d H:i:s')
+        ));
+        $engine->debug_print(['post_date 2' => get_post($post_2_id)->post_date]);
+
+        $content1 = 'Before "{[ =hello world= ]}" and after.';
+        $content2 = 'Before "hello world" and after.';
+
+        // post_2 is processed, post_1 is not
+        $this->assertEquals($content1, $engine->process($content1, $post_1_id));
+        $this->assertEquals($content2, $engine->process($content1, $post_2_id));
+
+        $options['process-also-posts'] = array($post_1_id);
+        Nzymes_Plugin::$options->set($options);
+        $engine = new Nzymes_Engine();
+
+        // post_1 is processed now
+        $this->assertEquals($content2, $engine->process($content1, $post_1_id));
+    }
 }

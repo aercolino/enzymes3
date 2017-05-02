@@ -89,7 +89,7 @@ class Nzymes_Options {
     function keysGet( $keys, $username = null ) {
         $result = array_fill_keys( $keys, null );
         $data   = $this->get( $username );
-        $result = array_merge( $result, $data );
+        $result = array_merge( $result, array_intersect_key( $data, $result ) );
 
         return $result;
     }

@@ -39,6 +39,13 @@ class Nzymes_Engine {
     const NO_POST_AUTHOR = 1;
 
     /**
+     * Plugin options.
+     *
+     * @var array
+     */
+    protected $options;
+
+    /**
      * Current sequence.
      *
      * @var string
@@ -380,6 +387,8 @@ class Nzymes_Engine {
         register_shutdown_function( array( $this, 'echo_last_eval_error' ) );
 
         $this->extra = new stdClass();
+
+        $this->options = array();
     }
 
     /**
@@ -1366,6 +1375,28 @@ class Nzymes_Engine {
     }
 
     /**
+     * True if the plugin can process the injection post, according to site options.
+     *
+     * @return bool
+     */
+    public
+    function plugin_can_process_injection_post() {
+        if (empty($this->options)) {
+            $options = Nzymes_Plugin::$options->get();
+            $this->options['process-posts-after'] = DateTime::createFromFormat(DATE_ATOM, $options['process-posts-after']);
+            $this->options['process-also-posts'] = $options['process-also-posts'];
+        }
+
+        $post_time = new DateTime($this->injection_post->post_date);
+        if ($post_time >= $this->options['process-posts-after']) return true;
+
+        $post_id = $this->injection_post->ID;
+        if (in_array($post_id, $this->options['process-also-posts'])) return true;
+
+        return false;
+    }
+
+    /**
      * Process all the injections applied to the $content, always in the context of apply_filters().
      *
      * @param string      $content
@@ -1388,6 +1419,10 @@ class Nzymes_Engine {
         $this->injection_post = $this->get_injection_post( $post_id );
         if ( false === $this->injection_post ) {
             $this->debug_print('absorb exit: no post');
+            return $content;
+        }
+        if ( ! $this->plugin_can_process_injection_post() ) {
+            $this->debug_print('absorb exit: post excluded from Nzymes');
             return $content;
         }
         if ( ! $this->injection_author_can( Nzymes_Capabilities::inject ) ) {
