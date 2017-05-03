@@ -10,7 +10,7 @@ class Nzymes_Engine {
     /**
      * When Nzymes_Engine::process() is called, this special filter tag is internally used.
      */
-    const DIRECT_FILTER = 'nzymes_process';
+    const DIRECT_FILTER = '__nzymes__process';
 
     /**
      * Used internally for converting escaped injections '{{[..]}' to non matching strings '{-[..]}'.
@@ -609,10 +609,10 @@ class Nzymes_Engine {
             case ( $post[0] == '@' && $post[1] == '@' ):
                 $post_id = $this->post_id_from_slug( $slug, array() );
                 if ( is_null( $post_id )
-                    && has_filter( 'nzymes_missing_post' )
+                    && has_filter( '__nzymes__missing_post' )
                     && $this->injection_author_can( Nzymes_Capabilities::create_dynamic_custom_fields ) ) {
-                    // nzymes_missing_post filters take a slug and return a WP_Post or null.
-                    $result = apply_filters( 'nzymes_missing_post', $post );
+                    // __nzymes__missing_post filters take a slug and return a WP_Post or null.
+                    $result = apply_filters( '__nzymes__missing_post', $post );
                 } else {
                     $result = null;
                 }
@@ -655,8 +655,8 @@ class Nzymes_Engine {
         if (empty($post_types)) {
             $post_types = array('');
         }
-        // nzymes_post_types filters take and return an array of post types to restrict lookup of slugs to.
-        $post_types = apply_filters( 'nzymes_post_types', $post_types );
+        // __nzymes__post_types filters take and return an array of post types to restrict lookup of slugs to.
+        $post_types = apply_filters( '__nzymes__post_types', $post_types );
         $post_types = array_map('esc_sql', $post_types );
         $types = implode("', '", $post_types);
         $order = implode(',', $post_types);  // No spaces around commas here, please!

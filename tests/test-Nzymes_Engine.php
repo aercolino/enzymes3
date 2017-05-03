@@ -988,7 +988,7 @@ class Nzymes_EngineTest
 
         $injection_post = $this->factory->post->create_and_get();
 
-        add_filter('nzymes_post_types', function ($post_types) { return array_reverse($post_types); });
+        add_filter('__nzymes__post_types', function ($post_types) { return array_reverse($post_types); });
 
         $engine = new Nzymes_Engine();
 
@@ -1067,7 +1067,7 @@ class Nzymes_EngineTest
         $content2 = 'Before "" and after.';
         $this->assertEquals($content2, $engine->process($content1, $post_1_id));
 
-        add_filter('nzymes_missing_post', function ($slug) use ($post_2_id) { return get_post($post_2_id); });
+        add_filter('__nzymes__missing_post', function ($slug) use ($post_2_id) { return get_post($post_2_id); });
 
         $content1 = 'Before "{[ @@this-is-not-a-post.sample-name ]}" and after.';
         $content2 = 'Before "sample value 2" and after.';
