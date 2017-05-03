@@ -18,7 +18,6 @@ function _manually_activate_plugin() {
     echo "\n  - WP_Version: $wp_version";
     echo "\n  - Roles: " . join(', ', wp_roles()->get_names() );
     echo "\n  - Administrator Capabilities: " . join(', ', array_keys(array_filter(get_role('administrator')->capabilities)));
-
     echo "\n  - " . Nzymes_Plugin::$options->name() . ": " . print_r(Nzymes_Plugin::$options->get(), true);
 }
 
