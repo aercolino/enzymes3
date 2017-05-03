@@ -13,7 +13,7 @@ class Nzymes_Options {
     public
     function name( $username = null ) {
         $result = self::PREFIX . ( $username
-                ? $username
+                ? 'options_for_' . $username
                 : 'global_options' );
 
         return $result;
