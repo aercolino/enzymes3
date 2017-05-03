@@ -10,7 +10,7 @@ class Nzymes_Options {
      *
      * @return string
      */
-    protected
+    public
     function name( $username = null ) {
         $result = self::PREFIX . ( $username
                 ? $username

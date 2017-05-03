@@ -17,11 +17,9 @@ function _manually_activate_plugin() {
     global $wp_version;
     echo "\n  - WP_Version: $wp_version";
     echo "\n  - Roles: " . join(', ', wp_roles()->get_names() );
-    echo "\n  - Administrator Capabilities: " . join(', ', array_keys(array_filter(get_role('administrator')->capabilities))) . "\n\n";
+    echo "\n  - Administrator Capabilities: " . join(', ', array_keys(array_filter(get_role('administrator')->capabilities)));
 
-    $options = Nzymes_Plugin::$options->get();
-    echo "\n  - process-posts-after: " . $options['process-posts-after'];
-    echo "\n  - process-also-posts: " . print_r($options['process-also-posts'], true);
+    echo "\n  - " . Nzymes_Plugin::$options->name() . ": " . print_r(Nzymes_Plugin::$options->get(), true);
 }
 
 function _manually_load_plugin() {
