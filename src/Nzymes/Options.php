@@ -1,7 +1,7 @@
 <?php
 
 class Nzymes_Options {
-    const PREFIX = 'nzymes.';
+    const PREFIX = '__nzymes__';
 
     /**
      * Returns the site/user option name.
