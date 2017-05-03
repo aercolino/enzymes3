@@ -54,8 +54,8 @@ class Nzymes_Options {
     public
     function get( $username = null ) {
         $name   = $this->name( $username );
-        $result = get_option( $name, array() );
-
+        $result = get_option( $name, json_encode(array()) );
+        $result = json_decode($result, true);
         return $result;
     }
 
@@ -74,7 +74,7 @@ class Nzymes_Options {
         $autoload = $username
             ? 'no'
             : 'yes';
-        add_option( $name, $value, null, $autoload );
+        add_option( $name, json_encode($value), null, $autoload );
     }
 
     /**
