@@ -1,31 +1,36 @@
 === Nzymes ===
 Contributors: aercolino
-Donate link: http://github.com/aercolino
-Tags: inject, custom fields, attributes, post, author, php code, enzymes, nzymes
+Donate link: https://www.paypal.me/AndreaErcolino
+Tags: inject, custom fields, attributes, post, author, php, code, enzymes
 Requires at least: 4.7
 Tested up to: 4.7.4
 Stable tag: 1.0.0
 License: GPLv2 or later
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
 
-Boost your posts with Nzymes injections.
+Boost your posts with Nzymes injections. Safely use PHP in posts' title, excerpt, and content. WordPress 4.7+ PHP 5.6+
 
 
 
 == Description ==
 
+*Your Problem*
 
-If you want to insert PHP code into posts content so safely that you can also allow trusted authors to do so themselves, then Nzymes is what you are looking for.
+* You want to add a thing to a post, but a plugin might not exist.
+* That thing is already available or can be associated to a post or author.
 
-1. You want to add a thing to a post, but a plugin might not exist.
-1. That thing is already available or can be associated to a post or author.
-1. You know how to program in PHP or another trusted author can do it for you.
+*Nzymes Solution*
+
+* Insert PHP code into posts' content easily and safely.
+* Program features by yourself or trust some of your blog's authors.
+
+
 
 = Example =
 
-When citing authors in a post, you'd like to show the number of posts they published. Maybe there is a plugin for that, maybe there is not. Anyway, how difficult would it be to code? Quite easy, actually, given that WordPress has a function to do exactly that: `count_user_posts`.
+When citing authors in a post, you'd like to show the number of posts they published. Maybe there is a plugin for that, maybe there is not. Anyway, how difficult to code would it be? Quite easy, actually, given that WordPress has a function to do exactly that (*count_user_posts*).
 
-If you used Nzymes, you could cite authors like this
+With Nzymes, you could cite authors like this
 
 > As you know, {[ =john= | @my.cite(1) ]} and I are very good friends.
 
@@ -33,10 +38,11 @@ Which could be shown like this
 
 > As you know, John (42 posts) and I are very good friends.
 
-With Nzymes many things are a couple of PHP lines away.
+With Nzymes, you are the plugin because many things are just a couple of PHP lines away.
 
-* Why not change the style of "(42 posts)"?
-* Why not add a link to John's posts?
+* Why not display "(42 posts)" in red?
+* Why not link "(42 posts)" to John's posts?
+
 
 = At a glance =
 
@@ -45,6 +51,13 @@ Nzymes injections are expressions like this: {[ enzyme-1 | enzyme-2 | … enzyme
 * Nzymes automatically filters title, excerpt, and content of a post looking for injections.
 * For each found injection, it orderly replaces each enzyme with its value, left to right.
 * Then it replaces the value of the last enzyme to the whole injection.
+
+
+= Reach out =
+
+* Community: https://www.facebook.com/NzymesPlugin/
+* Download: https://wordpress.org/plugins/nzymes/
+* Develop: https://github.com/aercolino/nzymes
 
 
 
@@ -61,23 +74,21 @@ Nzymes injections are expressions like this: {[ enzyme-1 | enzyme-2 | … enzyme
 
 1. Its literal value.
 1. The value referenced by the locator (transclusion).
-1. The value returned by evaluating the code referenced by the locator (execution).
+1. The value returned by evaluating the PHP code referenced by the locator (execution).
 
 
 = Is Nzymes secure? =
 
-1. Nzymes defines a rich set of capabilities and roles.
+1. Nzymes enforces a rich set of capabilities and roles.
 1. After activating Nzymes, only administrators have all the capabilities.
-1. To allow authors to use Nzymes, administrators can assign roles to them as they see fit.
+1. To allow authors to use Nzymes, administrators explicitly assign roles as they see fit.
 
-For example, to use an execution enzyme from a post of some coder into a post of some injector, first of all the coder must be able to `create_dynamic_custom_fields` then, additionally,
-* either the injector and the coder are the same person
-* or the injector can `use_others_custom_fields` and the coder can `share_dynamic_custom_fields`.
+For example, to execute code of some author into a post of some injector, first of all the author must be able to `create_dynamic_custom_fields`. Then, additionally, either the injector and the author are the same person or the injector can `use_others_custom_fields` and the author can `share_dynamic_custom_fields`.
 
 
-= Does Nzymes replaces Enzymes? =
+= Does Nzymes replace Enzymes? =
 
-If you currently use my [Enzymes](https://wordpress.org/plugins/enzymes/) plugin, then both can coexist in your blog. Nzymes is much easier to use and it's also much more powerful than Enzymes. Unfortunately Enzymes' enzymes (notice the different capitalization) and Nzymes' enzymes are not always compatible. Therefore, Nzymes will only process enzymes injected after its installation. See the manual for how to bend this rule.
+Yes! However, if you currently use [Enzymes](https://wordpress.org/plugins/enzymes/), then both can coexist in your blog. Nzymes is much easier to use and it's also much more powerful than Enzymes. Unfortunately, sometimes they are incompatible on the same post. Therefore, Nzymes will only process enzymes injected in posts created after its installation. See the manual to know how you can break this rule.
 
 
 = There is so much more to Nzymes! =
