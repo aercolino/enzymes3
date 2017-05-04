@@ -52,6 +52,8 @@ Nzymes injections are expressions like this: {[ enzyme-1 | enzyme-2 | … enzyme
 * For each found injection, it orderly replaces each enzyme with its value, left to right.
 * Then it replaces the value of the last enzyme to the whole injection.
 
+Manual: http://andowebsit.es/blog/noteslog.com/nzymes/
+
 
 = Reach out =
 
@@ -79,11 +81,17 @@ Nzymes injections are expressions like this: {[ enzyme-1 | enzyme-2 | … enzyme
 
 = Is Nzymes secure? =
 
-1. Nzymes enforces a rich set of capabilities and roles.
+Nzymes enforces a rich set of capabilities and roles.
+
 1. After activating Nzymes, only administrators have all the capabilities.
 1. To allow authors to use Nzymes, administrators explicitly assign roles as they see fit.
 
 For example, to execute code of some author into a post of some injector, first of all the author must be able to `create_dynamic_custom_fields`. Then, additionally, either the injector and the author are the same person or the injector can `use_others_custom_fields` and the author can `share_dynamic_custom_fields`.
+
+
+= OK, then. Where's the manual? =
+
+* http://andowebsit.es/blog/noteslog.com/nzymes/
 
 
 = Does Nzymes replace Enzymes? =
@@ -91,22 +99,16 @@ For example, to execute code of some author into a post of some injector, first 
 Yes! However, if you currently use [Enzymes](https://wordpress.org/plugins/enzymes/), then both can coexist in your blog. Nzymes is much easier to use and it's also much more powerful than Enzymes. Unfortunately, sometimes they are incompatible on the same post. Therefore, Nzymes will only process enzymes injected in posts created after its installation. See the manual to know how you can break this rule.
 
 
-= There is so much more to Nzymes! =
-
-* Read the manual at http://andowebsit.es/blog/noteslog.com/nzymes/.
-
 
 == Installation ==
 
-1. Upload the plugin zip file.
-1. Activate the plugin.
-
-
-== Screenshots ==
+1. Upload the zip file.
+1. Activate.
 
 
 
 == Changelog ==
 
 = 1.0.0 =
-First version of [Nzymes](https://wordpress.org/plugins/nzymes/).
+
+First version.
