@@ -485,11 +485,11 @@ class Nzymes_EngineTest
         $result = $this->call_method('clean_up', array(
                 '
         /* this is how we pass indexed and associative arrays to a function */
-        =one \{\[to\]\} three= | 1 | 2 | 3 | array(3) | hash(1) | 456.sum(1) /* here the post number 456 is supposed to contain
+        =one \{\[to\]\} three= | 1 | 2 | 3 | array(3) | assoc(1) | 456.sum(1) /* here the post number 456 is supposed to contain
         a custom field whose name is "sum" and whose value should be some code that can access the $received argument
         array("one {[to]} three" => array(1, 2, 3)) with list($received) = $arguments. */'
         ));
-        $this->assertEquals('=one {[to]} three=|1|2|3|array(3)|hash(1)|456.sum(1)', $result);
+        $this->assertEquals('=one {[to]} three=|1|2|3|array(3)|assoc(1)|456.sum(1)', $result);
     }
 
     public
@@ -656,14 +656,14 @@ class Nzymes_EngineTest
     {
         $post_id = $this->factory->post->create();
         add_post_meta($post_id, 'sample-name', '
-        list($hash) = $arguments;
-        $result = $hash["a hundred"] * array_sum($hash["twenty and three"]);
+        list($assoc) = $arguments;
+        $result = $assoc["a hundred"] * array_sum($assoc["twenty and three"]);
         return $result;
         ');
-        $post    = get_post($post_id);
+        $post   = get_post($post_id);
         $engine = new Nzymes_Engine();
 
-        $content1 = 'Before "{[ =whatever here= | =a hundred= | 100 | =twenty and three= | 20 | 3 | array(2) | hash(2) | .sample-name(1) ]}" and after.';
+        $content1 = 'Before "{[ =whatever here= | =a hundred= | 100 | =twenty and three= | 20 | 3 | array(2) | assoc(2) | .sample-name(1) ]}" and after.';
         $content2 = 'Before "2300" and after.';
         $this->assertEquals($content2, $engine->process($content1, $post));
     }
@@ -947,8 +947,8 @@ class Nzymes_EngineTest
     {
         $user_id = $this->factory->user->create(array('role' => Nzymes_Capabilities::Coder));
         add_user_meta($user_id, 'sample-name', '
-        list($hash) = $arguments;
-        $result = $hash["a hundred"] * array_sum($hash["twenty and three"]);
+        list($assoc) = $arguments;
+        $result = $assoc["a hundred"] * array_sum($assoc["twenty and three"]);
         return $result;
         ');
         $post_id = $this->factory->post->create(array('post_author' => $user_id));
@@ -956,7 +956,7 @@ class Nzymes_EngineTest
 
         $engine = new Nzymes_Engine();
 
-        $content1 = 'Before "{[ =whatever here= | =a hundred= | 100 | =twenty and three= | 20 | 3 | array(2) | hash(2) | /author.sample-name(1) ]}" and after.';
+        $content1 = 'Before "{[ =whatever here= | =a hundred= | 100 | =twenty and three= | 20 | 3 | array(2) | assoc(2) | /author.sample-name(1) ]}" and after.';
         $content2 = 'Before "2300" and after.';
         $this->assertEquals($content2, $engine->process($content1, $post));
     }

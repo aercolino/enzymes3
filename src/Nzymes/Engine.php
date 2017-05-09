@@ -253,7 +253,7 @@ class Nzymes_Engine {
      *   slug        := [\w+~-]+
      *   field       := [\w-]+ | string
      *
-     * execution := ("array" | "hash" | "defer" | item) "(" \d* ")"
+     * execution := ("array" | "assoc" | "defer" | item) "(" \d* ")"
      * ---
      *
      * These (key, value) pairs follow the pattern: "'rule_left' => '(?<rule_left>rule_right)';".
@@ -285,7 +285,7 @@ class Nzymes_Engine {
             'author_attr'  => '(?<author_attr>$post/author:$field)',
             'attr'         => '(?<attr>$post_attr|$author_attr)',
             'transclusion' => '(?<transclusion>$item|$attr)',
-            'execution'    => '(?<execution>(?:\b(?:array|hash|defer)\b|$item)\((?<num_args>\d*)\))',
+            'execution'    => '(?<execution>(?:\b(?:array|assoc|defer)\b|$item)\((?<num_args>\d*)\))',
             'enzyme'       => '(?<enzyme>(?:$execution|$transclusion|$literal))',
             'sequence'     => '(?<sequence>$enzyme(\|$enzyme)*)',
             'injection'    => '(?<injection>{[$sequence]})',
@@ -992,7 +992,7 @@ class Nzymes_Engine {
             case ( strpos( $execution, 'array(' ) === 0 && $num_args > 0 ):
                 $result = $this->catalyzed->pop( $num_args );
                 break;
-            case ( strpos( $execution, 'hash(' ) === 0 && $num_args > 0 ):
+            case ( strpos( $execution, 'assoc(' ) === 0 && $num_args > 0 ):
                 $result    = array();
                 $arguments = $this->catalyzed->pop( 2 * $num_args );
                 for ( $i = 0, $i_top = 2 * $num_args; $i < $i_top; $i += 2 ) {
