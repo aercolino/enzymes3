@@ -857,9 +857,9 @@ __nzymes__global_options
 
 ## There is Nzymes and Enzymes
 
-[Enzymes](https://wordpress.org/plugins/enzymes/) (first released in 2007) still perfectly works after many years and many WordPress versions and PHP versions in between.
+[Enzymes](https://wordpress.org/plugins/enzymes/) (which I first released in 2007) still perfectly works after many years and many WordPress versions and PHP versions in between.
 
-Then I got a new idea for Enzymes: change it to process its sequence of enzymes like [Reverse Polish Notation](https://en.wikipedia.org/wiki/Reverse_Polish_notation), thus removing the need for passing arguments in paretheses, which I never liked.
+Some time ago I got a new idea for Enzymes: change it to process its sequence of enzymes in a [Reverse Polish Notation](https://en.wikipedia.org/wiki/Reverse_Polish_notation) fashion, thus removing the need for passing arguments in paretheses, a feature which I never liked.
 
 Unfortunaltely, when I designed Enzymes, I decided to store some user's made files (called templates) in a subfolder of the plugin. This was a mistake because WordPress always deletes a plugin (without saving a backup before) when updating it to a new version.
 
@@ -870,9 +870,9 @@ To protect the Enzyme's 40 users (as of 2017) I was forced to change the name of
 
 Nzymes is completely independent from Enzymes and these two plugins can coexist, without ever interfering with each other. In fact, when you install Nzymes, it creates a global option with the current date, which it will later use to process only injections in posts created after that date.
 
-If you want to change that date, for example when you are migrating old Enzymes injections to new Nzymes injection, to make Nzymes process also old posts, just go to the Settings page and change the current page URL from `http.../wp-admin/options-general.php` to `http.../wp-admin/options.php`.
+If you want to change that date, for example when you are migrating old Enzymes injections, to make Nzymes process also old posts, just go to your Settings page and change the current page URL from `http.../wp-admin/options-general.php` to `http.../wp-admin/options.php`.
 
-Then, near the top of the page you should see the `__nzymes__global_options` entry, whose value would be something like this (but in one line)
+You'll get a long list of options, and near the top of the page you should see the `__nzymes__global_options` entry, whose value would be something like this (but in one line)
 
 ```
 {
@@ -913,7 +913,9 @@ Nzymes will process all posts created after `2017-05-10` at `12:24:36 UTC` as we
 
 ### How to migrate Enzymes injections to Nzymes
 
-You can transform, if you want, Enzymes injections so that Nzymes will process them with its improved syntax and engine.
+You can transform, if you want, Enzymes injections to Nzymes syntax so that you can force the latter to process posts created before its installation, thus taking advantage of its many improvements.
+
+#### Find posts with injections
 
 Using the [Debug Bar Console](https://wordpress.org/plugins/debug-bar-console/) plugin, you can find all posts where you have injections by running the following query in its SQL tab.
 
@@ -934,22 +936,109 @@ AND CONCAT_WS(' - ', post_title, post_content, post_excerpt) LIKE '%{[%'
 |post|67|test-thumb|
 
 
-#### Example 1
+#### Example
 
-Nzymes and Enzymes share most of the syntax and, if they were to process the same post, it could happen that the former, which always runs before the latter, recognizes an injection as its own and tries to process it but in the end it fails because that injection was really meant for the other.
+You have this setup to decorate and HTML-escape some text.
 
-The problem is that recognizing and failing make the injection processed, thus replacing it with a wrong result. Of course, if the injection contains elements that are not compatible, then Nzymes will simply reject it, thus offering Enzymes its chance to process it later.
+*Injection*
 
-If you stick to the rule that posts created before installing Nzymes always belong to Enzymes (this is the default), then you won't have any problems. But if you try to include a post from the past into the scope of Nzymes, or you add an injection with Enzymes, then Nzymes will try to process all its injections before Enzymes.
+```
+{[ .some-text | 1.pre() ]}
+```
+
+*Code*
+
+```php
+return  '<pre style="padding: 20px;">' . htmlspecialchars( $this->pathway ) . '</pre>';
+```
+
+##### Solution
+
+1. Change the injection in the posts to:
+
+    ```
+    {[ .some-text | 1.pre(1) ]}
+    ```
+
+1. Change the code into the `pre` custom field to:
+
+    ```php
+    list( $stuff ) = $arguments; 
+    return  '<pre style="padding: 20px;">' . htmlspecialchars( $stuff ) . '</pre>';
+    ```
 
 
-#### Example 2
+#### Example
 
+You have this setup to highlight and HTML-escape some code.
+
+*Injection*
+
+```
+{[ .some-code | 1.hilite(=php,ln-1=) ]}
+```
+
+*Code*
+
+```php
+$arguments = explode( ',', $this->substrate ); 
+list( $language, $numbers ) = array_pad( $arguments, 2, null ); 
+ 
+$pre_class = ''; 
+$numbers   = trim( $numbers ); 
+if ( $numbers ) { 
+    $pre_class = ' class="' . $numbers . '"'; 
+} 
+ 
+$code_class = ''; 
+$language   = trim( $language ); 
+if ( $language ) { 
+    $code_class = ' class="' . $language . '"'; 
+} 
+ 
+$code     = htmlspecialchars( $this->pathway ); 
+$template = '<pre%s><code%s>%s</code></pre>'; 
+$result   = sprintf( $template, $pre_class, $code_class, $code ); 
+ 
+return $result;
+```
+
+##### Solution
+
+1. Change the injection in the posts to:
+
+    ```
+    {[ .some-code | =php= | =ln-1= | 1.hilite(3) ]}
+    ```
+
+1. Change the code into the `hilite` custom field to:
+
+    ```php
+    list( $code, $language, $numbers ) = array_pad( $arguments, 3, null ); 
+     
+    $pre_class = ''; 
+    $numbers   = trim( $numbers ); 
+    if ( $numbers ) { 
+        $pre_class = ' class="' . $numbers . '"'; 
+    } 
+     
+    $code_class = ''; 
+    $language   = trim( $language ); 
+    if ( $language ) { 
+        $code_class = ' class="' . $language . '"'; 
+    } 
+     
+    $code     = htmlspecialchars( $code ); 
+    $template = '<pre%s><code%s>%s</code></pre>'; 
+    $result   = sprintf( $template, $pre_class, $code_class, $code ); 
+     
+    return $result;
+    ```
 
 
 ### Nzymes vs Enzymes
 
-However, Nzymes is substantially better than Enzyme 2.3. Here are all the differences.
+Nzymes is substantially better than Enzyme. Have a look at the many differences.
 
 |Feature|Enzyme|Nzyme|
 |---|---|---|
