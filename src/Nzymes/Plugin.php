@@ -168,7 +168,7 @@ class Nzymes_Plugin {
     static protected 
     function add_options() {
         $options = self::$options->get();
-        if (empty($options['first-activation'])) {
+        if (empty($options['installation-time'])) {
             $time = new DateTime();
             $time->setTimestamp(filemtime(NZYMES_PRIMARY));
             $options['installation-time'] = $time->format(DateTime::ATOM);
