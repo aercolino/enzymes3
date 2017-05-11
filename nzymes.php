@@ -28,6 +28,7 @@ defined( 'ABSPATH' ) || die( '<script>
     window.location.href="https://wordpress.org/plugins/nzymes/";
 </script>' );
 
+define('NZYMES_VERSION', '1.0.0');
 define('NZYMES_PRIMARY', __FILE__);
 require_once dirname( NZYMES_PRIMARY ) . '/src/Nzymes/Plugin.php';
 

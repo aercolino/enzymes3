@@ -179,6 +179,7 @@ class Nzymes_Plugin {
         if (empty($options['process-also-posts'])) {
             $options['process-also-posts'] = array();
         }
+        $options['version'] = NZYMES_VERSION;
         self::$options->set($options);
     }
 
