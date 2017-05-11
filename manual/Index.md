@@ -1,4 +1,17 @@
-# Index
+# Nzymes
+
+
+> **enzyme**: 
+a substance produced by a living organism which acts as a catalyst to bring about a specific biochemical reaction.
+
+Nzymes is a WordPress plugin for injecting enzymes into a post.
+The [Hello, World!](https://en.wikipedia.org/wiki/%22Hello,_World!%22_program) injection is: `{[ =Hello, World!= ]}`, and an injection is always an expression like this: `{[ enzyme-1 | enzyme-2 | ... enzyme-N ]}`.
+
+Nzymes automatically filters title, excerpt and content of any post type, looking for injections. It orderly computes the result of each enzyme of an injection and replaces the result of the last enzyme to the whole injection.
+
+The result of the `=Hello, World!=` enzyme is `Hello, World!` thus, if we put the `{[ =Hello, World!= ]}` injection into the title of a post, that post would be published with a `Hello, World!` title.
+
+An enzyme can have one of three origins (itself, post, and author), one of three forms (literal, attribute, and custom field), and one of two behaviours (transclusion and execution). By combining these characteristics together, Nzymes allows you to neatly improve your posts.
 
 
 
