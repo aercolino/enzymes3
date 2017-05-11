@@ -234,97 +234,97 @@ However, Nzymes roles not only document how the different capabilities work toge
 
 * **Nzymes User**
 
-    Real name: `nzymes.User`
+    Role name: `__nzymes__User`
     
     Capabilities:
-    `nzymes.inject`
-    `nzymes.use_own_attributes`
-    `nzymes.use_own_custom_fields`
-    `nzymes.create_static_custom_fields`
+    `__nzymes__inject`
+    `__nzymes__use_own_attributes`
+    `__nzymes__use_own_custom_fields`
+    `__nzymes__create_static_custom_fields`
 
 * **Nzymes Privileged User**
 
-    Real name: `nzymes.PrivilegedUser`
+    Role name: `__nzymes__PrivilegedUser`
     
     Capabilities: all those of **Nzymes User** plus
-    `nzymes.use_others_custom_fields`
+    `__nzymes__use_others_custom_fields`
 
 * **Nzymes Trusted User**
 
-    Real name: `nzymes.TrustedUser`
+    Role name: `__nzymes__TrustedUser`
     
     Capabilities: all those of **Nzymes Privileged User** plus
-    `nzymes.share_static_custom_fields`
+    `__nzymes__share_static_custom_fields`
 
 * **Nzymes Coder**
 
-    Real name: `nzymes.Coder`
+    Role name: `__nzymes__Coder`
     
     Capabilities: all those of **Nzymes Trusted User** plus
-    `nzymes.create_dynamic_custom_fields`
+    `__nzymes__create_dynamic_custom_fields`
 
 * **Nzymes Trusted Coder**
 
-    Real name: `nzymes.TrustedCoder`
+    Role name: `__nzymes__TrustedCoder`
     
     Capabilities: all those of **Nzymes Coder** plus
-    `nzymes.share_dynamic_custom_fields`
+    `__nzymes__share_dynamic_custom_fields`
 
 
 #### Capabilities
 
 * **inject**
 
-    Real name: `nzymes.inject`
+    Capability name: `__nzymes__inject`
     
     *It allows a user to inject enzymes into her posts.*
 
 * **use_own_attributes**
 
-    Real name: `nzymes.use_own_attributes`
+    Capability name: `__nzymes__use_own_attributes`
     
     *It allows a user to make her enzymes with her own attributes.*
 
 * **use_others_attributes**
 
-    Real name: `nzymes.use_others_attributes`
+    Capability name: `__nzymes__use_others_attributes`
     
     *It allows a user to make her enzymes with other users’ attributes.
     For privacy reasons, only the admin has this capability, i.e. it’s not included into any role. (just a default setting)*
 
 * **use_own_custom_fields**
 
-    Real name: `nzymes.use_own_custom_fields`
+    Capability name: `__nzymes__use_own_custom_fields`
     
     *It allows a user to make her enzymes with her own custom fields.*
 
 * **use_others_custom_fields**
 
-    Real name: `nzymes.use_others_custom_fields`
+    Capability name: `__nzymes__use_others_custom_fields`
     
     *It allows a user to make her enzymes with other users’ custom fields.*
 
 * **create_static_custom_fields**
 
-    Real name: `nzymes.create_static_custom_fields`
+    Capability name: `__nzymes__create_static_custom_fields`
     
     *It allows a user to create enzymes using non-evaluated custom fields.*
 
 * **create_dynamic_custom_fields**
 
-    Real name: `nzymes.create_dynamic_custom_fields`
+    Capability name: `__nzymes__create_dynamic_custom_fields`
     
     *It allows a user to create enzymes using evaluated custom fields.*
 
 * **share_static_custom_fields**
 
-    Real name: `nzymes.share_static_custom_fields`
+    Capability name: `__nzymes__share_static_custom_fields`
     
     *It allows a user to share her enzymes using non-evaluated custom fields.*
 
 * **share_dynamic_custom_fields**
 
-    Real name: `nzymes.share_dynamic_custom_fields`
+    Capability name: `__nzymes__share_dynamic_custom_fields`
     
     *It allows a user to share her enzymes using evaluated custom fields.*
 
@@ -831,33 +831,131 @@ An Nzymes injection is an expression written following the Reverse Polish notati
 Note that it’s not completely by chance that the processing ends with an empty internal stack. In fact RPN calculators consider that a final non-empty stack is an error condition. The practical reason is that you are supposed to push on the stack only something that is going to be used later. If something couldn’t be used before the end of the expression, there should be an error somewhere. Nzymes is forgiving here: a final non-empty internal stack is not an error.
 
 
-### The Nzymes prefix is always `__nzymes__`
-
-
 ### Difference between `draft` and `publish`
 
 
-### The `nzymes_post_types` hook
+
+### The prefix is `__nzymes__`
+
+Whenever a prefix is needed to 
+
+```
+__nzymes__post_types
+__nzymes__missing_post
+__nzymes__global_options
+```
+
+### Hooks
+
+#### The `__nzymes__post_types` hook
 
 
-### The `nzymes_missing_post` hook
+
+#### The `__nzymes__missing_post` hook
 
 
-## Nzymes vs Enzymes
 
-Enzymes 2.3 still works flawlessly after 10 years and many WordPress and PHP versions in between. Due to storing user's files in a subfolder of the folder of the plugin and given that WordPRess doesn't allow to back them up before updationg a plugin to a new version, I couldn’t offer a direct automatic update from Enzymes 2.3 to Enzymes 3.
+## There is Nzymes and Enzymes
 
-So I had to go with the only professional update path that would guarantee Enzymes 2.3 users the expected experience.
+[Enzymes](https://wordpress.org/plugins/enzymes/) (first released in 2007) still perfectly works after many years and many WordPress versions and PHP versions in between.
 
-Nzymes is a brand new plugin that shares almost the same syntax of the Enzymes 2 injections. It is completely independent from Enzymes 2.3 and you can, in fact, install and use both at the same time without any issue (not on the same posts, though).
+Then I got a new idea for Enzymes: change it to process its sequence of enzymes like [Reverse Polish Notation](https://en.wikipedia.org/wiki/Reverse_Polish_notation), thus removing the need for passing arguments in paretheses, which I never liked.
+
+Unfortunaltely, when I designed Enzymes, I decided to store some user's made files (called templates) in a subfolder of the plugin. This was a mistake because WordPress always deletes a plugin (without saving a backup before) when updating it to a new version.
+
+To protect the Enzyme's 40 users (as of 2017) I was forced to change the name of the plugin from Enzymes to Nzymes, thus releasing not an update (from 2.3 to 3) but a brand new plugin (at 1.0), formally unrelated to the original one.
+
+
+### Use Nzymes without worrying about Enzymes
+
+Nzymes is completely independent from Enzymes and these two plugins can coexist, without ever interfering with each other. In fact, when you install Nzymes, it creates a global option with the current date, which it will later use to process only injections in posts created after that date.
+
+If you want to change that date, for example when you are migrating old Enzymes injections to new Nzymes injection, to make Nzymes process also old posts, just go to the Settings page and change the current page URL from `http.../wp-admin/options-general.php` to `http.../wp-admin/options.php`.
+
+Then, near the top of the page you should see the `__nzymes__global_options` entry, whose value would be something like this (but in one line)
+
+```
+{
+  "installation-time":   "2017-05-10T12:24:36+00:00",
+  "process-posts-after": "2017-05-10T12:24:36+00:00",
+  "process-also-posts":  [],
+  "version":             "1.0.0"
+}
+```
+
+Please, ignore all but the following settings.
+
+#### process-posts-after
+
+All posts created after this date will be processed by Nzymes.
+
+* Respect the format of the date.
+
+#### process-also-posts
+
+All posts whose IDs belong to this list will be processed by Nzymes, independently from their creation date. 
+
+* Use commas to separate IDs.
+
+*Example* 
+
+```
+...
+"process-posts-after": "2017-05-10T12:24:36+00:00",
+"process-also-posts":  [5,33],
+...
+```
+
+*Result* 
+
+Nzymes will process all posts created after `2017-05-10` at `12:24:36 UTC` as well as posts with IDs `5` and `33` (even if created before that date).
+
+
+### How to migrate Enzymes injections to Nzymes
+
+You can transform, if you want, Enzymes injections so that Nzymes will process them with its improved syntax and engine.
+
+Using the [Debug Bar Console](https://wordpress.org/plugins/debug-bar-console/) plugin, you can find all posts where you have injections by running the following query in its SQL tab.
+
+```sql
+SELECT post_type, ID, post_name
+FROM wp_posts 
+WHERE post_status != 'inherit'
+AND CONCAT_WS(' - ', post_title, post_content, post_excerpt) LIKE '%{[%'
+```
+
+*Example of Result*
+
+|post_type|ID|post_name|
+|---|---|---|
+|post|5 |first-nzymes-test|
+|post|33|another-tes|
+|post|50|__trashed-2|
+|post|67|test-thumb|
+
+
+#### Example 1
+
+Nzymes and Enzymes share most of the syntax and, if they were to process the same post, it could happen that the former, which always runs before the latter, recognizes an injection as its own and tries to process it but in the end it fails because that injection was really meant for the other.
+
+The problem is that recognizing and failing make the injection processed, thus replacing it with a wrong result. Of course, if the injection contains elements that are not compatible, then Nzymes will simply reject it, thus offering Enzymes its chance to process it later.
+
+If you stick to the rule that posts created before installing Nzymes always belong to Enzymes (this is the default), then you won't have any problems. But if you try to include a post from the past into the scope of Nzymes, or you add an injection with Enzymes, then Nzymes will try to process all its injections before Enzymes.
+
+
+#### Example 2
+
+
+
+### Nzymes vs Enzymes
 
 However, Nzymes is substantially better than Enzyme 2.3. Here are all the differences.
 
 |Feature|Enzyme|Nzyme|
 |---|---|---|
 |Controlled access|Enzymes 2.3 has no roles nor permissions: either you activate the plugin and everything is available to everyone or… well, you deactivate it.|Nzymes has enough roles and permissions to allow you (the admin) to fine tune the right access level for the right users.|
-|Reverse Polish Notation|Enzymes 2.3 interprets injections from left to right by means of esoteric concepts: the pathway and the content. It’s a bit complicated.|Nzymes allows blog owners to effortlessly read an injection and foresee its result. The value returned by an enzyme replaces the enzyme (and all of its arguments, if any) in the injection. The value returned by the last enzyme replaces all the injection. All output is captured and sent to the browser’s console.|
-|Listed arguments|Enzymes 2.3 executions’ arguments, expressed like `locator(=arg-1, arg-2=)` are passed to the code at `locator` by means of an esoteric concept: the substrate. It’s a bit complicated and not very flexible.|Nzymes executions’ arguments, like `arg-1 | arg-2 | locator(2)` are orderly passed to the code at `locator` by means of the `$arguments` array. (like `[arg-1, arg-2]`)|
+|Engine|Enzymes 2.3 interprets injections from left to right by means of esoteric concepts: the pathway and the content. It’s a bit complicated.|Nzymes allows to effortlessly read an injection and foresee its result. The value returned by an enzyme replaces the enzyme (and all of its arguments, if any) in the injection. The value returned by the last enzyme replaces all the injection. All output is captured and sent to the browser’s console.|
+|Reverse Polish Notation|Enzymes 2.3 executions’ arguments, expressed like `locator(=arg-1, arg-2=)` are passed to the code at `locator` by means of an esoteric concept: the substrate. It’s a bit complicated and not very flexible.|Nzymes executions’ arguments, like `arg-1 | arg-2 | locator(2)` are orderly passed to the code at `locator` by means of the `$arguments` array. (like `[arg-1, arg-2]`)|
 |Engine access|Enzymes 2.3 plugin’s engine is a global object. It can execute not only as a filter but also directly, both from outside posts and from inside custom fields. The global `metabolize()` function is used for that.|Nzymes plugin’s engine is a singleton object. It achieves exactly the same by means of the `Nzymes_Plugin::engine()->process()` method.|
 |Default post|Enzymes 2.3 always uses the global post by default, if the engine is called directly, without a post object.|Nzymes always uses what is explicitly provided. If the engine needs to work without a post object, `Nzymes_Engine::NO_POST` must be passed. If the engine needs to work with the global post, get_post() can be passed.|
 |Templates support|Enzymes 2.3 supports templates, which are files used to output what the injection has prepared. They are a bit complicated and not really useful.|Nzymes has no templates. But you can easily achieve the same result with a dynamic enzyme, if you have at least the Coder role (strengthened security).|
@@ -867,24 +965,3 @@ However, Nzymes is substantially better than Enzyme 2.3. Here are all the differ
 |Plugin priority|Enzymes 2.3 handles WordPress content filtering at priority `10`. You can change it by editing the `enzymes/enzymes.php` file, and the change affects the whole engine.|Nzymes handles WordPress content filtering at priority `9`. You can change it by editing the `nzymes/src/Enzymes/Plugin.php` file, and the change affects the whole engine.|
 |Injection priority|Enzymes 2.3 does not support any other priority than the one for the plugin.|Nzymes allows you to set the priority at which an injection is supposed to be processed (see `defer`).|
 |Debugging help|Enzymes 2.3 doesn’t help you in any way while developing execution enzymes. If something fails, you either get a broken post or an invisible result.|Nzymes tries its best at providing you with meaningful information about where the error occurred and why. This information is always sent to the JavaScript console.|
-
-
-### Migrating Enzymes to Nzymes
-
-
-```sql
-SELECT ID, post_name 
-FROM wp_posts 
-WHERE post_type IN ('page', 'post')
-AND post_status != 'inherit'
-AND CONCAT_WS(' - ', post_title, post_content, post_excerpt) LIKE '%{[%'
-```
-        
-to easily find out a list of hosts with injections to change before start using Nzymes, so that those Enzymes 2 injections can be converted to Nzymes.
-
-
-### Avoid migrating Enzymes to Nzymes
-
-Use `/wp-admin/options.php` to edit `__nzymes__global_options`
-
-
