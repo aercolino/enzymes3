@@ -1,24 +1,24 @@
 <?php
 
 class Nzymes_Capabilities {
-    const PREFIX = 'nzymes.';
+    const PREFIX = '__nzymes__';
 
 //@formatter:off
-    const inject                       = 'nzymes.inject';                        // It allows a user to inject enzymes into her posts.
-    const use_own_attributes           = 'nzymes.use_own_attributes';            // It allows a user to make her enzymes with her own attributes.
-    const use_others_attributes        = 'nzymes.use_others_attributes';         // It allows a user to make her enzymes with others\' attributes.
-    const use_own_custom_fields        = 'nzymes.use_own_custom_fields';         // It allows a user to make her enzymes with her own custom fields.
-    const use_others_custom_fields     = 'nzymes.use_others_custom_fields';      // It allows a user to make her enzymes with others\' custom fields.
-    const create_static_custom_fields  = 'nzymes.create_static_custom_fields';   // It allows a user to create enzymes from non-evaluated custom fields.
-    const create_dynamic_custom_fields = 'nzymes.create_dynamic_custom_fields';  // It allows a user to create enzymes from evaluated custom fields.
-    const share_static_custom_fields   = 'nzymes.share_static_custom_fields';    // It allows a user to share her enzymes from non-evaluated custom fields.
-    const share_dynamic_custom_fields  = 'nzymes.share_dynamic_custom_fields';   // It allows a user to share her enzymes from evaluated custom fields.
+    const inject                       = '__nzymes__inject';                        // It allows a user to inject enzymes into her posts.
+    const use_own_attributes           = '__nzymes__use_own_attributes';            // It allows a user to make her enzymes with her own attributes.
+    const use_others_attributes        = '__nzymes__use_others_attributes';         // It allows a user to make her enzymes with others\' attributes.
+    const use_own_custom_fields        = '__nzymes__use_own_custom_fields';         // It allows a user to make her enzymes with her own custom fields.
+    const use_others_custom_fields     = '__nzymes__use_others_custom_fields';      // It allows a user to make her enzymes with others\' custom fields.
+    const create_static_custom_fields  = '__nzymes__create_static_custom_fields';   // It allows a user to create enzymes from non-evaluated custom fields.
+    const create_dynamic_custom_fields = '__nzymes__create_dynamic_custom_fields';  // It allows a user to create enzymes from evaluated custom fields.
+    const share_static_custom_fields   = '__nzymes__share_static_custom_fields';    // It allows a user to share her enzymes from non-evaluated custom fields.
+    const share_dynamic_custom_fields  = '__nzymes__share_dynamic_custom_fields';   // It allows a user to share her enzymes from evaluated custom fields.
 
-    const User           = 'nzymes.User';            // inject + use_own_attributes + use_own_custom_fields + create_static_custom_fields
-    const PrivilegedUser = 'nzymes.PrivilegedUser';  // + use_others_custom_fields
-    const TrustedUser    = 'nzymes.TrustedUser';     // + share_static_custom_fields
-    const Coder          = 'nzymes.Coder';           // + create_dynamic_custom_fields
-    const TrustedCoder   = 'nzymes.TrustedCoder';    // + share_dynamic_custom_fields
+    const User           = '__nzymes__User';            // inject + use_own_attributes + use_own_custom_fields + create_static_custom_fields
+    const PrivilegedUser = '__nzymes__PrivilegedUser';  // + use_others_custom_fields
+    const TrustedUser    = '__nzymes__TrustedUser';     // + share_static_custom_fields
+    const Coder          = '__nzymes__Coder';           // + create_dynamic_custom_fields
+    const TrustedCoder   = '__nzymes__TrustedCoder';    // + share_dynamic_custom_fields
 //@formatter:on
 
     /**
