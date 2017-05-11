@@ -1387,13 +1387,22 @@ class Nzymes_Engine {
             $this->options['process-also-posts'] = $options['process-also-posts'];
         }
 
+        $result = false;
         $post_time = new DateTime($this->injection_post->post_date);
-        if ($post_time >= $this->options['process-posts-after']) return true;
+        if ($post_time >= $this->options['process-posts-after']) {
+            $result = true;
+        } elseif (in_array($this->injection_post->ID, $this->options['process-also-posts'])) {
+            $result = true;
+        }
+        if ($result) {
+            global $enzymes;  // Enzymes plugin
+            $enzymes_priority = has_filter($this->current_filter, array( &$enzymes, 'metabolism' ));
+            if ($enzymes_priority && $this->current_priority <= $enzymes_priority) {
+                remove_filter($this->current_filter, array( &$enzymes, 'metabolism' ), $enzymes_priority);
+            }
+        }
 
-        $post_id = $this->injection_post->ID;
-        if (in_array($post_id, $this->options['process-also-posts'])) return true;
-
-        return false;
+        return $result;
     }
 
     /**
