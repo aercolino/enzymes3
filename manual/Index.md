@@ -844,28 +844,61 @@ An Nzymes injection is an expression written following the Reverse Polish notati
 Note that it’s not completely by chance that the processing ends with an empty internal stack. In fact RPN calculators consider that a final non-empty stack is an error condition. The practical reason is that you are supposed to push on the stack only something that is going to be used later. If something couldn’t be used before the end of the expression, there should be an error somewhere. Nzymes is forgiving here: a final non-empty internal stack is not an error.
 
 
-### Difference between `draft` and `publish`
+### Difference between `publish`-ed and non-`publish`-ed posts
 
+As long as a `post_status` is different from `publish`, that post exists only for its author: thus Nzymes will always return `null` for enzymes hosted into non-`publish`-ed posts when they are requested from injections into posts of another author. This allows an author to freely experiment with enzymes before `publish`-ing the post that hosts them, i.e. before (possibly) sharing them with others.
 
-
-### The prefix is `__nzymes__`
-
-Whenever a prefix is needed to 
-
-```
-__nzymes__post_types
-__nzymes__missing_post
-__nzymes__global_options
-```
 
 ### Hooks
 
 #### The `__nzymes__post_types` hook
 
+This is a filter that is triggered right before trying to find a post by its slug. In fact, [WordPress' slugs are namespaced by `post_type`](https://core.trac.wordpress.org/ticket/18962), and Nzymes will find custom fields belonging to pages before those belonging to posts, by default.
+
+**Triggering code**
+
+```php
+// __nzymes__post_types filters take and return an array of post types to restrict lookup of slugs to.
+$post_types = apply_filters( '__nzymes__post_types', $post_types );
+```
+
+Notice that the types in this `$post_types` array are at the same time the only types of posts to search and the relevance of the results. Thus, if for example you add a filter handler that returns only one type, then only that type will be searched before returning `null`.
+
+**Example of a listener**
+
+This is how you can force Nzymes to find custom fields belonging to `my_type` posts before `page` and `post` posts.
+
+```php
+function my_post_types($post_types) {
+    $post_types = array_unshift($post_types, 'my_type');
+    return $post_types;
+}
+add_filter('__nzymes__post_types','my_post_types');
+```
+
+With that in place, an injection like `{[ @some-slug.some-custom-field ]}` would make Nzymes look for a post with a `some-slug` slug and a `my_type` type and, if it's not found, then look for one with a `page` type and, if it's not found, then look for one with a `post` type and, if it's not found, then finally give up and return a `null`. (but see also the `__nzymes__missing_post` hook)
 
 
 #### The `__nzymes__missing_post` hook
 
+This is kind of a special filter that is triggered right after failing to find a post by its slug. It's special for two reasons. First it is triggered only if the slug begins with `@@` (a double at-sign) instead of `@` (a single at-sign), and second, it is triggered only if the injection author can create dynamic custom fields.
+
+**Triggering code**
+
+```php
+// __nzymes__missing_post filters take a slug and return a WP_Post or null.
+$result = apply_filters( '__nzymes__missing_post', $slug );
+```
+
+**Example of a listener**
+
+```php
+function then_try_this($slug) {
+    //...
+    return $post;
+}
+add_filter('__nzymes__missing_post','then_try_this');
+```
 
 
 ## There is Nzymes and Enzymes
