@@ -612,7 +612,7 @@ class Nzymes_Engine {
                     && has_filter( '__nzymes__missing_post' )
                     && $this->injection_author_can( Nzymes_Capabilities::create_dynamic_custom_fields ) ) {
                     // __nzymes__missing_post filters take a slug and return a WP_Post or null.
-                    $result = apply_filters( '__nzymes__missing_post', $post );
+                    $result = apply_filters( '__nzymes__missing_post', $slug );
                 } else {
                     $result = null;
                 }
