@@ -1344,7 +1344,7 @@ class Nzymes_Engine {
     }
 
     /**
-     * Process all the injections applied to the $content, not necessarily in the context of apply_filters().
+     * Process all the injections in the $content, not necessarily in the context of apply_filters().
      *
      * @param                  $content
      * @param null|int|WP_Post $post_id  Null means Nzymes_Engine::GLOBAL_POST.
