@@ -686,6 +686,42 @@ Rest assured that no hook is added after the first one (with the same filter and
 Note that `{[ defer(X) ]}` is not only a valid injection, but also a very useful one. In such a case, once processed, the current filter will erase the injection from the content only after having prepared a later execution. That deferred execution will probably process new injections introduced by filters in the middle.
 
 
+### Direct processing
+
+You can directly process any content with an expression like this:
+
+```php
+$result = Nzymes_Plugin::engine()->process($content, $origin, $filter, $priority);
+```
+
+or this
+
+```php
+$engine = new Nzymes_Engine();
+$result = $engine->process($content, $origin, $filter, $priority);
+```
+
+depending on whether you want to use the same engine as the one used by the plugin or not. Choose the former when you need to access the context of the plugin when it's processing the current filter, and the latter in any other case, to keep the processing of the `$content` completely separated from the processing of the current filter.
+
+
+#### Arguments
+
+* `$content` is a string with injections
+
+* `$origin` is the ID of the current post, i.e. the post you want to consider the `$content` as belonging to. It will be used as the implicit / relative origin for all the enzyme into `$content`.
+
+    * use `Nzymes_Engine::GLOBAL_POST` (default) to specify that you want to use whatever is the currently global post
+    * use `Nzymes_Engine::NO_POST` to specify that you really don’t want any post
+
+        * if an enzyme into `$content` starts with `/author`, the author would be `Nzymes_Engine::NO_POST_AUTHOR`, i.e. the admin whose ID is `1`
+
+* `$filter` is a WordPress filter; it defaults to `Nzymes_Engine::DIRECT_FILTER`
+
+* `$priority` is a filter priority; it defaults to `Nzymes_Plugin::PRIORITY`
+
+* `process()` works by adding the usual Nzymes filter handler to the given `$filter` at the given `$priority` and immediately calling `apply_filters()` on the given `$content` and `$origin`. This guarantees the same behavior and functionalities both in filter and in direct processing mode.
+
+
 ### Exchanging data
 
 If you need to pass information from one injection to another, inside the same content and priority, you can use `$this->intra`, a property which gets initialized at the start of each new content processing.
@@ -694,17 +730,17 @@ If you need to pass information from one injection to another, outside the same 
 
 **Example**
 
-Let's say that we have a pretty colorful begin of a novel:
+Let's say that we have a pretty begin of a novel:
 
 > Far out in the uncharted backwaters of the unfashionable end of the western spiral arm of the Galaxy lies a small unregarded yellow sun. Orbiting this at a distance of roughly ninety-two million miles is an utterly insignificant little blue green planet whose ape-descended life forms are so amazingly primitive that they still think digital watches are a pretty neat idea.
 
-We can use Nzymes to make some vowels red.
+We can use Nzymes to show special words in `strong` style, after saving a list of common words, like these [2000 Words of Contemporary Fiction](https://en.wiktionary.org/wiki/Wiktionary:Frequency_lists/Contemporary_fiction), into a custom field of a page.
 
-> Far out in the uncharted backwaters of the unfashionable end of the western spiral arm of the Galaxy lies a small unregarded yellow sun. Orbiting this at a distance of **{[ @my.start() ]}** roughly ninety-two million miles **{[ @my.end() | .red-vowels(1) ]}** is an utterly insignificant little blue green planet whose ape-descended life forms are so amazingly primitive that they still think digital watches are a pretty neat idea.
+> Far out in the uncharted backwaters of the unfashionable end of the western spiral arm of the Galaxy lies **{[ @my.start() ]}** a small unregarded yellow sun **{[ @my.end() | @my.special-words(1) ]}**. Orbiting this at a distance of roughly ninety-two million miles is an utterly insignificant little blue green planet whose ape-descended life forms are so amazingly primitive that they still think digital watches are a pretty neat idea.
 
 **Result**
 
-<blockquote><p> Far out in the uncharted backwaters of the unfashionable end of the western spiral arm of the Galaxy lies a small unregarded yellow sun. Orbiting this at a distance of r<span style="color: red; font-weight: bold;">o</span><span style="color: red; font-weight: bold;">u</span>ghl<span style="color: red; font-weight: bold;">y</span> n<span style="color: red; font-weight: bold;">i</span>n<span style="color: red; font-weight: bold;">e</span>t<span style="color: red; font-weight: bold;">y</span>-tw<span style="color: red; font-weight: bold;">o</span> m<span style="color: red; font-weight: bold;">i</span>ll<span style="color: red; font-weight: bold;">i</span><span style="color: red; font-weight: bold;">o</span>n m<span style="color: red; font-weight: bold;">i</span>l<span style="color: red; font-weight: bold;">e</span>s is an utterly insignificant little blue green planet whose ape-descended life forms are so amazingly primitive that they still think digital watches are a pretty neat idea. </p></blockquote>
+> Far out in the uncharted backwaters of the unfashionable end of the western spiral arm of the Galaxy lies a small **unregarded** yellow sun. Orbiting this at a distance of roughly ninety-two million miles is an utterly insignificant little blue green planet whose ape-descended life forms are so amazingly primitive that they still think digital watches are a pretty neat idea.
 
 
 ##### About the code
@@ -725,69 +761,74 @@ $this->new_content = substr( $this->new_content, 0, $this->intra->start_pos );
 return $selected;
 ```
 
-`.red-vowels`
+`@my.special-words` 
 
 ```php
 list( $selected ) = $arguments;
-$result = preg_replace( '/[aeiouy]/i', '<span style="color: red; font-weight: bold;">$0</span>', $selected );
+
+if (! isset($this->extra->ranking)) {
+  $engine = new Nzymes_Engine();
+  $words = $engine->catalyze('@2000-words-fiction.as-string');
+  $this->extra->ranking = array_flip(explode(' ', $words));
+}
+$ranking = $this->extra->ranking;
+
+$result = preg_replace_callback('/[\w\'-]+/', function ($matches) use ($ranking) {
+  $replacement = $matches[0];
+  $key = strtolower($replacement);
+  if (! isset($ranking[$key])) {
+    $replacement = "<strong>$replacement</strong>";
+  }
+  return $replacement;
+}, $selected);
+
 return $result;
 ```
 
 ##### Notes
 
-Notice that those `start`, `end`, and `red-vowels` enzymes are written in a way to make them completely portable. You can move them around in that content or copy and paste them, and they continue to work as expected, without having to change anything.
+1. The method used to select text is based on position, and it works perfectly only if `start` and `end` are processed at the same prority, one after the (corresponding) other, like above. See also `defer`.
+
+1. We cache the `ranking` value, because it could be a cause of slowness to prepare it once and again.
+
+1. We use `extra` instead of `intra`, because it allow us to use it also in different filters.
+
+1. `start`, `end`, and `special-words` snippets are designed to be completely portable. We can move them around in that content or copy and paste them, and they continue to work as expected, without having to change anything.
+
 
 *Example*
 
-> Far out **{[ @my.start() ]}** in the uncharted backwaters of the unfashionable end of the western spiral arm of the Galaxy **{[ @my.end() | .red-vowels(1) ]}** lies a small unregarded yellow sun. Orbiting this at a distance of roughly ninety-two million miles is **{[ @my.start() ]}** an utterly insignificant little blue green planet **{[ @my.end() | .red-vowels(1) ]}** whose ape-descended life forms are so amazingly primitive that they still think digital watches are a pretty neat idea.
+> **{[ @my.start() ]}** Far out in the uncharted backwaters of the unfashionable end of the western spiral arm of the Galaxy lies a small unregarded yellow sun. Orbiting this at a distance of roughly ninety-two million miles is an utterly insignificant little blue green planet whose ape-descended life forms are so amazingly primitive that they still think digital watches are a pretty neat idea. **{[ @my.end() | @my.special-words(1) ]}**
+
 
 *Result*
 
-<blockquote><p> Far out <span style="color: red; font-weight: bold;">i</span>n th<span style="color: red; font-weight: bold;">e</span> <span style="color: red; font-weight: bold;">u</span>nch<span style="color: red; font-weight: bold;">a</span>rt<span style="color: red; font-weight: bold;">e</span>d b<span style="color: red; font-weight: bold;">a</span>ckw<span style="color: red; font-weight: bold;">a</span>t<span style="color: red; font-weight: bold;">e</span>rs <span style="color: red; font-weight: bold;">o</span>f th<span style="color: red; font-weight: bold;">e</span> <span style="color: red; font-weight: bold;">u</span>nf<span style="color: red; font-weight: bold;">a</span>sh<span style="color: red; font-weight: bold;">i</span><span style="color: red; font-weight: bold;">o</span>n<span style="color: red; font-weight: bold;">a</span>bl<span style="color: red; font-weight: bold;">e</span> <span style="color: red; font-weight: bold;">e</span>nd <span style="color: red; font-weight: bold;">o</span>f th<span style="color: red; font-weight: bold;">e</span> w<span style="color: red; font-weight: bold;">e</span>st<span style="color: red; font-weight: bold;">e</span>rn sp<span style="color: red; font-weight: bold;">i</span>r<span style="color: red; font-weight: bold;">a</span>l <span style="color: red; font-weight: bold;">a</span>rm <span style="color: red; font-weight: bold;">o</span>f th<span style="color: red; font-weight: bold;">e</span> G<span style="color: red; font-weight: bold;">a</span>l<span style="color: red; font-weight: bold;">a</span>x<span style="color: red; font-weight: bold;">y</span> lies a small unregarded yellow sun. Orbiting this at a distance of roughly ninety-two million miles is <span style="color: red; font-weight: bold;">a</span>n <span style="color: red; font-weight: bold;">u</span>tt<span style="color: red; font-weight: bold;">e</span>rl<span style="color: red; font-weight: bold;">y</span> <span style="color: red; font-weight: bold;">i</span>ns<span style="color: red; font-weight: bold;">i</span>gn<span style="color: red; font-weight: bold;">i</span>f<span style="color: red; font-weight: bold;">i</span>c<span style="color: red; font-weight: bold;">a</span>nt l<span style="color: red; font-weight: bold;">i</span>ttl<span style="color: red; font-weight: bold;">e</span> bl<span style="color: red; font-weight: bold;">u</span><span style="color: red; font-weight: bold;">e</span> gr<span style="color: red; font-weight: bold;">e</span><span style="color: red; font-weight: bold;">e</span>n pl<span style="color: red; font-weight: bold;">a</span>n<span style="color: red; font-weight: bold;">e</span>t whose ape-descended life forms are so amazingly primitive that they still think digital watches are a pretty neat idea. </p></blockquote>
+> Far out in the **uncharted backwaters** of the **unfashionable** end of the **western spiral** arm of the **Galaxy lies** a small **unregarded** yellow sun. **Orbiting** this at a distance of **roughly ninety-two** million **miles** is an **utterly insignificant** little blue green **planet** whose **ape-descended** life **forms** are so **amazingly primitive** that they still think **digital watches** are a pretty **neat** idea.
 
-### Direct processing
 
-You can directly process any content with an expression like this:
+Notice that some common words appear in strong style above because we use a list like if it was a dictionary, but it's not:
 
-```
-Nzymes_Plugin::engine()->process($content, $origin, $filter, $priority);
-```
-
-where
-
-* `$content` is a string with injections
-
-* `$origin` is the ID of the current post, i.e. the post you want to consider the `$content` as belonging to. It will be used as the implicit / relative origin for all the enzyme into `$content`.
-
-    * use `Nzymes_Engine::GLOBAL_POST` (default) to specify that you want to use whatever is the currently global post
-    * use `Nzymes_Engine::NO_POST` to specify that you really don’t want any post
-
-        * if an enzyme into `$content` starts with `/author`, the author would be `Nzymes_Engine::NO_POST_AUTHOR`, i.e. the admin whose ID is `1`
-
-* `$filter` is a WordPress filter; it defaults to `Nzymes_Engine::DIRECT_FILTER`
-
-* `$priority` is a filter priority; it defaults to `Nzymes_Plugin::PRIORITY`
-
-* `process()` works by adding the usual Nzymes filter handler to the given `$filter` at the given `$priority` and immediately calling `apply_filters()` on the given `$content` and `$origin`. This guarantees the same behavior and functionalities both in filter and in direct processing mode.
+> Regular plurals are combined with their singular forms (tree, trees; box, boxes). Variations of a verb ending in -ed, -ing or -(e)s are lumped together with their root verb (smile, smiled, smiling, smiles). Adjective forms ending in -er or -est are included with their positive form (sad, sadder, saddest). And words ending in -'s are grouped with the form without the apostrophe (boy, boy's; everything, everything's), except for a few common contractions (it's; that's).
 
 
 ### Debugging
 
 When custom fields are injected by means of dynamic enzymes, their PHP code gets evaluated from inside a method that takes care of the return value, the errors and the output. Before the evaluation, as many arguments as specified by an enzyme are popped from the internal stack and put into the `$arguments` array. After the evaluation, the return value is pushed onto the internal stack; **errors and output are sent to the JavaScript console**.
 
-Tip. While developing a dynamic enzyme, frequently check the JavaScript console. There are in fact two kinds of PHP errors: Shutdown errors and non-shutdown errors. The former are easy to detect because they make the PHP interpreter stop at the point they occur and very often the resulting output is awfully broken. The latter instead make the PHP interpreter try to recover. Nzymes takes care of both types and tries to output to the JavaScript console as much information as possible to help you debug your code.
+*Tip*
 
-**Fatal Error Example**
+While developing a dynamic enzyme, frequently check the JavaScript console. There are in fact two kinds of PHP errors: Shutdown errors and non-shutdown errors. The former are easy to detect because they make the PHP interpreter stop at the point they occur and very often the resulting output is awfully broken. The latter instead make the PHP interpreter try to recover. Nzymes takes care of both types and tries to output to the JavaScript console as much information as possible to help you debug your code.
 
-A PHP Fatal error is captured by Nzymes and shown into the JavaScript console.
+*Tip*
 
-![](http://i.imgur.com/uKP59cA.png)
+Remember that you can just `echo $something;` from the code in a custom field and see it in the JavaScript console.
 
-**Syntax Error Example**
 
-A PHP Parse error is captured by Nzymes and shown into the JavaScript console.
+**Example**
 
-![](http://i.imgur.com/napTpGK.png)
+A shutdown error is captured and shown into the JavaScript console.
+
+![Imgur](http://i.imgur.com/WfbvCVH.png)
 
 
 ### Recommended plugins
