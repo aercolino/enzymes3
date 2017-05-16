@@ -1226,7 +1226,7 @@ class Nzymes_Engine {
      *
      * @return array|null|string
      */
-    protected
+    public
     function catalyze( $could_be_sequence ) {
         $sequence                       = $this->clean_up( $could_be_sequence );
         $there_are_only_chained_enzymes = preg_match( $this->e_sequence_valid, '|' . $sequence );
