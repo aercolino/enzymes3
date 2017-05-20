@@ -21,6 +21,7 @@ namespace :nzymes do
       cp_r 'vendor/Ando', 'dist/nzymes/vendor'
       cp_r 'src', 'dist/nzymes'
       cp_r Dir.glob('*.php'), 'dist/nzymes'
+      cp_r Dir.glob('*.md'), 'dist/nzymes'
       cp_r 'readme.txt', 'dist/nzymes'
       Rake::Task['nzymes:package'].invoke
     end
