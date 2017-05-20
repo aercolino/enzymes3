@@ -11,7 +11,7 @@ Nzymes automatically filters title, excerpt and content of any post type, lookin
 
 The result of the `=Hello, World!=` enzyme is `Hello, World!` thus, if we put the `{[ =Hello, World!= ]}` injection into the title of a post, that post would be published with a `Hello, World!` title.
 
-An enzyme can have one of three origins (itself, post, and author), one of three forms (literal, attribute, and custom field), and one of two behaviours (transclusion and execution). By combining these characteristics together, Nzymes allows you to neatly improve your posts.
+An enzyme can have one of three origins (itself, post, and author), one of three forms (literal, attribute, and custom field), and one of two behaviours (transclusion and execution). By combining these characteristics together, Nzymes allows you to greatly improve your posts.
 
 
 
@@ -20,7 +20,7 @@ An enzyme can have one of three origins (itself, post, and author), one of three
 
 ### Injections belong to the visual editor
 
-Nzymes' syntax comes directly from Enzymes, a similar plugin that I wrote many years ago for myself, and was meant to do mostly the same things. I chose Enzymes' syntax so that I could write my expressions without switching from the visual to the text editor, which is sometimes needed to make WordPress understand what you mean, and is very annoying for me.
+Nzymes' syntax comes directly from Enzymes, a similar plugin that I wrote many years ago, and was meant to do mostly the same things. I chose Enzymes' syntax so that I could write my expressions without switching from the visual to the text editor, which is sometimes needed to make WordPress literally treat what you type (it uses to convert quotes for example), and I consider it very annoying.
 
 Of course you can use whichever editor you like.
 
@@ -76,7 +76,7 @@ In these examples *something in italics* shows how Nzymes sees it.
 
 1. this injection has two enzymes
 1. enzyme-1 is a literal string and its value will be replaced to itself.
-1. enzyme-2 is a locator for the custom field whose name is `locale`, which belongs to the post whose ID is `123`, and its value will be replaced to itself and 1 value before.
+1. enzyme-2 is a locator for the custom field whose name is `locale`, which belongs to the post whose ID is `123`, and its value will be replaced to itself and `1` value before.
 
 ##### Processing
 
@@ -89,13 +89,13 @@ In these examples *something in italics* shows how Nzymes sees it.
 
 1. Nzymes replaces enzyme-2 with its value: 
 
-    1. Nzymes hands to it 1 value before: 
+    1. Nzymes hands to it `1` value before: 
 
         | State |
         |---|
         | *123.locale("5 €")* |
 
-    1. Nzymes evaluates the code stored in the custom field, which converts currency from EUR to USD: 
+    1. Nzymes evaluates the code stored in the custom field, which converts currency from EUR to the currency of the reader (here itwould be USD): 
 
         | State |
         |---|
@@ -111,9 +111,9 @@ In these examples *something in italics* shows how Nzymes sees it.
 
 1. this injection has 4 enzymes
 1. enzyme-1 is a literal string and its value will be replaced to itself.
-1. enzyme-2 is a locator for the custom field whose name is `comments-count`, which belongs to the post whose slug is `wp`, and its value will be replaced to itself and 1 value before.
+1. enzyme-2 is a locator for the custom field whose name is `comments-count`, which belongs to the post whose slug is `wp`, and its value will be replaced to itself and `1` value before.
 1. enzyme-3 is a locator for the custom field whose name is `comments`, which belongs to the post whose slug is `cit`, and its value will be replaced to itself.
-1. enzyme-4 is a locator for the custom field whose name is `render`, which belongs to the post whose slug is `ui`, and its value will be replaced to itself and 2 values before.
+1. enzyme-4 is a locator for the custom field whose name is `render`, which belongs to the post whose slug is `ui`, and its value will be replaced to itself and `2` values before.
 
 ##### Processing
 
@@ -128,7 +128,7 @@ In these examples *something in italics* shows how Nzymes sees it.
 
 1. Nzymes replaces enzyme-2 with its value: 
 
-    1. Nzymes hands to it 1 value before:
+    1. Nzymes hands to it `1` value before:
 
         | State |
         |---|
@@ -154,22 +154,22 @@ In these examples *something in italics* shows how Nzymes sees it.
 
 1. Nzymes replaces enzyme-4 with its value: 
 
-    1. Nzymes hands to it 2 values before: 
+    1. Nzymes hands to it `2` values before: 
 
         | State |
         |---|
-        | *@ui.render( {count: 42, unit: "comment", author: "john"}, ":author (`<span style='color: red'>`:count :plural(unit,count)`</span>`" )* |
+        | *@ui.render( {count: 42, unit: "comment", author: "john"}, "`<strong>`:author`</strong>` (:count :plural(unit,count)" )* |
 
-    1. Nzymes evaluates the code stored in the custom field, which fills a template with some values:
+    1. Nzymes evaluates the code stored in the custom field, which (in this case) replaces data to placeholders into a template:
 
         | State |
         |---|
-        | *"John `<span style="color:red">`(42 comments)`</span>`"* |
+        | *"`<strong>`John`</strong>` (42 comments)"* |
 
 
 ##### Result
 
-> John <span style="color:red">(42 comments)</span>
+> **John** (42 comments)
 
 --
 
@@ -180,13 +180,20 @@ If Nzymes gets an error while processing an injection, the enzyme causing the er
 
 If Nzymes gets an error while evaluating the code stored in a custom field, you'll see the error in the JavaScript console of your browser.
 
-Thus, if you see an injection which Nzymes didn't process at all, it means you mistook the syntax somewhere. But if you see nothing, then there could be an error. If the console shows an error, try to understand and fix it. If the console doesn't show the error, it means that you have an access error. Most common reasons: a locator references something that doesn't exist, you tried to do something which is forbidden to you.
+Thus, if you see an injection which Nzymes didn't process at all, it means you mistook the syntax somewhere. But if you see nothing, then there could be an error. If the console shows an error, try to understand and fix it. If the console doesn't show any error, it means that you may have an access error. 
+
+Most common reasons for access errors: 
+
+* a locator references something that doesn't exist, 
+* you tried to do something which is forbidden to you.
 
 
 #### Examples
 
 * `12 {[ .not-a-custom-field | 34 ]} 56` produces `12 34 56` without any error in the JS console.
-* `12 {[ .not-a-custom-field() | 34 ]} 56` produces `12 34 56` with an error in the JS console: `Code to execute must be a string: NULL given.`.
+* `12 {[ .not-a-custom-field() | 34 ]} 56` produces `12 34 56` with an error in the JS console: 
+
+    * `Code to execute must be a string: NULL given.`
 
 
 ### Side effects
@@ -197,14 +204,14 @@ Each Nzymes injection follows one of three patterns according to the type of the
 * `{[ … | <static enzyme> ]} –> <referred value>`
 * `{[ … | <dynamic enzyme> ]} –> <returned value>`
 
-Notice that even if the final value of the first two patterns only depends on the value of the last enzyme, no shortcut is ever taking place. Each and every enzyme in the injection is processed in turn, from left to right. This is relevant for side effects.
+Notice that even if the final value of the first two patterns only depends on the value of the last enzyme, no shortcut is ever taking place. Each and every enzyme in the injection is processed in turn, from left to right. This is relevant for side effects that the enzymes before the last one may be causing.
 
 For example, if you want to silence an injection, you only need to end it with an empty string: `{[ … | == ]}`. However, remember that last dynamic enzymes returning `null` are effectively silencing the injection too, no need to use an empty string.
 
 
 ### Escaping injections
 
-If you want to write about Nzymes injections, while also having the Nzymes plugin actively filtering the content of your posts, you need a way to tell Nzymes that it has to ignore some injections. You do it by starting an injection with two braces instead of one: `{{[`. When Nzymes finds an escaped injection, it removes the first brace and displays the rest, without any processing.
+If you want to write about Nzymes injections, while also having the Nzymes plugin actively filtering the content of your posts, you need a way to tell Nzymes that it has to ignore some injections. You do it by starting an injection with two braces instead of one: `{{[`. When Nzymes finds an escaped injection, it removes the first brace and displays the rest, without any further processing.
 
 *Example*
 
@@ -364,9 +371,8 @@ Non negative integers (0, 1, 2...) and strings are the only possible literals.
 
 ##### Notes
 
-Numbers do not need to be quoted. (i.e. wrapped inside a couple of `=` characters)
-
-Internally, numbers are regular PHP numbers.
+* Numbers do not need to be quoted. (i.e. wrapped inside a couple of `=` characters)
+* Internally, numbers are regular PHP numbers.
 
 
 #### Injection of a literal string
@@ -383,9 +389,9 @@ Internally, numbers are regular PHP numbers.
 
 ##### Notes
 
-Strings are always quoted. (i.e. always wrapped inside a couple of `=` characters)
-
-Internally, strings are regular PHP strings.
+* Strings are always quoted. (i.e. always wrapped inside a couple of `=` characters)
+* You can use a `\=` (backslash equal) to escape an `=` inside a string.
+* Internally, strings are regular PHP strings.
 
 
 ### Attribute Enzymes
@@ -408,9 +414,18 @@ The result of an attribute enzyme is always the value of the referred attribute.
 
 * *Origin*: The *author* origin is always referred to by `/author`. A post reference is not present in the example above, then the origin is the author of the current post.
 * *Form*: The *attribute* form is always referred to by a starting colon `:`. The attribute in the example above is `display_name`.
-* *Kind*: The *static* kind is always represented by the lack of parentheses `()`.
+* *Behaviour*: The *static* behaviour is always represented by the lack of parentheses `()`.
 
 * [list of author attributes](https://codex.wordpress.org/Function_Reference/get_userdata) (in the *Notes/users* section)
+
+    * ID
+    * user_login
+    * user_pass
+    * user_nicename
+    * user_email
+    * user_url
+    * user_registered
+    * display_name
 
 
 #### Injection of a post attribute enzyme
@@ -429,9 +444,28 @@ The result of an attribute enzyme is always the value of the referred attribute.
 
 * *Origin*: The *post* origin is always referred to by the lack of `/author`. A post reference is not present in the example above, then the origin is the current post.
 * *Form*: The *attribute* form is always referred to by a starting colon `:`. The attribute in the example above is `post_title`.
-* *Kind*: The *static* kind is always referred to by the lack of parentheses `()`.
+* *Behaviour*: The *static* behaviour is always referred to by the lack of parentheses `()`.
 
-[list of post attributes](https://codex.wordpress.org/Class_Reference/WP_Post) (in the Member Variables section)
+* [list of post attributes](https://codex.wordpress.org/Class_Reference/WP_Post) (in the Member Variables section)
+
+    * ID
+    * post_author
+    * post_name
+    * post_type
+    * post_title
+    * post_date
+    * post_date_gmt
+    * post_content
+    * post_excerpt
+    * post_status
+    * comment_status
+    * ping_status
+    * post_password
+    * post_parent
+    * post_modified
+    * post_modified_gmt
+    * comment_count
+    * menu_order
 
 
 ### Implicit versus Explicit origins
@@ -480,7 +514,7 @@ You could certainly use some short-codes to achieve the same thing, no doubt. Ho
 
 * *Origin*: The *author* origin is always referred to by `/author`. A post reference is not present in the example above, then the origin is the author of the current post.
 * *Form*: The *custom field* form is always referred to by a starting dot `.`. The custom field is `eye color`. Due to the space in the name of the custom field, we need to use an explicit string.
-* *Kind*: The *static* kind is always represented by the lack of parentheses `()`.
+* *Behaviour*: The *static* behaviour is always represented by the lack of parentheses `()`.
 
 [list of default author custom fields](http://codex.wordpress.org/Function_Reference/get_userdata) (in the *Notes/user_meta* section)
 
@@ -498,7 +532,7 @@ You could certainly use some short-codes to achieve the same thing, no doubt. Ho
 
 * *Origin*: The *post* origin is always referred to by the lack of `/author`. The origin in the example above is the post whose slug is `hitchhikers-guide`.
 * *Form*: The *custom field* form is always referred to by a starting dot `.`. The custom field in the example above is `wikipedia-url`. Due to the absence of special characters in the name of the custom field, we can use it directly.
-* *Kind*: The *static* kind is always referred to by the lack of parentheses `()`.
+* *Behaviour*: The *static* behaviour is always referred to by the lack of parentheses `()`.
 
 
 ## Part 3: Dynamic Enzymes
@@ -531,7 +565,7 @@ Custom field evaluation allows you to add dynamic content to your blog, in a fas
 
 * *Origin*: Author of the post with the `hitchhikers-guide` slug.
 * *Form*: The *custom field* form in the example above is `num_posts`.
-* *Kind*: The *dynamic* kind is always referred to by appending parentheses `()`.
+* *Behaviour*: The *dynamic* behaviour is always referred to by appending parentheses `()`.
 
 ##### About the code
 
@@ -567,7 +601,7 @@ return $user_post_count;
 
 * *Origin*: Current post.
 * *Form*: The *custom field* form in the example above is `num_words`.
-* *Kind*: The *dynamic* kind is always referred to by appending parentheses `()`. 
+* *Behaviour*: The *dynamic* behaviour is always referred to by appending parentheses `()`. 
 
 ##### About the code
 
@@ -616,7 +650,7 @@ While literal transclusions get into the content exactly like that, array and as
 
 * *Origin*: Itself and as many previous enzymes as indicated.
 * *Form*: literal.
-* *Kind*: dynamic. Indexed arrays build standard PHP indexed arrays.
+* *Behaviour*: dynamic. Indexed arrays build standard PHP indexed arrays.
 
 
 #### `assoc`
@@ -635,7 +669,7 @@ While literal transclusions get into the content exactly like that, array and as
 
 * *Origin*: Itself and twice as many previous enzymes as indicated.
 * *Form*: literal.
-* *Kind*: dynamic. Associative arrays build standard PHP associative arrays.
+* *Behaviour*: dynamic. Associative arrays build standard PHP associative arrays.
 
 
 #### `defer`
@@ -806,7 +840,7 @@ return $result;
 > Far out in the **uncharted backwaters** of the **unfashionable** end of the **western spiral** arm of the **Galaxy lies** a small **unregarded** yellow sun. **Orbiting** this at a distance of **roughly ninety-two** million **miles** is an **utterly insignificant** little blue green **planet** whose **ape-descended** life **forms** are so **amazingly primitive** that they still think **digital watches** are a pretty **neat** idea.
 
 
-Notice that some common words appear in strong style above because we use a list like if it was a dictionary, but it's not:
+Notice that some common words appear in strong style above because we use a list of roots without variations:
 
 > Regular plurals are combined with their singular forms (tree, trees; box, boxes). Variations of a verb ending in -ed, -ing or -(e)s are lumped together with their root verb (smile, smiled, smiling, smiles). Adjective forms ending in -er or -est are included with their positive form (sad, sadder, saddest). And words ending in -'s are grouped with the form without the apostrophe (boy, boy's; everything, everything's), except for a few common contractions (it's; that's).
 
@@ -848,39 +882,40 @@ Consider the following plugins to help you develop dynamic enzymes.
 
 An Nzymes injection is an expression written following the Reverse Polish notation. A calculator for results of such expressions is easy to implement and quite powerful. All you need is a stack, which is a LIFO data structure: last in, first out. Therefore, Nzymes manages its enzymes by means of an internal stack. The structure of an injection reflects how the internal stack changes during its interpretation.
 
-```
-{[ 3 | .last-comments(1) | .comment-template | .show-comments(2) ]}
-```
+1. \+ `{[ 3 | .last-comments(1) | .comment-template | .show-comments(2) ]}`
 
-1. `{[`
+    Before an injection, Nzymes reads each character from the content and writes it to `$this->new_content`.
+    * **Stack**: `null`
 
-    Nzymes finds the start of a new injection and creates an (empty) internal stack.
-    * Stack: `<>`
+1. `{[` + `3 | .last-comments(1) | .comment-template | .show-comments(2) ]}`
 
-1. `{[ 3`
+    Nzymes finds the start of a new injection, suspends writing to `$this->new_content`, and creates an (empty) internal stack.
+    * **Stack**: `[]`
 
-    Nzymes finds a literal enzyme and pushes its value onto the internal stack.
-    * Stack: `<3>`
+1. `{[ 3 ` + `| .last-comments(1) | .comment-template | .show-comments(2) ]}`
 
-1. `{[ 3 | .last-comments(1)`
+    Nzymes finds a literal enzyme and pushes its value (`Value-1 == 3`) onto the internal stack.
+    * **Stack**: `[ 3 ]`
 
-    Nzymes finds a dynamic enzyme, pops 1 item (the number 3) and puts it into the `$arguments` array, gets the code from `last-comments` and evaluates it, pushes the result (be it A) onto the internal stack.
-    * Stack: `<A>`
+1. `{[ 3 | .last-comments(1) ` + `| .comment-template | .show-comments(2) ]}`
 
-1. `{[ 3 | .last-comments(1) | .comment-template`
+    Nzymes finds a dynamic enzyme, pops 1 item (the number 3) and puts it into the `$arguments` array, gets the code from `last-comments` and evaluates it, pushes the result (be it `Value-2`) onto the internal stack.
+    * **Stack**: `[ Value-2 ]`
 
-    Nzymes finds a static enzyme, gets the text from `comment-template`, pushes it (be it B) onto the internal stack.
-    * Stack: `<A B>`
+1. `{[ 3 | .last-comments(1) | .comment-template ` + `| .show-comments(2) ]}`
 
-1. `{[ 3 | .last-comments(1) | .comment-template | .show-comments(2)`
+    Nzymes finds a static enzyme, gets the text from `comment-template`, pushes it (be it `Value-3`) onto the internal stack.
+    * **Stack**: `[ Value-2 Value-3 ]`
 
-    Nzymes finds a dynamic enzyme, pops 2 items (A and B) and puts them into the `$arguments` array, gets the code from `show-comments` and evaluates it, pushes the result (be it C) onto the internal stack.
-    * Stack: `<C>`
+1. `{[ 3 | .last-comments(1) | .comment-template | .show-comments(2) ` + `]}`
 
-1. `{[ 3 | .last-comments(1) | .comment-template | .show-comments(2) ]}`
+    Nzymes finds a dynamic enzyme, pops 2 items (`Value-2` and `Value-3`) and puts them into the `$arguments` array, gets the code from `show-comments` and evaluates it, pushes the result (be it `Value-4`) onto the internal stack.
+    * **Stack**: `[ Value-4 ]`
 
-    Nzymes finds the end of the current injection, replaces all the injection with the top item of the stack, and destroys the internal stack.
-    * Stack: `null`
+1. `{[ 3 | .last-comments(1) | .comment-template | .show-comments(2) ]}` +
+
+    Nzymes finds the end of the current injection, replaces all the injection with the top item of the stack, and destroys the internal stack. After the injection, Nzymes resumes reading each character from the content and writing it to `$this->new_content`.
+    * **Stack**: `null`
 
 Note that it’s not completely by chance that the processing ends with an empty internal stack. In fact RPN calculators consider that a final non-empty stack is an error condition. The practical reason is that you are supposed to push on the stack only something that is going to be used later. If something couldn’t be used before the end of the expression, there should be an error somewhere. Nzymes is forgiving here: a final non-empty internal stack is not an error.
 
@@ -942,7 +977,7 @@ add_filter('__nzymes__missing_post','then_try_this');
 ```
 
 
-## There is Nzymes and Enzymes
+## Difference between Nzymes and Enzymes
 
 [Enzymes](https://wordpress.org/plugins/enzymes/) (which I first released in 2007) still perfectly works after many years and many WordPress versions and PHP versions in between.
 
@@ -1123,9 +1158,9 @@ return $result;
     ```
 
 
-### Nzymes vs Enzymes
+### Nzymes is substantially better than Enzymes
 
-Nzymes is substantially better than Enzyme. Have a look at the many differences.
+Have a look at the many differences.
 
 |Feature|Enzyme|Nzyme|
 |---|---|---|
