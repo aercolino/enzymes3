@@ -5,7 +5,7 @@ Nzymes is a WordPress plugin for injecting [enzymes](https://en.wikipedia.org/wi
 
 The [Hello, World!](https://en.wikipedia.org/wiki/%22Hello,_World!%22_program) injection could be: 
 
-* `Nzymes says "{[ =Hello, World!= ]}" to everybody.` 
+> Nzymes says "{[ =Hello, World!= ]}" to everybody.
 
 which will render to: 
 
@@ -26,7 +26,7 @@ Nzymes' syntax comes directly from Enzymes, a similar plugin that I wrote many y
 Of course you can use whichever editor you like.
 
 
-### Injections and other Expressions
+### Injections and other expressions
 
 Nzymes doesn't assume anything about what you write in your posts. If some text appears in between `{[` and `]}` Nzymes will try to see if that's an injection or not. If it is, Nzymes will replace all of it (including brackets) with the final result. If it is not, Nzymes will just ignore it. Notice that that means that you'll see that expression as you wrote it in the post (including brackets).
 
