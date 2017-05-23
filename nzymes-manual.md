@@ -96,7 +96,7 @@ In these examples *something in italics* shows how Nzymes sees it.
         |---|
         | *123.locale("5 €")* |
 
-    1. Nzymes evaluates the code stored in the custom field, which converts currency from EUR to the currency of the reader (here itwould be USD): 
+    1. Nzymes evaluates the code stored in the custom field, which converts currency from EUR to the currency of the reader (here it would be USD): 
 
         | State |
         |---|
@@ -519,6 +519,18 @@ You could certainly use some short-codes to achieve the same thing, no doubt. Ho
 
 [list of default author custom fields](http://codex.wordpress.org/Function_Reference/get_userdata) (in the *Notes/user_meta* section)
 
+    * first_name
+    * last_name
+    * nickname
+    * description
+    * wp_capabilities (array)
+    * admin_color (Theme of your admin page. Default is fresh.)
+    * closedpostboxes_page
+    * primary_blog
+    * rich_editing
+    * source_domain
+
+
 #### Injection of a post custom field static enzymes
 
 **Example**
@@ -576,7 +588,7 @@ We want to know how to *count the number of posts by author in WordPress*. The f
 $user_post_count = count_user_posts( $userid , $post_type );
 ```
 
-When executing an enzyme, Nzymes put many useful values at our disposal. In this case we need `$this->origin_post`, which is the post object with the current injection. The author ID is into its `post_author` property. Here is what the custom field value could be.
+When executing an enzyme, Nzymes puts many useful values at our disposal. In this case we need `$this->origin_post`, which is the post object with the current injection. The author ID is into its `post_author` property. Here is what the custom field value could be.
 
 ```php
 $userid = $this->origin_post->post_author;
@@ -632,7 +644,7 @@ Keep reading if you want to know how to get the exact number of words with Nzyme
 
 Literals offer a shortcut to their respective custom-field versions. It’d be tedious to create a custom field for literals, but you certainly can.
 
-While literal transclusions get into the content exactly like that, array and assoc executions get into the content like `Array`. However they only make sense when used together with another dynamic enzyme which consume them. 
+While literal transclusions get into the content exactly like that, `array` and `assoc` executions get into the content like a standard PHP `array` value. However they only make sense when used together with another dynamic enzyme which consumes them. 
 
 
 #### `array`
@@ -681,12 +693,12 @@ By default, Nzymes filters at priority `9`, because the default priority of Word
 
 Additionally, Nzymes allows you to do the opposite, i.e. fix things for others, by running again at any later priority.
 
-##### How does it work?
+##### How does `{[ ...enzyme-J | defer(X) | enzyme-K... ]}` work?
 
 1. Case when Nzymes is running at an earlier priority `P1` (i.e. such that `P1 < X`):
 
     1. orderly process all enzymes before `defer(X)`
-    1. on `defer(X)`, hook Nzymes at priority `X` and its value is `null`
+    1. on `defer(X)`, hook Nzymes at priority `X`; the value of `defer(X)` is `null`
     1. ignore all enzymes after `defer(X)`
     1. reject the whole injection (as if it was never processed at all)
     1. keep processing all the other injections
@@ -694,11 +706,11 @@ Additionally, Nzymes allows you to do the opposite, i.e. fix things for others, 
 1. Case when Nzymes is running at a later priority `P2` (i.e. such that `X <= P2`): 
 
     1. orderly process all enzymes before `defer(X)`
-    1. on `defer(X)`, its value is `null`
+    1. on `defer(X)`, the value of `defer(X)` is `null`
     1. keep processing all enzymes after `defer(X)`
     1. keep processing all the other injections
 
-Notice that the rules above allows you to put `defer(X)` at any position in an injection, but given that enzymes before are processed and enzymes after are not (at a lower priority) then enzymes before had a reason to exist only if they produced some side effects you are interested into. Otherwise, make a habit of putting `defer(X)` at the start of an injection, so that it will work the same at any priority.
+Notice that the rules above allow you to put `defer(X)` at any position in an injection, but given that enzymes before it are processed and enzymes after it are not (at a lower priority) then the former had a reason to exist only if they produced some side effects you are interested into. Otherwise, make a habit of putting `defer(X)` at the start of an injection, so that it will work the same at any priority.
 
 Rest assured that no hook is added after the first one (with the same filter and priority). This matters when you copy and paste injections containing `defer`: you can ignore duplicates altogether.
 
@@ -743,7 +755,7 @@ depending on whether you want to use the same engine as the one used by the plug
 
 * `$content` is a string with injections
 
-* `$origin` is the ID of the current post, i.e. the post you want to consider the `$content` as belonging to. It will be used as the implicit / relative origin for all the enzyme into `$content`.
+* `$origin` is the ID of the current post, i.e. the post you want to consider the `$content` as belonging to. It will be used as the implicit / relative origin for all the enzymes into `$content`.
 
     * use `Nzymes_Engine::GLOBAL_POST` (default) to specify that you want to use whatever is the currently global post
     * use `Nzymes_Engine::NO_POST` to specify that you really don’t want any post
@@ -1167,12 +1179,12 @@ Have a look at the many differences.
 |---|---|---|
 |Controlled access|Enzymes 2.3 has no roles nor permissions: either you activate the plugin and everything is available to everyone or… well, you deactivate it.|Nzymes has enough roles and permissions to allow you (the admin) to fine tune the right access level for the right users.|
 |Engine|Enzymes 2.3 interprets injections from left to right by means of esoteric concepts: the pathway and the content. It’s a bit complicated.|Nzymes allows to effortlessly read an injection and foresee its result. The value returned by an enzyme replaces the enzyme (and all of its arguments, if any) in the injection. The value returned by the last enzyme replaces all the injection. All output is captured and sent to the browser’s console.|
-|Reverse Polish Notation|Enzymes 2.3 executions’ arguments, expressed like `locator(=arg-1, arg-2=)` are passed to the code at `locator` by means of an esoteric concept: the substrate. It’s a bit complicated and not very flexible.|Nzymes executions’ arguments, like `arg-1 | arg-2 | locator(2)` are orderly passed to the code at `locator` by means of the `$arguments` array. (like `[arg-1, arg-2]`)|
+|Reverse Polish Notation|Enzymes 2.3 executions’ arguments, expressed like `locator(=arg-1, arg-2=)` are passed to the code at `locator` by means of an esoteric concept: the substrate. It’s a bit complicated and not very flexible.|Nzymes executions’ arguments, like <code>arg-1 &#124; arg-2 &#124; locator(2)</code> are orderly passed to the code at `locator` by means of the `$arguments` array. (like `[arg-1, arg-2]`)|
 |Engine access|Enzymes 2.3 plugin’s engine is a global object. It can execute not only as a filter but also directly, both from outside posts and from inside custom fields. The global `metabolize()` function is used for that.|Nzymes plugin’s engine is a singleton object. It achieves exactly the same by means of the `Nzymes_Plugin::engine()->process()` method.|
 |Default post|Enzymes 2.3 always uses the global post by default, if the engine is called directly, without a post object.|Nzymes always uses what is explicitly provided. If the engine needs to work without a post object, `Nzymes_Engine::NO_POST` must be passed. If the engine needs to work with the global post, get_post() can be passed.|
 |Templates support|Enzymes 2.3 supports templates, which are files used to output what the injection has prepared. They are a bit complicated and not really useful.|Nzymes has no templates. But you can easily achieve the same result with a dynamic enzyme, if you have at least the Coder role (strengthened security).|
 |Author prefix|Enzymes 2.3 uses `~author` to get to the author of a post. A `/` introduces templates.|Nzymes uses `/author` instead. A `/` is much easier to find on some keyboards than a ~.|
-|Quoted custom fields|Enzymes 2.3 allows to inject alphanumeric names without wrapping them into `=` quotes.|Nzymes allows to inject unquoted names containing symbols, except `.`, `=`, `|`, `]`, `}`.|
+|Quoted custom fields|Enzymes 2.3 allows to inject alphanumeric names without wrapping them into `=` quotes.|Nzymes allows to inject unquoted names containing symbols, except `.`, `=`, <code>&#124;</code>, `]`, `}`.|
 |Standard attributes|Enzymes 2.3 uses its own attribute names. For example, `{[ :date_gmt ]}` would show the GMT date on which the injection post was created.|Nzymes uses WordPress raw attribute names. For the same date you inject `{[ :post_date_gmt ]}`. This allows a simpler engine and official documentation.|
 |Plugin priority|Enzymes 2.3 handles WordPress content filtering at priority `10`. You can change it by editing the `enzymes/enzymes.php` file, and the change affects the whole engine.|Nzymes handles WordPress content filtering at priority `9`. You can change it by editing the `nzymes/src/Enzymes/Plugin.php` file, and the change affects the whole engine.|
 |Injection priority|Enzymes 2.3 does not support any other priority than the one for the plugin.|Nzymes allows you to set the priority at which an injection is supposed to be processed (see `defer`).|
