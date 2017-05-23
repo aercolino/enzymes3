@@ -517,7 +517,7 @@ You could certainly use some short-codes to achieve the same thing, no doubt. Ho
 * *Form*: The *custom field* form is always referred to by a starting dot `.`. The custom field is `eye color`. Due to the space in the name of the custom field, we need to use an explicit string.
 * *Behaviour*: The *static* behaviour is always represented by the lack of parentheses `()`.
 
-[list of default author custom fields](http://codex.wordpress.org/Function_Reference/get_userdata) (in the *Notes/user_meta* section)
+* [list of default author custom fields](http://codex.wordpress.org/Function_Reference/get_userdata) (in the *Notes/user_meta* section)
 
     * first_name
     * last_name
