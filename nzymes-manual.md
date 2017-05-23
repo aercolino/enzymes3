@@ -18,7 +18,6 @@ An enzyme has an origin (itself, post, and author), a form (literal, attribute, 
 
 ## Part 1: Introduction
 
-
 ### Injections belong to the visual editor
 
 Nzymes' syntax comes directly from Enzymes, a similar plugin that I wrote many years ago, and was meant to do mostly the same things. I chose Enzymes' syntax so that I could write my expressions without switching from the visual to the text editor, which is sometimes needed to make WordPress literally treat what you type (it uses to convert quotes for example), and I consider it very annoying.
@@ -45,6 +44,7 @@ Nzymes doesn't assume anything about what you write in your posts. If some text 
 
 ### Syntax of enzymes
 
+--
 #### Literals
 
 * `<non negative integer>`
@@ -55,6 +55,7 @@ Nzymes doesn't assume anything about what you write in your posts. If some text 
 * `12`
 * `=Where do you want to go today?=`
 
+--
 #### Locators
 
 * `<post identifier>:<attribute name>`
@@ -73,6 +74,7 @@ Nzymes doesn't assume anything about what you write in your posts. If some text 
 
 In these examples *something in italics* shows how Nzymes sees it.
 
+--
 #### {[ =5 €= | 123.locale(1) ]}
 
 1. this injection has two enzymes
@@ -107,7 +109,6 @@ In these examples *something in italics* shows how Nzymes sees it.
 > $ 5.49
 
 --
-
 #### {[ =john= | @wp.comments-count(1) | @cit.comments | @ui.render(2) ]}
 
 1. this injection has 4 enzymes
@@ -172,8 +173,6 @@ In these examples *something in italics* shows how Nzymes sees it.
 
 > **John** (42 comments)
 
---
-
 
 ### Injections are fail-safe
 
@@ -189,7 +188,7 @@ Most common reasons for access errors:
 * you tried to do something which is forbidden to you.
 
 
-#### Examples
+**Examples**
 
 * `12 {[ .not-a-custom-field | 34 ]} 56` produces `12 34 56` without any error in the JS console.
 * `12 {[ .not-a-custom-field() | 34 ]} 56` produces `12 34 56` with an error in the JS console: 
@@ -214,7 +213,7 @@ For example, if you want to silence an injection, you only need to end it with a
 
 If you want to write about Nzymes injections, while also having the Nzymes plugin actively filtering the content of your posts, you need a way to tell Nzymes that it has to ignore some injections. You do it by starting an injection with two braces instead of one: `{{[`. When Nzymes finds an escaped injection, it removes the first brace and displays the rest, without any further processing.
 
-*Example*
+**Example**
 
 All WordPress blogs have a `hello-world` post. 
 
@@ -245,107 +244,104 @@ Notice that Nzymes roles are set up but not directly enforced. By limiting enfor
 
 However, Nzymes roles not only document how the different capabilities work together, but they are also a convenient way of managing users' access, using third party plugins, like [WPFront User Role Editor](https://wordpress.org/plugins/wpfront-user-role-editor/) and [many others](https://wordpress.org/plugins/search/roles/). 
 
+--
 #### Roles
+
+Roles' display names follow these conventions:
 
 * `User` implies the capability to create static custom fields.
 * `Coder` implies the capability to create dynamic custom fields.
 * `Trusted` implies the capability to share custom fields with other users.
 
---
 
-* **Nzymes User**
+**Nzymes User**
 
-    Role name: `__nzymes__User`
-    
-    Capabilities:
+* Role name: `__nzymes__User`
+* Capabilities:
     `__nzymes__inject`
     `__nzymes__use_own_attributes`
     `__nzymes__use_own_custom_fields`
     `__nzymes__create_static_custom_fields`
 
-* **Nzymes Privileged User**
+**Nzymes Privileged User**
 
-    Role name: `__nzymes__PrivilegedUser`
-    
-    Capabilities: all those of **Nzymes User** plus
+* Role name: `__nzymes__PrivilegedUser`
+* Capabilities: all those of **Nzymes User** plus
     `__nzymes__use_others_custom_fields`
 
-* **Nzymes Trusted User**
+**Nzymes Trusted User**
 
-    Role name: `__nzymes__TrustedUser`
-    
-    Capabilities: all those of **Nzymes Privileged User** plus
+* Role name: `__nzymes__TrustedUser`
+* Capabilities: all those of **Nzymes Privileged User** plus
     `__nzymes__share_static_custom_fields`
 
-* **Nzymes Coder**
+**Nzymes Coder**
 
-    Role name: `__nzymes__Coder`
-    
-    Capabilities: all those of **Nzymes Trusted User** plus
+* Role name: `__nzymes__Coder`
+* Capabilities: all those of **Nzymes Trusted User** plus
     `__nzymes__create_dynamic_custom_fields`
 
-* **Nzymes Trusted Coder**
+**Nzymes Trusted Coder**
 
-    Role name: `__nzymes__TrustedCoder`
-    
-    Capabilities: all those of **Nzymes Coder** plus
+* Role name: `__nzymes__TrustedCoder`
+* Capabilities: all those of **Nzymes Coder** plus
     `__nzymes__share_dynamic_custom_fields`
 
-
+--
 #### Capabilities
 
-* **inject**
+**inject**
 
-    Capability name: `__nzymes__inject`
+* Capability name: `__nzymes__inject`
     
     *It allows a user to inject enzymes into her posts.*
 
-* **use_own_attributes**
+**use_own_attributes**
 
-    Capability name: `__nzymes__use_own_attributes`
+* Capability name: `__nzymes__use_own_attributes`
     
     *It allows a user to make her enzymes with her own attributes.*
 
-* **use_others_attributes**
+**use_others_attributes**
 
-    Capability name: `__nzymes__use_others_attributes`
+* Capability name: `__nzymes__use_others_attributes`
     
     *It allows a user to make her enzymes with other users’ attributes.
     For privacy reasons, only the admin has this capability, i.e. it’s not included into any role. (just a default setting)*
 
-* **use_own_custom_fields**
+**use_own_custom_fields**
 
-    Capability name: `__nzymes__use_own_custom_fields`
+* Capability name: `__nzymes__use_own_custom_fields`
     
     *It allows a user to make her enzymes with her own custom fields.*
 
-* **use_others_custom_fields**
+**use_others_custom_fields**
 
-    Capability name: `__nzymes__use_others_custom_fields`
+* Capability name: `__nzymes__use_others_custom_fields`
     
     *It allows a user to make her enzymes with other users’ custom fields.*
 
-* **create_static_custom_fields**
+**create_static_custom_fields**
 
-    Capability name: `__nzymes__create_static_custom_fields`
+* Capability name: `__nzymes__create_static_custom_fields`
     
     *It allows a user to create enzymes using non-evaluated custom fields.*
 
-* **create_dynamic_custom_fields**
+**create_dynamic_custom_fields**
 
-    Capability name: `__nzymes__create_dynamic_custom_fields`
+* Capability name: `__nzymes__create_dynamic_custom_fields`
     
     *It allows a user to create enzymes using evaluated custom fields.*
 
-* **share_static_custom_fields**
+**share_static_custom_fields**
 
-    Capability name: `__nzymes__share_static_custom_fields`
+* Capability name: `__nzymes__share_static_custom_fields`
     
     *It allows a user to share her enzymes using non-evaluated custom fields.*
 
-* **share_dynamic_custom_fields**
+**share_dynamic_custom_fields**
 
-    Capability name: `__nzymes__share_dynamic_custom_fields`
+* Capability name: `__nzymes__share_dynamic_custom_fields`
     
     *It allows a user to share her enzymes using evaluated custom fields.*
 
@@ -358,6 +354,7 @@ The result of a literal enzyme is always the injected value.
 
 Non negative integers (0, 1, 2...) and strings are the only possible literals.
 
+--
 #### Injection of a literal number
 
 **Example**
@@ -375,7 +372,7 @@ Non negative integers (0, 1, 2...) and strings are the only possible literals.
 * Numbers do not need to be quoted. (i.e. wrapped inside a couple of `=` characters)
 * Internally, numbers are regular PHP numbers.
 
-
+--
 #### Injection of a literal string
 
 **Example**
@@ -399,6 +396,7 @@ Non negative integers (0, 1, 2...) and strings are the only possible literals.
 
 The result of an attribute enzyme is always the value of the referred attribute.
 
+--
 #### Injection of an author attribute enzyme
 
 **Example**
@@ -428,7 +426,7 @@ The result of an attribute enzyme is always the value of the referred attribute.
     * user_registered
     * display_name
 
-
+--
 #### Injection of a post attribute enzyme
 
 **Example**
@@ -499,6 +497,7 @@ By storing a block of text in a custom field instead of having it directly mixed
 
 You could certainly use some short-codes to achieve the same thing, no doubt. However, Nzymes injections are particularly versatile and very clean. Additionally, transclusions are only a piece of the system, even if a fundamental piece.
 
+--
 #### Injection of an author custom field static enzyme
 
 **Example**
@@ -530,7 +529,7 @@ You could certainly use some short-codes to achieve the same thing, no doubt. Ho
     * rich_editing
     * source_domain
 
-
+--
 #### Injection of a post custom field static enzymes
 
 **Example**
@@ -562,6 +561,7 @@ The result of a custom-field dynamic enzyme is always the value returned after e
 
 Custom field evaluation allows you to add dynamic content to your blog, in a fashion very similar to what functions do in programming languages. Look at it like this: a post is an object, a custom field name is a method of that object, and the value of that custom field is the body of that method. Thus, without appended parentheses, the locator addresses the text of the code, and with the appended parentheses, the locator represents a call to that code.
 
+--
 #### Injection of an author custom field dynamic enzyme
 
 **Example**
@@ -597,7 +597,7 @@ $user_post_count = count_user_posts( $userid, $post_type );
 return $user_post_count;
 ```
 
-
+--
 #### Injection of a post custom field dynamic enzyme
 
 **Example**
@@ -646,7 +646,7 @@ Literals offer a shortcut to their respective custom-field versions. It’d be t
 
 While literal transclusions get into the content exactly like that, `array` and `assoc` executions get into the content like a standard PHP `array` value. However they only make sense when used together with another dynamic enzyme which consumes them. 
 
-
+--
 #### `array`
 
 **Example**
@@ -665,7 +665,7 @@ While literal transclusions get into the content exactly like that, `array` and 
 * *Form*: literal.
 * *Behaviour*: dynamic. Indexed arrays build standard PHP indexed arrays.
 
-
+--
 #### `assoc`
 
 **Example**
@@ -684,7 +684,7 @@ While literal transclusions get into the content exactly like that, `array` and 
 * *Form*: literal.
 * *Behaviour*: dynamic. Associative arrays build standard PHP associative arrays.
 
-
+--
 #### `defer`
 
 WordPress priorities are like points on a time line, so that `1` happens before `2` which happens before `3` and so on.
@@ -940,6 +940,7 @@ As long as a `post_status` is different from `publish`, that post exists only fo
 
 ### Hooks
 
+--
 #### The `__nzymes__post_types` hook
 
 This is a filter that is triggered right before trying to find a post by its slug. In fact, [WordPress' slugs are namespaced by `post_type`](https://core.trac.wordpress.org/ticket/18962), and Nzymes will find custom fields belonging to pages before those belonging to posts, by default.
@@ -967,7 +968,7 @@ add_filter('__nzymes__post_types','my_post_types');
 
 With that in place, an injection like `{[ @some-slug.some-custom-field ]}` would make Nzymes look for a post with a `some-slug` slug and a `my_type` type and, if it's not found, then look for one with a `page` type and, if it's not found, then look for one with a `post` type and, if it's not found, then finally give up and return a `null`. (but see also the `__nzymes__missing_post` hook)
 
-
+--
 #### The `__nzymes__missing_post` hook
 
 This is kind of a special filter that is triggered right after failing to find a post by its slug. It's special for two reasons. First it is triggered only if the slug begins with `@@` (a double at-sign) instead of `@` (a single at-sign), and second, it is triggered only if the injection author can create dynamic custom fields.
@@ -1071,7 +1072,7 @@ AND CONCAT_WS(' - ', post_title, post_content, post_excerpt) LIKE '%{[%'
 |post|67|test-thumb|
 
 
-#### Example
+#### Example 1
 
 You have this setup to decorate and HTML-escape some text.
 
@@ -1103,7 +1104,7 @@ return  '<pre style="padding: 20px;">' . htmlspecialchars( $this->pathway ) . '<
     ```
 
 
-#### Example
+#### Example 2
 
 You have this setup to highlight and HTML-escape some code.
 
