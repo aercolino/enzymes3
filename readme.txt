@@ -52,7 +52,7 @@ Nzymes injections are expressions like this: {[ enzyme-1 | enzyme-2 | … enzyme
 * For each found injection, it orderly replaces each enzyme with its value, left to right.
 * Then it replaces the value of the last enzyme to the whole injection.
 
-Manual: http://andowebsit.es/blog/noteslog.com/nzymes/
+Manual: https://github.com/aercolino/nzymes/blob/master/nzymes-manual.md
 
 
 = Reach out =
@@ -91,7 +91,7 @@ For example, to execute code of some author into a post of some injector, first 
 
 = OK, then. Where's the manual? =
 
-* http://andowebsit.es/blog/noteslog.com/nzymes/
+* https://github.com/aercolino/nzymes/blob/master/nzymes-manual.md
 
 
 = Does Nzymes replace Enzymes? =
