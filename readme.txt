@@ -16,14 +16,12 @@ Boost your posts with Nzymes injections. Safely use PHP in posts' title, excerpt
 
 *Your Problem*
 
-* You want to add a thing to a post, but a plugin might not exist.
-* That thing is already available or can be associated to a post or author.
+* You want to do something inside a post, but a plugin might not exist.
 
 *Nzymes Solution*
 
 * Insert PHP code into posts' content easily and safely.
 * Program features by yourself or trust some of your blog's authors.
-
 
 
 = Example =
@@ -38,10 +36,10 @@ Which could be shown like this
 
 > As you know, John (42 posts) and I are very good friends.
 
-With Nzymes, you are the plugin because many things are just a couple of PHP lines away.
+With Nzymes, many things are just a couple of PHP lines away.
 
 * Why not display "(42 posts)" in red?
-* Why not link "(42 posts)" to John's posts?
+* Why not link "John" to John's posts?
 
 
 = At a glance =
@@ -68,11 +66,15 @@ Manual: https://github.com/aercolino/nzymes/blob/master/nzymes-manual.md
 
 = What is an enzyme? =
 
+Any of the following:
+
 1. A string or an unsigned integer.
 1. A locator of an attribute or a custom field of a post or a post's author.
 
 
 = What is the value of an enzyme? =
+
+Any of the following:
 
 1. Its literal value.
 1. The value referenced by the locator (transclusion).
@@ -84,19 +86,19 @@ Manual: https://github.com/aercolino/nzymes/blob/master/nzymes-manual.md
 Nzymes enforces a rich set of capabilities and roles.
 
 1. After activating Nzymes, only administrators have all the capabilities.
-1. To allow authors to use Nzymes, administrators explicitly assign roles as they see fit.
+1. To allow authors to use Nzymes, administrators may explicitly assign roles as they see fit.
 
 For example, to execute code of some author into a post of some injector, first of all the author must be able to `create_dynamic_custom_fields`. Then, additionally, either the injector and the author are the same person or the injector can `use_others_custom_fields` and the author can `share_dynamic_custom_fields`.
 
 
-= OK, then. Where's the manual? =
+= OK, where's the manual? =
 
 * https://github.com/aercolino/nzymes/blob/master/nzymes-manual.md
 
 
 = Does Nzymes replace Enzymes? =
 
-Yes! However, if you currently use [Enzymes](https://wordpress.org/plugins/enzymes/), then both can coexist in your blog. Nzymes is much easier to use and it's also much more powerful than Enzymes. Unfortunately, sometimes they are incompatible on the same post. Therefore, Nzymes will only process enzymes injected in posts created after its installation. See the manual to know how you can break this rule.
+Yes! However, if you currently use [Enzymes](https://wordpress.org/plugins/enzymes/), then both can coexist in your blog. Nzymes is much easier to use and it's also much more powerful than Enzymes. Unfortunately, sometimes they are incompatible on the same post. Therefore, Nzymes will only process enzymes injected in posts created after its installation. See the manual to know how you can bend this rule.
 
 
 
