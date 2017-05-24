@@ -5,7 +5,7 @@ namespace :nzymes do
 	Rake::PackageTask.new('nzymes', :noversion) do |p|
 		p.need_zip = true
 		p.package_dir = 'dist'
-		p.package_files.include('dist/**/*')
+		p.package_files.include('./dist/**/*')
 	end
 
     task :default => [:update]
@@ -16,7 +16,7 @@ namespace :nzymes do
     end
 
     desc 'update dist folder and its contents'
-    task :update do
+    task :update => :clean do
       mkdir_p 'dist/nzymes/vendor'
       cp_r 'vendor/Ando', 'dist/nzymes/vendor'
       cp_r 'src', 'dist/nzymes'
