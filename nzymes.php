@@ -2,7 +2,7 @@
 /*
 Plugin Name: Nzymes
 Plugin URI: http://wordpress.org/plugins/nzymes/
-Description: Boost your blog with safe PHP injections. <a href="https://github.com/aercolino/nzymes/blob/master/nzymes-manual.md">Documentation</a>.
+Description: Boost your blog with safe PHP injections. <a href="https://github.com/aercolino/nzymes/blob/master/nzymes-manual.md">Documentation</a> | <a href="https://www.paypal.me/AndreaErcolino"><strong>Donate</strong></a>
 Version: 1.0.0
 Author: Andrea Ercolino
 Author URI: http://github.com/aercolino
