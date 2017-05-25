@@ -1322,28 +1322,6 @@ class Nzymes_Engine {
     }
 
     /**
-     * Make Nzymes undone injections jump over Enzymes 2 later auto-un-escaping.
-     *
-     * @param string $could_be_sequence
-     *
-     * @return string
-     */
-    protected
-    function escape_for_enzymes2( $could_be_sequence ) {
-        $result = '{';  // To have a valid injection we need to start with a '{'.
-        if ( is_plugin_active( 'enzymes/enzymes.php' ) ) {
-            global $enzymes2;
-            $enzymes2_priority = has_action( $this->current_filter, array( $enzymes2, 'metabolism' ) );
-            if ( false !== $enzymes2_priority && $this->current_priority < $enzymes2_priority ) {
-                $result .= '{';  // Escape now: Enzymes 2 will un-escape it later.
-            }
-        }
-        $result .= '[' . $could_be_sequence . ']}';
-
-        return $result;
-    }
-
-    /**
      * Process all the injections in the $content, not necessarily in the context of apply_filters().
      *
      * @param                  $content
@@ -1453,14 +1431,15 @@ class Nzymes_Engine {
             $this->new_content .= $before;
 
             $was_escaped = '{' == substr( $before, - 1 );  // True if it was "{{[..]}".
-            if ( $was_escaped ) {
+            if ( $was_escaped ) {  // keep always escaped from Nzymes, even in case of later runs due to deferrals
                 $result = self::ESCAPE_CHAR . "[$could_be_sequence]}";  // It will be "{-[..]}".
                 $this->unescape_later( $this->current_filter, self::UNESCAPE_PRIORITY );
             } else {
                 $this->reject_injection = false;
                 $result                 = $this->catalyze( $could_be_sequence );
-                if ( $this->reject_injection ) {
-                    $result = $this->escape_for_enzymes2( $could_be_sequence );
+                if ( $this->reject_injection ) {  // defer is being taken into account
+                    $result = "{[$could_be_sequence]}";  // no need to escape from Enzymes because it was removed by
+                                                         // plugin_can_process_injection_post
                 }
             }
             $this->new_content .= $result;
