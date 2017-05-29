@@ -119,8 +119,8 @@ First version.
 
 == Screenshots ==
 
-Example. Unusual words. Picture 1/4. Reading. Nzymes filtering ON.
-Example. Unusual words. Picture 2/4. Reading. Nzymes filtering OFF.
-Example. Unusual words. Picture 3/4. Writing. Content.
-Example. Unusual words. Picture 4/4. Writing. Custom fields.
-Settings. See the manual.
+1. Example. Unusual words. Picture 1/4. Reading. Nzymes ON.
+2. Example. Unusual words. Picture 2/4. Reading. Nzymes OFF.
+3. Example. Unusual words. Picture 3/4. Writing. Content.
+4. Example. Unusual words. Picture 4/4. Writing. Custom fields.
+5. Settings. See the manual.
