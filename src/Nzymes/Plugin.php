@@ -1,6 +1,7 @@
 <?php
 require_once dirname( NZYMES_PRIMARY ) . '/src/Nzymes/Capabilities.php';
 require_once dirname( NZYMES_PRIMARY ) . '/src/Nzymes/Options.php';
+require_once dirname( NZYMES_PRIMARY ) . '/vendor/Ando/ErrorFactory.php';
 
 class Nzymes_Plugin {
     /**
