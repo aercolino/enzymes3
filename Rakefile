@@ -13,7 +13,8 @@ namespace :nzymes do
     task :create do
       mkdir_p 'dist/nzymes/vendor'
       cp_r 'vendor/Ando', 'dist/nzymes/vendor'
-      cp_r 'assets', 'dist/nzymes'
+      mkdir_p 'dist/nzymes/assets'
+      cp_r Dir.glob('assets/*.png'), 'dist/nzymes/assets'
       cp_r 'src', 'dist/nzymes'
       cp_r Dir.glob('*.php'), 'dist/nzymes'
       cp_r Dir.glob('*.md'), 'dist/nzymes'
