@@ -114,3 +114,13 @@ Yes! However, if you currently use [Enzymes](https://wordpress.org/plugins/enzym
 = 1.0.0 =
 
 First version.
+
+
+
+== Screenshots ==
+
+Example. Unusual words. Picture 1/4. Reading. Nzymes filtering ON.
+Example. Unusual words. Picture 2/4. Reading. Nzymes filtering OFF.
+Example. Unusual words. Picture 3/4. Writing. Content.
+Example. Unusual words. Picture 4/4. Writing. Custom fields.
+Settings. See the manual.
